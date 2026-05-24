@@ -763,26 +763,36 @@
       "lastMonth": "Last month"
     },
     "variable": {
-      "title": "Variable spending",
-      "subtitle": "When you spend, and how badly when you do.",
-      "modeWeekly": "Weekly",
-      "modeDayOfWeek": "Day",
-      "dotGridLabel": "Days within daily rate",
-      "overspentDays": "{overspent} of {tracked} days overspent",
-      "largestDayCallout": "Worst day: {date}, {amount} — {ratio}× your daily rate.",
-      "insightHeavyStart": "You tend to spend most heavily at the start of the month.",
-      "insightHeavyEnd": "Spending picked up toward the end of the month.",
-      "insightConsistent": "Your spending was consistent this month.",
-      "insightOverTarget": "Several weeks ran over the weekly target.",
-      "dowInsight": "Your heaviest day is {day}, averaging {amount}.",
-      "dow": {
-        "sun": "Sun",
-        "mon": "Mon",
-        "tue": "Tue",
-        "wed": "Wed",
-        "thu": "Thu",
-        "fri": "Fri",
-        "sat": "Sat"
+      "title": "Variable rhythm",
+      "subtitle": "How your day-to-day spending flowed this month",
+      "legend": {
+        "thisMonth": "This month",
+        "lastMonth": "Last month",
+        "evenPace": "Even pace",
+        "today": "Today"
+      },
+      "pace": {
+        "label": "Pace",
+        "overSuffix": "EGP over pace",
+        "underSuffix": "EGP under pace",
+        "exactly": "On pace"
+      },
+      "rhythm": {
+        "label": "Rhythm",
+        "steady": "Steady",
+        "frontLoaded": "Front-loaded",
+        "backLoaded": "Back-loaded",
+        "uneven": "Uneven"
+      },
+      "compare": {
+        "thisMonthLabel": "This month",
+        "lastMonthLabel": "Last month",
+        "deltaSame": "Same",
+        "rhythmLabel": "Rhythm",
+        "rhythmSame": "Same as last month",
+        "inProgressEmpty": "Comparison available once this month closes.",
+        "noPriorEmpty": "No previous month to compare.",
+        "budgetCaveat": "Budget changed by {delta} from last month."
       }
     },
     "major": {

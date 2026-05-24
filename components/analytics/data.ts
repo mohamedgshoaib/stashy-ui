@@ -9,6 +9,26 @@ import type {
 
 export const ANALYTICS_PLAN: "free" | "pro" = "pro"
 
+export function deriveRhythmCharacter(
+  cumulative: number[],
+): "steady" | "frontLoaded" | "backLoaded" | "uneven" {
+  if (cumulative.length < 4) return "steady"
+
+  const deltas = cumulative.map((value, index) => value - (cumulative[index - 1] ?? 0))
+  const midpoint = Math.floor(deltas.length / 2)
+  const firstHalf = deltas.slice(0, midpoint)
+  const secondHalf = deltas.slice(midpoint)
+  const firstAvg = firstHalf.reduce((sum, value) => sum + value, 0) / firstHalf.length
+  const secondAvg = secondHalf.reduce((sum, value) => sum + value, 0) / secondHalf.length
+  const overallAvg = deltas.reduce((sum, value) => sum + value, 0) / deltas.length
+  const withinSteadyBand = (value: number) => Math.abs(value - overallAvg) <= overallAvg * 0.15
+
+  if (withinSteadyBand(firstAvg) && withinSteadyBand(secondAvg)) return "steady"
+  if (firstAvg > secondAvg * 1.15) return "frontLoaded"
+  if (secondAvg > firstAvg * 1.15) return "backLoaded"
+  return "uneven"
+}
+
 const FIXED_PLAN: FixedBucketPlan[] = [
   { id: "fb-rent", name: "Rent", budget: 800, type: "recurring" },
   { id: "fb-spotify", name: "Spotify", budget: 100, type: "recurring" },
@@ -46,6 +66,11 @@ const snapshot_2026_04: MonthSnapshot = {
   variableSavingsRate: 16,
   rolloverEgpFinal: -20,
   overspentDays: 4,
+  dailyVariableCumulative: [
+    170, 335, 495, 650, 800, 945, 1085, 1225, 1360, 1490, 1615, 1740, 1860, 1980, 2100,
+    2220, 2340, 2460, 2580, 2700, 2810, 2910, 3005, 3100, 3190, 3280, 3370, 3460, 3550,
+    3640,
+  ],
   weeklySpend: [820, 940, 880, 1000],
   weeklyBudgetTarget: 845,
   dayOfWeekSpend: [560, 380, 410, 380, 720, 760, 430],
@@ -142,6 +167,11 @@ const snapshot_2026_03: MonthSnapshot = {
   variableSavingsRate: 18,
   rolloverEgpFinal: 340,
   overspentDays: 2,
+  dailyVariableCumulative: [
+    80, 165, 255, 345, 440, 535, 630, 720, 815, 910, 1010, 1110, 1210, 1310, 1410, 1510,
+    1615, 1720, 1830, 1940, 2055, 2170, 2290, 2410, 2535, 2660, 2790, 2920, 3055, 3190,
+    3300,
+  ],
   weeklySpend: [780, 740, 850, 720, 210],
   weeklyBudgetTarget: 822,
   dayOfWeekSpend: [510, 320, 360, 360, 660, 690, 400],
@@ -219,6 +249,10 @@ const snapshot_2026_02: MonthSnapshot = {
   variableSavingsRate: 11,
   rolloverEgpFinal: -380,
   overspentDays: 6,
+  dailyVariableCumulative: [
+    170, 335, 495, 650, 800, 945, 1085, 1225, 1360, 1495, 1625, 1755, 1880, 2005, 2150,
+    2295, 2435, 2575, 2705, 2835, 2965, 3095, 3220, 3345, 3465, 3585, 3700, 3820,
+  ],
   weeklySpend: [1010, 980, 920, 910],
   weeklyBudgetTarget: 952,
   dayOfWeekSpend: [580, 410, 440, 430, 780, 770, 410],
@@ -321,6 +355,10 @@ const liveMonth_2026_05: LiveMonthAnalysis = {
   budgetUsedPct: 48,
   monthProgressPct: 58,
   overspentDaysMtd: 3,
+  dailyVariableCumulative: [
+    80, 170, 265, 350, 460, 560, 665, 755, 875, 970, 1070, 1180, 1270, 1375, 1495, 1590,
+    1705, 1820,
+  ],
   weeklySpend: [560, 520, 480, 260],
   weeklyBudgetTarget: 875,
   dayOfWeekSpend: [320, 180, 220, 200, 380, 360, 160],
@@ -428,6 +466,10 @@ const liveMonth_atRisk: LiveMonthAnalysis = {
   projectedEndSpend: 4360,
   projectedSavings: -280,
   projectedSavingsRate: -7,
+  dailyVariableCumulative: [
+    220, 430, 635, 825, 1005, 1175, 1340, 1500, 1650, 1785, 1910, 2030, 2145, 2255, 2355,
+    2450, 2530, 2600,
+  ],
   weeklySpend: [720, 760, 680, 440],
   dayOfWeekSpend: [440, 260, 380, 340, 460, 480, 240],
   largestVariableDay: { date: "2026-05-10", amount: 380 },
@@ -451,6 +493,10 @@ const liveMonth_over: LiveMonthAnalysis = {
   projectedEndSpend: 6320,
   projectedSavings: -1240,
   projectedSavingsRate: -33,
+  dailyVariableCumulative: [
+    180, 390, 610, 840, 1080, 1330, 1590, 1835, 2070, 2300, 2520, 2755, 2995, 3245, 3505,
+    3760, 4000, 4240,
+  ],
   weeklySpend: [980, 1120, 1240, 900],
   dayOfWeekSpend: [580, 420, 560, 480, 680, 820, 700],
   largestVariableDay: { date: "2026-05-14", amount: 620 },
@@ -508,6 +554,7 @@ export function snapshotToView(snapshot: MonthSnapshot): LiveMonthAnalysis {
     budgetUsedPct,
     monthProgressPct: 100,
     overspentDaysMtd: snapshot.overspentDays,
+    dailyVariableCumulative: snapshot.dailyVariableCumulative,
     weeklySpend: snapshot.weeklySpend,
     weeklyBudgetTarget: snapshot.weeklyBudgetTarget,
     dayOfWeekSpend: snapshot.dayOfWeekSpend,

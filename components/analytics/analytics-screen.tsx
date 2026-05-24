@@ -174,7 +174,7 @@ export function AnalyticsScreen() {
             <PaymentMethodCard month={selectedMonth} prevPaymentMethods={prevPaymentMethods} />
             <FixedAnalysisCard month={selectedMonth} data={analyticsData} />
             <MethodObligationCard month={selectedMonth} data={analyticsData} />
-            <VariableAnalysisCard month={selectedMonth} />
+            <VariableAnalysisCard month={selectedMonth} data={analyticsData} />
             <MajorBehaviourCard month={selectedMonth} data={analyticsData} />
 
             <SectionHeader
