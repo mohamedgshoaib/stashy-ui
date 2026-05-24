@@ -763,26 +763,36 @@
       "lastMonth": "الشهر الماضي"
     },
     "variable": {
-      "title": "الإنفاق المتغير",
-      "subtitle": "متى تُنفق وكيف يكون التجاوز.",
-      "modeWeekly": "أسبوعياً",
-      "modeDayOfWeek": "يوم",
-      "dotGridLabel": "الأيام ضمن المعدل اليومي",
-      "overspentDays": "{overspent} من {tracked} يوماً تجاوزت فيه الإنفاق",
-      "largestDayCallout": "أسوأ يوم: {date}، {amount} — {ratio}× معدلك اليومي.",
-      "insightHeavyStart": "تميل إلى الإنفاق بكثافة في بداية الشهر.",
-      "insightHeavyEnd": "ارتفع الإنفاق نحو نهاية الشهر.",
-      "insightConsistent": "كان إنفاقك منتظماً هذا الشهر.",
-      "insightOverTarget": "عدة أسابيع تجاوزت الهدف الأسبوعي.",
-      "dowInsight": "أعلى يوم لديك هو {day}، بمتوسط {amount}.",
-      "dow": {
-        "sun": "أحد",
-        "mon": "إثن",
-        "tue": "ثلا",
-        "wed": "أرب",
-        "thu": "خمي",
-        "fri": "جمع",
-        "sat": "سبت"
+      "title": "إيقاع الإنفاق المتغير",
+      "subtitle": "كيف تدفق إنفاقك اليومي خلال هذا الشهر",
+      "legend": {
+        "thisMonth": "هذا الشهر",
+        "lastMonth": "الشهر الماضي",
+        "evenPace": "إيقاع متساوٍ",
+        "today": "اليوم"
+      },
+      "pace": {
+        "label": "الإيقاع",
+        "overSuffix": "جنيه فوق الإيقاع",
+        "underSuffix": "جنيه تحت الإيقاع",
+        "exactly": "على الإيقاع"
+      },
+      "rhythm": {
+        "label": "النسق",
+        "steady": "منتظم",
+        "frontLoaded": "مبكر الثقل",
+        "backLoaded": "متأخر الثقل",
+        "uneven": "غير منتظم"
+      },
+      "compare": {
+        "thisMonthLabel": "هذا الشهر",
+        "lastMonthLabel": "الشهر الماضي",
+        "deltaSame": "مماثل",
+        "rhythmLabel": "النسق",
+        "rhythmSame": "مماثل للشهر الماضي",
+        "inProgressEmpty": "تظهر المقارنة بعد إغلاق هذا الشهر.",
+        "noPriorEmpty": "لا يوجد شهر سابق للمقارنة.",
+        "budgetCaveat": "تغيرت الميزانية بمقدار {delta} عن الشهر الماضي."
       }
     },
     "major": {

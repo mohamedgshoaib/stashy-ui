@@ -70,6 +70,7 @@ export type MonthSnapshot = {
   variableSavingsRate: number
   rolloverEgpFinal: number
   overspentDays: number
+  dailyVariableCumulative: number[]
   weeklySpend: number[]
   weeklyBudgetTarget: number
   dayOfWeekSpend: number[]
@@ -115,6 +116,7 @@ export type LiveMonthAnalysis = {
   budgetUsedPct: number
   monthProgressPct: number
   overspentDaysMtd: number
+  dailyVariableCumulative: number[]
   weeklySpend: number[]
   weeklyBudgetTarget: number
   dayOfWeekSpend: number[]
