@@ -795,15 +795,14 @@
         "budgetCaveat": "تغيرت الميزانية بمقدار {delta} عن الشهر الماضي."
       }
     },
-    "major": {
-      "title": "الإنفاق الكبير",
-      "subtitle": "كم مرة تعيد تصنيف المشتريات الكبيرة كرئيسية.",
-      "heroMtd": "من الميزانية حتى الآن",
-      "heroFinal": "من الميزانية",
-      "deltaPositive": "+{delta}% مقارنة بالشهر الماضي",
-      "deltaNegative": "{delta}% مقارنة بالشهر الماضي",
-      "deltaNeutral": "مماثل للشهر الماضي",
-      "escapeValveHint": "استخدام بند الرئيسي مرتفع بشكل غير معتاد هذا الشهر."
+    "flaggedAsMajor": {
+      "title": "مُصنَّف كمصروف كبير",
+      "subtitle": "يحمي معدلك اليومي من المصروفات الكبيرة.",
+      "itemsCount": "{count, plural, =0 {عبر 0 عملية} one {عبر عملية واحدة} two {عبر عمليتين} few {عبر # عمليات} many {عبر # عملية} other {عبر # عملية}}",
+      "andNMore": "{count, plural, =0 {} one {وعملية أخرى واحدة} two {وعمليتين إضافيتين} few {و# عمليات أخرى} many {و# عملية أخرى} other {و# عملية أخرى}}",
+      "popupSummary": "{month} · {total} · {count}",
+      "comparisonHeader": "مقارنة بالشهر الماضي",
+      "noPriorMonth": "لا يوجد شهر سابق للمقارنة"
     },
     "methods": {
       "title": "طرق الدفع",

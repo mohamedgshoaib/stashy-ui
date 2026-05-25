@@ -795,15 +795,14 @@
         "budgetCaveat": "Budget changed by {delta} from last month."
       }
     },
-    "major": {
-      "title": "Major spending",
-      "subtitle": "How often you reclassify large purchases as Major.",
-      "heroMtd": "of budget so far",
-      "heroFinal": "of budget",
-      "deltaPositive": "+{delta}% vs last month",
-      "deltaNegative": "{delta}% vs last month",
-      "deltaNeutral": "Same as last month",
-      "escapeValveHint": "Major usage is unusually high this month."
+    "flaggedAsMajor": {
+      "title": "Flagged as major",
+      "subtitle": "Protects your daily rate from large expenses.",
+      "itemsCount": "{count, plural, one {across 1 item} other {across # items}}",
+      "andNMore": "{count, plural, one {and 1 more} other {and # more}}",
+      "popupSummary": "{month} · {total} · {count}",
+      "comparisonHeader": "Vs last month",
+      "noPriorMonth": "No previous month to compare"
     },
     "methods": {
       "title": "Payment methods",

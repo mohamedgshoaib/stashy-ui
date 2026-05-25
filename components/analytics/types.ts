@@ -44,6 +44,14 @@ export type FixedTransferSummary = {
 export type LargestDay = { date: string; amount: number }
 export type LargestTxn = { id: string; amount: number; description: string }
 
+export type MajorTransaction = {
+  id: string
+  amount: number
+  description: string
+  date: string
+  paymentMethodName: string
+}
+
 export type MonthSnapshot = {
   month: string
   isoDate: string
@@ -61,6 +69,7 @@ export type MonthSnapshot = {
   fixedBucketsActual: FixedBucketActual[]
   majorTotal: number
   majorCount: number
+  majorTransactions: MajorTransaction[]
   injectionTotal: number
   injectionCount: number
   variableReceivedTotal: number
@@ -103,6 +112,7 @@ export type LiveMonthAnalysis = {
   fixedBucketsActual: FixedBucketActual[]
   majorTotal: number
   majorCount: number
+  majorTransactions: MajorTransaction[]
   injectionTotal: number
   injectionCount: number
   variableReceivedTotal: number
