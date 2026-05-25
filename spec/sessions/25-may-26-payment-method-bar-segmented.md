@@ -84,3 +84,74 @@ Carried forward from `24-may-26-variable-rhythm-redesign.md`. The analytics sect
 2. `pnpm lint` continues to fail on the same pre-existing unrelated issues (not introduced by this session):
    - `components/tracker/tracker-transfer-drawer.tsx` — unused `surfacePanelClass` import
    - `components/settings/settings-sections.tsx` — unused `SubSectionHeader` declaration
+
+---
+
+# Session 2 — Flagged as Major card refactor
+
+**Time:** Afternoon block
+
+---
+
+## Status at Session Start
+
+Analytics Section 2 had already been reshaped around the newer Fixed, Variable, and Method cards, but the existing `MajorBehaviourCard` was still a first-pass implementation built around a percentage hero and chart. The next lift was to replace it with the `Flagged as Major` design: a lightweight card, a drawer for month detail, new `majorTransactions` mock data, and a full i18n key replacement while keeping the rest of the analytics sandbox coherent.
+
+---
+
+## Completed This Session
+
+- Replaced `components/analytics/major-behaviour-card.tsx` with `components/analytics/flagged-as-major-card.tsx` and updated `components/analytics/analytics-screen.tsx` to mount `FlaggedAsMajorCard`.
+- Added `components/analytics/flagged-as-major-popup.tsx` as a bottom drawer patterned after the tracker sheet structure.
+- Rebuilt the card around the new structure:
+  - hides itself when `majorCount === 0`
+  - stacked total + count block for the viewed month
+  - largest-major preview row with a single shared tap target for the row and optional `and N more` line
+  - closed-month comparison block with neutral two-cell tile or quiet no-prior fallback
+- Removed all old major-card behaviors from the UI:
+  - `majorPctOfBudget` hero rendering
+  - Recharts `BarChart`
+  - MTD dashed bar treatment
+  - signed delta line
+  - escape-valve callout
+- Extended analytics types with `MajorTransaction` and added `majorTransactions` to both `LiveMonthAnalysis` and `MonthSnapshot`.
+- Populated `majorTransactions` across analytics mock scenarios and snapshots with explicit coverage for:
+  - live month with `majorCount === 1`
+  - live month with `majorCount >= 3`
+  - live month with `majorCount === 0`
+  - closed month comparing against a prior month with values on both sides
+  - closed month comparing against a prior month with zero majors
+  - closed month with no prior snapshot
+- Kept payment-method mock reconciliation narrow: only `major` and `total` were adjusted where required. `variable`, `fixed`, and `fixedByType` were left intact.
+- Replaced the `Analytics.major.*` locale block in both `messages/en.json` and `messages/ar.json` with `Analytics.flaggedAsMajor.*`, including pluralized `itemsCount` and `andNMore` keys.
+- Implemented popup-summary bidi handling with segmented spans so month text can remain locale-native while numeric amounts stay `dir="ltr"` and `tabular-nums`.
+- Fixed a separate pre-existing production build blocker by wrapping `TrackerScreen` in `Suspense` at `app/[locale]/tracker/page.tsx`, matching the existing transactions-page pattern required by `useSearchParams()`.
+- Follow-up polish pass:
+  - removed the top-right month badge from `FlaggedAsMajorCard`
+  - removed the same month badge from `VariableAnalysisCard`
+  - expanded the default live on-track month from 1 Major to 3 Majors so the popup path is visible in the baseline scenario
+  - rebalanced the affected `paymentMethods[].major` and `paymentMethods[].total` fields without changing `variable`, `fixed`, or `fixedByType`
+  - introduced restrained major-color emphasis in the new card by tinting the total, largest-item amount, and comparison eyebrow with `text-major`
+  - made the drawer trigger read as interactive by adding a disclosure arrow, a subtle major-tinted border, stronger hover/press feedback, and an accessible trigger label on the tappable row
+- Verification results:
+  - `pnpm typecheck` passed
+  - `pnpm build` passed
+  - `pnpm lint` still fails only on the same two pre-existing unrelated issues listed below; no new lint failures were introduced in touched files
+
+---
+
+## Decisions Made
+
+- `FlaggedAsMajorCard` derives the largest transaction at render time from `majorTransactions` rather than adding another precomputed analytics field.
+- The popup summary stays translation-driven for content but uses segmented spans instead of flat interpolation so Arabic keeps the numbers visually LTR.
+- The comparison tile stays fully neutral-toned even when one side is zero, to preserve the “comparison, not verdict” direction.
+- The build-blocking `useSearchParams()` issue in tracker was fixed in this same work block because the task’s verification bar required a successful production build.
+
+---
+
+## Open Blockers
+
+1. Manual browser visual verification across all analytics scenarios and Arabic/RTL was not performed in this environment. A sandbox UI pass is still recommended for tap target feel, drawer scroll behavior, and bidi rendering.
+2. `pnpm lint` continues to fail on the same pre-existing unrelated issues, unchanged from Session 1:
+   - `components/tracker/tracker-transfer-drawer.tsx` — unused `surfacePanelClass` import
+   - `components/settings/settings-sections.tsx` — unused `SubSectionHeader` declaration
