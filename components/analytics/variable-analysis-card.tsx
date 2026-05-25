@@ -19,7 +19,6 @@ import {
 } from "@/components/analytics/data"
 import {
   formatAnalyticsCurrency,
-  formatAnalyticsMonthLabel,
   formatAnalyticsSignedCurrency,
 } from "@/components/analytics/formatters"
 import type { AnalyticsData, LiveMonthAnalysis } from "@/components/analytics/types"
@@ -177,16 +176,11 @@ export function VariableAnalysisCard({ month, data }: VariableAnalysisCardProps)
   return (
     <Card size="sm" className="py-4">
       <CardContent className="flex flex-col gap-4 px-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="space-y-1">
-            <h2 className="text-[1.0625rem] font-medium text-foreground">{t("variable.title")}</h2>
-            <p className="text-sm leading-[1.5] text-text-secondary text-pretty">
-              {t("variable.subtitle")}
-            </p>
-          </div>
-          <span className="inline-flex shrink-0 items-center rounded-full bg-surface-offset px-2 py-0.5 text-xs font-medium text-text-secondary">
-            {formatAnalyticsMonthLabel(locale, month.isoDate)}
-          </span>
+        <div className="space-y-1">
+          <h2 className="text-[1.0625rem] font-medium text-foreground">{t("variable.title")}</h2>
+          <p className="text-sm leading-[1.5] text-text-secondary text-pretty">
+            {t("variable.subtitle")}
+          </p>
         </div>
 
         <div className="space-y-2">

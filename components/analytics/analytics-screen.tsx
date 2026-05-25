@@ -11,7 +11,7 @@ import { getAnalyticsDataForScenario, getMonthView, getPreviousSnapshot } from "
 import { FixedAnalysisCard } from "@/components/analytics/fixed-analysis-card"
 import { MethodObligationCard } from "@/components/analytics/method-obligation-card"
 import { formatAnalyticsMonthLabel } from "@/components/analytics/formatters"
-import { MajorBehaviourCard } from "@/components/analytics/major-behaviour-card"
+import { FlaggedAsMajorCard } from "@/components/analytics/flagged-as-major-card"
 import { MonthPickerDrawer } from "@/components/analytics/month-picker-drawer"
 import { MonthlyHealthCard } from "@/components/analytics/monthly-health-card"
 import { PaymentMethodCard } from "@/components/analytics/payment-method-card"
@@ -175,7 +175,7 @@ export function AnalyticsScreen() {
             <FixedAnalysisCard month={selectedMonth} data={analyticsData} />
             <MethodObligationCard month={selectedMonth} data={analyticsData} />
             <VariableAnalysisCard month={selectedMonth} data={analyticsData} />
-            <MajorBehaviourCard month={selectedMonth} data={analyticsData} />
+            <FlaggedAsMajorCard month={selectedMonth} data={analyticsData} />
 
             <SectionHeader
               title={t("section.improving.title")}
