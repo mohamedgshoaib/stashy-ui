@@ -4,6 +4,7 @@ import type {
   FixedBucketActual,
   FixedBucketPlan,
   LiveMonthAnalysis,
+  MajorTransaction,
   MonthSnapshot,
 } from "@/components/analytics/types"
 
@@ -37,6 +38,95 @@ const FIXED_PLAN: FixedBucketPlan[] = [
   { id: "fb-groceries", name: "Groceries", budget: 240, type: "manual" },
 ]
 
+const majorTransactions_2026_04: MajorTransaction[] = [
+  {
+    id: "major-2026-04-laptop-battery",
+    amount: 480,
+    description: "Laptop battery replacement",
+    date: "2026-04-18",
+    paymentMethodName: "Instapay",
+  },
+]
+
+const majorTransactions_2026_03: MajorTransaction[] = [
+  {
+    id: "major-2026-03-clinic",
+    amount: 360,
+    description: "Clinic visit and scans",
+    date: "2026-03-08",
+    paymentMethodName: "Instapay",
+  },
+  {
+    id: "major-2026-03-desk",
+    amount: 210,
+    description: "Desk chair repair",
+    date: "2026-03-19",
+    paymentMethodName: "Instapay",
+  },
+  {
+    id: "major-2026-03-tires",
+    amount: 150,
+    description: "Car tire replacement",
+    date: "2026-03-24",
+    paymentMethodName: "Instapay",
+  },
+]
+
+const majorTransactions_2026_05: MajorTransaction[] = [
+  {
+    id: "major-2026-05-course-fee",
+    amount: 480,
+    description: "Course renewal fee",
+    date: "2026-05-12",
+    paymentMethodName: "Instapay",
+  },
+  {
+    id: "major-2026-05-lab-tests",
+    amount: 260,
+    description: "Lab tests package",
+    date: "2026-05-08",
+    paymentMethodName: "Vodafone Cash",
+  },
+  {
+    id: "major-2026-05-air-purifier",
+    amount: 160,
+    description: "Air purifier filter set",
+    date: "2026-05-16",
+    paymentMethodName: "Bank Card",
+  },
+]
+
+const majorTransactions_2026_05_atRisk: MajorTransaction[] = [
+  {
+    id: "major-2026-05-phone-screen",
+    amount: 900,
+    description: "Phone screen replacement",
+    date: "2026-05-04",
+    paymentMethodName: "Instapay",
+  },
+  {
+    id: "major-2026-05-dental",
+    amount: 260,
+    description: "Dental treatment deposit",
+    date: "2026-05-08",
+    paymentMethodName: "Vodafone Cash",
+  },
+  {
+    id: "major-2026-05-appliance",
+    amount: 160,
+    description: "Water heater part",
+    date: "2026-05-11",
+    paymentMethodName: "Bank Card",
+  },
+  {
+    id: "major-2026-05-travel",
+    amount: 100,
+    description: "Family travel booking",
+    date: "2026-05-15",
+    paymentMethodName: "Cash",
+  },
+]
+
 const snapshot_2026_04: MonthSnapshot = {
   month: "2026-04",
   isoDate: "2026-04-01",
@@ -58,6 +148,7 @@ const snapshot_2026_04: MonthSnapshot = {
   ],
   majorTotal: 480,
   majorCount: 1,
+  majorTransactions: majorTransactions_2026_04,
   injectionTotal: 0,
   injectionCount: 0,
   variableReceivedTotal: 200,
@@ -158,7 +249,8 @@ const snapshot_2026_03: MonthSnapshot = {
     { id: "fb-groceries", spent: 160, transactionCount: 5 },
   ],
   majorTotal: 720,
-  majorCount: 2,
+  majorCount: 3,
+  majorTransactions: majorTransactions_2026_03,
   injectionTotal: 200,
   injectionCount: 1,
   variableReceivedTotal: 0,
@@ -239,8 +331,9 @@ const snapshot_2026_02: MonthSnapshot = {
     { id: "fb-coffee", spent: 240, transactionCount: 11 },
     { id: "fb-groceries", spent: 340, transactionCount: 6 },
   ],
-  majorTotal: 1500,
-  majorCount: 2,
+  majorTotal: 0,
+  majorCount: 0,
+  majorTransactions: [],
   injectionTotal: 0,
   injectionCount: 0,
   variableReceivedTotal: 0,
@@ -266,8 +359,8 @@ const snapshot_2026_02: MonthSnapshot = {
       name: "Cash",
       variable: 1420,
       fixed: 0,
-      major: 600,
-      total: 2020,
+      major: 0,
+      total: 1420,
       fixedByType: { manual: 0, recurring: 0, installment: 0 },
     },
     {
@@ -275,8 +368,8 @@ const snapshot_2026_02: MonthSnapshot = {
       name: "Instapay",
       variable: 1240,
       fixed: 700,
-      major: 900,
-      total: 2840,
+      major: 0,
+      total: 1940,
       fixedByType: { manual: 0, recurring: 700, installment: 0 },
     },
     {
@@ -341,7 +434,8 @@ const liveMonth_2026_05: LiveMonthAnalysis = {
   fixedOverspend: 0,
   fixedBucketsActual: liveFixedBucketsActual,
   majorTotal: 900,
-  majorCount: 1,
+  majorCount: 3,
+  majorTransactions: majorTransactions_2026_05,
   injectionTotal: 0,
   injectionCount: 0,
   variableReceivedTotal: 0,
@@ -388,8 +482,8 @@ const liveMonth_2026_05: LiveMonthAnalysis = {
       name: "Instapay",
       variable: 840,
       fixed: 700,
-      major: 900,
-      total: 2440,
+      major: 480,
+      total: 2020,
       fixedByType: { manual: 0, recurring: 700, installment: 0 },
     },
     {
@@ -397,8 +491,8 @@ const liveMonth_2026_05: LiveMonthAnalysis = {
       name: "Vodafone Cash",
       variable: 260,
       fixed: 605,
-      major: 0,
-      total: 865,
+      major: 260,
+      total: 1125,
       fixedByType: { manual: 305, recurring: 0, installment: 300 },
     },
     {
@@ -406,8 +500,8 @@ const liveMonth_2026_05: LiveMonthAnalysis = {
       name: "Bank Card",
       variable: 560,
       fixed: 200,
-      major: 0,
-      total: 760,
+      major: 160,
+      total: 920,
       fixedByType: { manual: 0, recurring: 200, installment: 0 },
     },
   ],
@@ -458,6 +552,9 @@ const liveMonth_atRisk: LiveMonthAnalysis = {
   ...liveMonth_2026_05,
   monthlyState: "atRisk",
   totalVariableSpent: 2600,
+  majorTotal: 1420,
+  majorCount: 4,
+  majorTransactions: majorTransactions_2026_05_atRisk,
   rolloverEgp: -320,
   pacingDeltaPct: 18,
   budgetUsedPct: 70,
@@ -474,6 +571,44 @@ const liveMonth_atRisk: LiveMonthAnalysis = {
   dayOfWeekSpend: [440, 260, 380, 340, 460, 480, 240],
   largestVariableDay: { date: "2026-05-10", amount: 380 },
   largestVariableTxn: { id: "tx-05-10-a", amount: 280, description: "Dinner out" },
+  paymentMethods: [
+    {
+      id: "pm1",
+      name: "Cash",
+      variable: 260,
+      fixed: 0,
+      major: 100,
+      total: 360,
+      fixedByType: { manual: 0, recurring: 0, installment: 0 },
+    },
+    {
+      id: "pm2",
+      name: "Instapay",
+      variable: 1180,
+      fixed: 700,
+      major: 900,
+      total: 2780,
+      fixedByType: { manual: 0, recurring: 700, installment: 0 },
+    },
+    {
+      id: "pm3",
+      name: "Vodafone Cash",
+      variable: 420,
+      fixed: 605,
+      major: 260,
+      total: 1285,
+      fixedByType: { manual: 305, recurring: 0, installment: 300 },
+    },
+    {
+      id: "pm4",
+      name: "Bank Card",
+      variable: 740,
+      fixed: 200,
+      major: 160,
+      total: 1100,
+      fixedByType: { manual: 0, recurring: 200, installment: 0 },
+    },
+  ],
 }
 
 export const analyticsDataAtRisk: AnalyticsData = {
@@ -485,6 +620,9 @@ const liveMonth_over: LiveMonthAnalysis = {
   ...liveMonth_2026_05,
   monthlyState: "over",
   totalVariableSpent: 4240,
+  majorTotal: 0,
+  majorCount: 0,
+  majorTransactions: [],
   rolloverEgp: -1840,
   pacingDeltaPct: 42,
   budgetUsedPct: 113,
@@ -502,6 +640,44 @@ const liveMonth_over: LiveMonthAnalysis = {
   largestVariableDay: { date: "2026-05-14", amount: 620 },
   largestVariableTxn: { id: "tx-05-14-a", amount: 540, description: "Emergency repair" },
   fixedManualOverBudgetCount: 2,
+  paymentMethods: [
+    {
+      id: "pm1",
+      name: "Cash",
+      variable: 420,
+      fixed: 0,
+      major: 0,
+      total: 420,
+      fixedByType: { manual: 0, recurring: 0, installment: 0 },
+    },
+    {
+      id: "pm2",
+      name: "Instapay",
+      variable: 1620,
+      fixed: 700,
+      major: 0,
+      total: 2320,
+      fixedByType: { manual: 0, recurring: 700, installment: 0 },
+    },
+    {
+      id: "pm3",
+      name: "Vodafone Cash",
+      variable: 960,
+      fixed: 605,
+      major: 0,
+      total: 1565,
+      fixedByType: { manual: 305, recurring: 0, installment: 300 },
+    },
+    {
+      id: "pm4",
+      name: "Bank Card",
+      variable: 1240,
+      fixed: 200,
+      major: 0,
+      total: 1440,
+      fixedByType: { manual: 0, recurring: 200, installment: 0 },
+    },
+  ],
 }
 
 export const analyticsDataOver: AnalyticsData = {
@@ -541,6 +717,7 @@ export function snapshotToView(snapshot: MonthSnapshot): LiveMonthAnalysis {
     fixedBucketsActual: snapshot.fixedBucketsActual,
     majorTotal: snapshot.majorTotal,
     majorCount: snapshot.majorCount,
+    majorTransactions: snapshot.majorTransactions,
     injectionTotal: snapshot.injectionTotal,
     injectionCount: snapshot.injectionCount,
     variableReceivedTotal: snapshot.variableReceivedTotal,
