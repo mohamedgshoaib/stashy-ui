@@ -85,81 +85,99 @@ interface BudgetBarProps {
   grandTotal: number
   monthlyBudget: number
   injectionTotal: number
+  fixedSpent: number
+  variableSpent: number
+  majorSpent: number
   locale: string
   t: ReturnType<typeof useTranslations<"Analytics">>
 }
 
-function BudgetBar({ grandTotal, monthlyBudget, injectionTotal, locale, t }: BudgetBarProps) {
+function BudgetBar({
+  grandTotal,
+  monthlyBudget,
+  injectionTotal,
+  fixedSpent,
+  variableSpent,
+  majorSpent,
+  locale,
+  t,
+}: BudgetBarProps) {
   const hasInjection = injectionTotal > 0
+  const totalCapacity = monthlyBudget + injectionTotal
 
-  if (hasInjection) {
-    // State 2 — two-segment bar
-    const totalCapacity = monthlyBudget + injectionTotal
-    const spentPct = Math.min((grandTotal / totalCapacity) * 100, 100)
-    const injectionPct = Math.min((injectionTotal / totalCapacity) * 100, 100 - spentPct)
-    const displayPct = Math.round((grandTotal / monthlyBudget) * 100)
-    const formattedBudget = new Intl.NumberFormat(locale).format(monthlyBudget)
-    const formattedInjection = new Intl.NumberFormat(locale).format(injectionTotal)
+  // Compute each segment as a share of total capacity, sequentially capped so
+  // they never collectively exceed 100 %.
+  const fixedPct = totalCapacity > 0 ? Math.min((fixedSpent / totalCapacity) * 100, 100) : 0
+  const variablePct =
+    totalCapacity > 0 ? Math.min((variableSpent / totalCapacity) * 100, 100 - fixedPct) : 0
+  const majorPct =
+    totalCapacity > 0
+      ? Math.min((majorSpent / totalCapacity) * 100, 100 - fixedPct - variablePct)
+      : 0
+  const injectionPct = hasInjection
+    ? Math.min(
+        (injectionTotal / totalCapacity) * 100,
+        100 - fixedPct - variablePct - majorPct,
+      )
+    : 0
 
-    return (
-      <div className="flex flex-col gap-2">
-        {/* Two-segment bar track */}
-        <div className="flex h-1.5 overflow-hidden rounded-full bg-surface-offset">
-          <div
-            className="h-full bg-foreground"
-            style={{ width: `${spentPct}%` }}
-          />
-          <div
-            className="h-full bg-injection opacity-60"
-            style={{ width: `${injectionPct}%` }}
-          />
-        </div>
-
-        {/* Meta row */}
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-xs text-text-tertiary">
-            {t("methods.budgetUsedPctOriginal", { pct: displayPct })}
-          </span>
-          <span dir="ltr" className="shrink-0 text-xs tabular-nums text-text-tertiary">
-            {t("methods.budgetTotal", { budget: formattedBudget })}
-          </span>
-        </div>
-
-        {/* Injection note */}
-        <div className="flex items-center gap-1.5">
-          <span className="size-[7px] shrink-0 rounded-full bg-injection" />
-          <span className="text-xs font-medium text-injection">
-            {t("methods.injectionNote", { amount: formattedInjection })}
-          </span>
-        </div>
-      </div>
-    )
-  }
-
-  // State 1 — single-fill bar
-  const fillPct = Math.min((grandTotal / monthlyBudget) * 100, 100)
-  const displayPct = Math.round((grandTotal / monthlyBudget) * 100)
+  const displayPct = monthlyBudget > 0 ? Math.round((grandTotal / monthlyBudget) * 100) : 0
   const formattedBudget = new Intl.NumberFormat(locale).format(monthlyBudget)
 
   return (
     <div className="flex flex-col gap-2">
-      {/* Single-fill bar track */}
-      <div className="h-1.5 overflow-hidden rounded-full bg-surface-offset">
-        <div
-          className="h-full rounded-full bg-foreground"
-          style={{ width: `${fillPct}%` }}
-        />
+      {/* Segmented bar: fixed | variable | major | injection (optional) | empty track */}
+      <div className="flex h-3 w-full overflow-hidden rounded-full bg-surface-offset shadow-ring">
+        <div className="h-full bg-fixed" style={{ width: `${fixedPct}%` }} />
+        <div className="h-full bg-variable" style={{ width: `${variablePct}%` }} />
+        {majorPct > 0 && <div className="h-full bg-major" style={{ width: `${majorPct}%` }} />}
+        {hasInjection && (
+          <div className="h-full bg-injection opacity-60" style={{ width: `${injectionPct}%` }} />
+        )}
       </div>
 
       {/* Meta row */}
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs text-text-tertiary">
-          {t("methods.budgetUsedPct", { pct: displayPct })}
+          {t(hasInjection ? "methods.budgetUsedPctOriginal" : "methods.budgetUsedPct", {
+            pct: displayPct,
+          })}
         </span>
         <span dir="ltr" className="shrink-0 text-xs tabular-nums text-text-tertiary">
           {t("methods.budgetTotal", { budget: formattedBudget })}
         </span>
       </div>
+
+      {/* Spending type legend */}
+      <div className="flex flex-wrap gap-2">
+        {fixedSpent > 0 && (
+          <span className="inline-flex items-center rounded-full bg-fixed-subtle px-2.5 py-0.5 text-xs font-medium text-fixed">
+            <span dir="ltr" className="tabular-nums">{formatAnalyticsCurrency(locale, fixedSpent)}</span>
+          </span>
+        )}
+        {variableSpent > 0 && (
+          <span className="inline-flex items-center rounded-full bg-variable-subtle px-2.5 py-0.5 text-xs font-medium text-variable">
+            <span dir="ltr" className="tabular-nums">{formatAnalyticsCurrency(locale, variableSpent)}</span>
+          </span>
+        )}
+        {majorSpent > 0 && (
+          <span className="inline-flex items-center rounded-full bg-major-subtle px-2.5 py-0.5 text-xs font-medium text-major">
+            <span dir="ltr" className="tabular-nums">{formatAnalyticsCurrency(locale, majorSpent)}</span>
+          </span>
+        )}
+      </div>
+
+      {/* Injection note */}
+      {hasInjection && (
+        <div className="flex items-center gap-1.5">
+          <span className="size-[7px] shrink-0 rounded-full bg-injection" />
+          <span className="text-xs font-medium text-injection">
+            {t("methods.injectionNote", {
+              amount: new Intl.NumberFormat(locale).format(injectionTotal),
+            })}
+          </span>
+        </div>
+      )}
     </div>
   )
 }
@@ -190,21 +208,22 @@ function MethodRow({ method, prevMethod, monthStatus, grandTotal, locale, t }: M
             <span dir="ltr" className="text-[1.0625rem] font-semibold tabular-nums text-foreground">
               {formatAnalyticsCurrency(locale, method.total)}
             </span>
-            <span className="text-xs tabular-nums text-text-tertiary">{pct}%</span>
+            <span className="inline-flex min-w-[2.75rem] items-center justify-center rounded-full bg-card px-2 py-0.5 text-xs tabular-nums text-text-tertiary shadow-ring">
+              {pct}%
+            </span>
           </span>
         </div>
 
         {/* Layer 2 — Identity chips (only non-zero) */}
         <div className="flex flex-wrap gap-1.5">
-          {SPLIT_ITEMS.map(({ key, chipClass, labelKey }) => {
+          {SPLIT_ITEMS.map(({ key, chipClass }) => {
             const amount = method[key]
             if (amount <= 0) return null
             return (
               <span
                 key={key}
-                className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium", chipClass)}
+                className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium", chipClass)}
               >
-                {t(labelKey as Parameters<typeof t>[0])}
                 <span dir="ltr" className="tabular-nums">
                   {formatAnalyticsCurrency(locale, amount)}
                 </span>
@@ -270,6 +289,9 @@ export function PaymentMethodCard({ month, prevPaymentMethods }: PaymentMethodCa
               grandTotal={grandTotal}
               monthlyBudget={month.monthlyBudget}
               injectionTotal={month.injectionTotal}
+              fixedSpent={month.fixedTotalSpent}
+              variableSpent={month.totalVariableSpent}
+              majorSpent={month.majorTotal}
               locale={locale}
               t={t}
             />
