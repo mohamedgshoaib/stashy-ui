@@ -1,11 +1,6 @@
 export type FixedBucketType = "manual" | "recurring" | "installment"
 
-export type FixedBucketIconKey =
-  | "rent"
-  | "spotify"
-  | "phone-installment"
-  | "coffee"
-  | "groceries"
+export type FixedBucketIconKey = "rent" | "spotify" | "phone-installment" | "coffee" | "groceries"
 
 export type FixedBucketPlan = {
   id: string
@@ -60,6 +55,30 @@ export type MajorTransaction = {
   paymentMethodName: string
 }
 
+// Plan-vs-actual for a single manual fixed bucket at month close.
+export type ManualBucketCalibration = {
+  bucketId: string
+  name: string
+  planned: number
+  actual: number
+}
+
+export type ClosedMonthVerdict = "withinPlan" | "adjustedInFlight" | "outranThePlan"
+
+export type WholeBudgetVerdict = "underBudget" | "exactBudget" | "overBudget"
+
+export type WholeBudgetCloseout = {
+  adjustedBudgetTotal: number
+  spentTotal: number
+  remainder: number
+  manualFixedUnusedTotal: number
+  manualFixedOverspendTotal: number
+  fixedSpentTotal: number
+  variableSpentTotal: number
+  majorSpentTotal: number
+  verdict: WholeBudgetVerdict
+}
+
 export type MonthSnapshot = {
   month: string
   isoDate: string
@@ -78,10 +97,15 @@ export type MonthSnapshot = {
   majorTotal: number
   majorCount: number
   majorTransactions: MajorTransaction[]
+  manualBucketCalibration: ManualBucketCalibration[]
+  closedMonthVerdict: ClosedMonthVerdict
+  wholeBudgetCloseout: WholeBudgetCloseout
   injectionTotal: number
   injectionCount: number
   variableReceivedTotal: number
 
+  baseVariableBudget: number
+  adjustedVariableBudget: number
   effectiveVariableBudgetFinal: number
   baseDailyRate: number
   variableSavingsRate: number
@@ -121,10 +145,15 @@ export type LiveMonthAnalysis = {
   majorTotal: number
   majorCount: number
   majorTransactions: MajorTransaction[]
+  manualBucketCalibration: ManualBucketCalibration[]
+  closedMonthVerdict: ClosedMonthVerdict | null
+  wholeBudgetCloseout: WholeBudgetCloseout
   injectionTotal: number
   injectionCount: number
   variableReceivedTotal: number
 
+  baseVariableBudget: number
+  adjustedVariableBudget: number
   effectiveVariableBudget: number
   baseDailyRate: number
   todaysRate: number

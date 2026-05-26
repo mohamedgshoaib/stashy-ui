@@ -1,11 +1,14 @@
 import type {
   AnalyticsData,
   AnalyticsMonthOption,
+  ClosedMonthVerdict,
   FixedBucketActual,
   FixedBucketPlan,
   LiveMonthAnalysis,
+  ManualBucketCalibration,
   MajorTransaction,
   MonthSnapshot,
+  WholeBudgetCloseout,
 } from "@/components/analytics/types"
 
 export const ANALYTICS_PLAN: "free" | "pro" = "pro"
@@ -139,7 +142,321 @@ const majorTransactions_2026_05_atRisk: MajorTransaction[] = [
   },
 ]
 
-const snapshot_2026_04: MonthSnapshot = {
+export function deriveManualBucketCalibration(
+  fixedBuckets: FixedBucketPlan[],
+  fixedBucketsActual: FixedBucketActual[],
+): ManualBucketCalibration[] {
+  const actualById = new Map(fixedBucketsActual.map((bucket) => [bucket.id, bucket.spent]))
+
+  return fixedBuckets
+    .filter((bucket) => bucket.type === "manual")
+    .map((bucket) => ({
+      bucketId: bucket.id,
+      name: bucket.name,
+      planned: bucket.budget,
+      actual: actualById.get(bucket.id) ?? 0,
+    }))
+}
+
+export function withManualBucketCalibration<
+  T extends { fixedBuckets: FixedBucketPlan[]; fixedBucketsActual: FixedBucketActual[] },
+>(month: T): T & { manualBucketCalibration: ManualBucketCalibration[] } {
+  return {
+    ...month,
+    manualBucketCalibration: deriveManualBucketCalibration(
+      month.fixedBuckets,
+      month.fixedBucketsActual,
+    ),
+  }
+}
+
+type MonthTruthMetrics = {
+  baseVariableBudget: number
+  adjustedVariableBudget: number
+  effectiveVariableBudget: number
+  actualVariableSpent: number
+  remainingVariableBudget: number
+  budgetUsedPct: number
+  majorPctOfBudget: number
+  fixedManualOverBudgetCount: number
+  monthProgressPct: number
+  avgDailySpend: number
+  projectedEndSpend: number
+  projectedSavings: number
+  projectedSavingsRate: number
+  rolloverEgp: number
+  monthlyState: LiveMonthAnalysis["monthlyState"]
+  baseDailyRate: number
+  todaysRate: number
+}
+
+function countManualOverBudget(
+  fixedBuckets: FixedBucketPlan[],
+  fixedBucketsActual: FixedBucketActual[],
+): number {
+  const actualById = new Map(fixedBucketsActual.map((bucket) => [bucket.id, bucket.spent]))
+
+  return fixedBuckets.filter((bucket) => {
+    if (bucket.type !== "manual") return false
+    return (actualById.get(bucket.id) ?? 0) > bucket.budget
+  }).length
+}
+
+function sumFixedTotalSpent(fixedBucketsActual: FixedBucketActual[]): number {
+  return fixedBucketsActual.reduce((sum, bucket) => sum + bucket.spent, 0)
+}
+
+function deriveWholeBudgetCloseout({
+  monthlyBudget,
+  fixedTotalBudget,
+  injectionTotal,
+  variableReceivedTotal,
+  fixedBuckets,
+  fixedBucketsActual,
+  totalVariableSpent,
+  majorTotal,
+}: {
+  monthlyBudget: number
+  fixedTotalBudget: number
+  injectionTotal: number
+  variableReceivedTotal: number
+  fixedBuckets: FixedBucketPlan[]
+  fixedBucketsActual: FixedBucketActual[]
+  totalVariableSpent: number
+  majorTotal: number
+}): WholeBudgetCloseout {
+  const actualById = new Map(fixedBucketsActual.map((bucket) => [bucket.id, bucket.spent]))
+
+  const manualBuckets = fixedBuckets.filter((bucket) => bucket.type === "manual")
+  const manualFixedUnusedTotal = manualBuckets.reduce(
+    (sum, bucket) => sum + Math.max(0, bucket.budget - (actualById.get(bucket.id) ?? 0)),
+    0,
+  )
+  const manualFixedOverspendTotal = manualBuckets.reduce(
+    (sum, bucket) => sum + Math.max(0, (actualById.get(bucket.id) ?? 0) - bucket.budget),
+    0,
+  )
+  const fixedOverspendTotal = Math.max(0, sumFixedTotalSpent(fixedBucketsActual) - fixedTotalBudget)
+  const fixedSpentTotal = fixedTotalBudget + fixedOverspendTotal
+  const netVariableSpent = Math.max(0, totalVariableSpent - variableReceivedTotal)
+  const spentTotal = fixedSpentTotal + netVariableSpent + majorTotal
+  const adjustedBudgetTotal = monthlyBudget + injectionTotal + manualFixedUnusedTotal
+  const remainder = adjustedBudgetTotal - spentTotal
+  const verdict = remainder > 0 ? "underBudget" : remainder < 0 ? "overBudget" : "exactBudget"
+
+  return {
+    adjustedBudgetTotal,
+    spentTotal,
+    remainder,
+    manualFixedUnusedTotal,
+    manualFixedOverspendTotal,
+    fixedSpentTotal,
+    variableSpentTotal: netVariableSpent,
+    majorSpentTotal: majorTotal,
+    verdict,
+  }
+}
+
+function deriveMonthTruthMetrics({
+  monthlyBudget,
+  fixedTotalBudget,
+  totalVariableSpent,
+  majorTotal,
+  injectionTotal,
+  variableReceivedTotal,
+  daysTracked,
+  daysRemaining,
+  daysInMonth,
+  fixedBuckets,
+  fixedBucketsActual,
+}: {
+  monthlyBudget: number
+  fixedTotalBudget: number
+  totalVariableSpent: number
+  majorTotal: number
+  injectionTotal: number
+  variableReceivedTotal: number
+  daysTracked: number
+  daysRemaining: number
+  daysInMonth: number
+  fixedBuckets: FixedBucketPlan[]
+  fixedBucketsActual: FixedBucketActual[]
+}): MonthTruthMetrics {
+  const fixedTotalSpent = sumFixedTotalSpent(fixedBucketsActual)
+  const fixedOverspend = Math.max(0, fixedTotalSpent - fixedTotalBudget)
+  const baseVariableBudget = Math.max(0, monthlyBudget - fixedTotalBudget)
+  const adjustedVariableBudget = Math.max(0, baseVariableBudget + injectionTotal)
+  const effectiveVariableBudget = Math.max(0, adjustedVariableBudget - fixedOverspend - majorTotal)
+  const actualVariableSpent = Math.max(0, totalVariableSpent - variableReceivedTotal)
+  const remainingVariableBudget = effectiveVariableBudget - actualVariableSpent
+  const budgetUsedPct = Math.round(
+    (actualVariableSpent / Math.max(1, effectiveVariableBudget)) * 100,
+  )
+  const monthProgressPct = Math.round((daysTracked / Math.max(1, daysInMonth)) * 100)
+  const isClosedMonth = daysRemaining === 0 || daysTracked >= daysInMonth
+  const avgDailySpend = Math.round(actualVariableSpent / Math.max(1, daysTracked))
+  const projectedEndSpend = isClosedMonth
+    ? actualVariableSpent
+    : Math.round(avgDailySpend * daysInMonth)
+  const projectedSavings = effectiveVariableBudget - projectedEndSpend
+  const projectedSavingsRate = Math.round(
+    (projectedSavings / Math.max(1, effectiveVariableBudget)) * 100,
+  )
+  const rolloverEgp = effectiveVariableBudget - projectedEndSpend
+  const baseDailyRate = Math.round(baseVariableBudget / Math.max(1, daysInMonth))
+  const todaysRate =
+    daysRemaining > 0
+      ? Math.round(Math.max(0, remainingVariableBudget) / Math.max(1, daysRemaining))
+      : 0
+  const monthlyState: LiveMonthAnalysis["monthlyState"] =
+    remainingVariableBudget < 0 ? "over" : projectedSavings < 0 ? "atRisk" : "onTrack"
+
+  return {
+    baseVariableBudget,
+    adjustedVariableBudget,
+    effectiveVariableBudget,
+    actualVariableSpent,
+    remainingVariableBudget,
+    budgetUsedPct,
+    majorPctOfBudget: Math.round((majorTotal / Math.max(1, monthlyBudget)) * 100),
+    fixedManualOverBudgetCount: countManualOverBudget(fixedBuckets, fixedBucketsActual),
+    monthProgressPct,
+    avgDailySpend,
+    projectedEndSpend,
+    projectedSavings,
+    projectedSavingsRate,
+    rolloverEgp,
+    monthlyState,
+    baseDailyRate,
+    todaysRate,
+  }
+}
+
+function deriveClosedMonthVerdict({
+  actualVariableSpent,
+  effectiveVariableBudget,
+  injectionTotal,
+}: {
+  actualVariableSpent: number
+  effectiveVariableBudget: number
+  injectionTotal: number
+}): ClosedMonthVerdict {
+  if (actualVariableSpent > effectiveVariableBudget) return "outranThePlan"
+  if (injectionTotal > 0) return "adjustedInFlight"
+  return "withinPlan"
+}
+
+function normalizeLiveMonth(month: LiveMonthAnalysis): LiveMonthAnalysis {
+  const truth = deriveMonthTruthMetrics({
+    monthlyBudget: month.monthlyBudget,
+    fixedTotalBudget: month.fixedTotalBudget,
+    totalVariableSpent: month.totalVariableSpent,
+    majorTotal: month.majorTotal,
+    injectionTotal: month.injectionTotal,
+    variableReceivedTotal: month.variableReceivedTotal,
+    daysTracked: month.daysTracked,
+    daysRemaining: month.daysRemaining,
+    daysInMonth: month.daysInMonth,
+    fixedBuckets: month.fixedBuckets,
+    fixedBucketsActual: month.fixedBucketsActual,
+  })
+  const wholeBudgetCloseout = deriveWholeBudgetCloseout({
+    monthlyBudget: month.monthlyBudget,
+    fixedTotalBudget: month.fixedTotalBudget,
+    injectionTotal: month.injectionTotal,
+    variableReceivedTotal: month.variableReceivedTotal,
+    fixedBuckets: month.fixedBuckets,
+    fixedBucketsActual: month.fixedBucketsActual,
+    totalVariableSpent: month.totalVariableSpent,
+    majorTotal: month.majorTotal,
+  })
+
+  return withManualBucketCalibration({
+    ...month,
+    closedMonthVerdict:
+      month.status === "closed"
+        ? deriveClosedMonthVerdict({
+            actualVariableSpent: truth.actualVariableSpent,
+            effectiveVariableBudget: truth.effectiveVariableBudget,
+            injectionTotal: month.injectionTotal,
+          })
+        : null,
+    fixedTotalSpent: sumFixedTotalSpent(month.fixedBucketsActual),
+    fixedOverspend: Math.max(
+      0,
+      sumFixedTotalSpent(month.fixedBucketsActual) - month.fixedTotalBudget,
+    ),
+    wholeBudgetCloseout,
+    monthlyState: truth.monthlyState,
+    baseVariableBudget: truth.baseVariableBudget,
+    adjustedVariableBudget: truth.adjustedVariableBudget,
+    effectiveVariableBudget: truth.effectiveVariableBudget,
+    baseDailyRate: truth.baseDailyRate,
+    todaysRate: truth.todaysRate,
+    variableSavingsRateMtd: truth.projectedSavingsRate,
+    rolloverEgp: truth.rolloverEgp,
+    pacingDeltaPct: truth.budgetUsedPct - truth.monthProgressPct,
+    budgetUsedPct: truth.budgetUsedPct,
+    monthProgressPct: truth.monthProgressPct,
+    fixedManualOverBudgetCount: truth.fixedManualOverBudgetCount,
+    majorPctOfBudget: truth.majorPctOfBudget,
+    avgDailySpend: truth.avgDailySpend,
+    projectedEndSpend: truth.projectedEndSpend,
+    projectedSavings: truth.projectedSavings,
+    projectedSavingsRate: truth.projectedSavingsRate,
+  })
+}
+
+function normalizeSnapshot(snapshot: MonthSnapshot): MonthSnapshot {
+  const truth = deriveMonthTruthMetrics({
+    monthlyBudget: snapshot.monthlyBudget,
+    fixedTotalBudget: snapshot.fixedTotalBudget,
+    totalVariableSpent: snapshot.totalVariableSpent,
+    majorTotal: snapshot.majorTotal,
+    injectionTotal: snapshot.injectionTotal,
+    variableReceivedTotal: snapshot.variableReceivedTotal,
+    daysTracked: snapshot.daysInMonth,
+    daysRemaining: 0,
+    daysInMonth: snapshot.daysInMonth,
+    fixedBuckets: snapshot.fixedBuckets,
+    fixedBucketsActual: snapshot.fixedBucketsActual,
+  })
+  const wholeBudgetCloseout = deriveWholeBudgetCloseout({
+    monthlyBudget: snapshot.monthlyBudget,
+    fixedTotalBudget: snapshot.fixedTotalBudget,
+    injectionTotal: snapshot.injectionTotal,
+    variableReceivedTotal: snapshot.variableReceivedTotal,
+    fixedBuckets: snapshot.fixedBuckets,
+    fixedBucketsActual: snapshot.fixedBucketsActual,
+    totalVariableSpent: snapshot.totalVariableSpent,
+    majorTotal: snapshot.majorTotal,
+  })
+
+  return withManualBucketCalibration({
+    ...snapshot,
+    closedMonthVerdict: deriveClosedMonthVerdict({
+      actualVariableSpent: truth.actualVariableSpent,
+      effectiveVariableBudget: truth.effectiveVariableBudget,
+      injectionTotal: snapshot.injectionTotal,
+    }),
+    fixedTotalSpent: sumFixedTotalSpent(snapshot.fixedBucketsActual),
+    fixedOverspend: Math.max(
+      0,
+      sumFixedTotalSpent(snapshot.fixedBucketsActual) - snapshot.fixedTotalBudget,
+    ),
+    wholeBudgetCloseout,
+    baseVariableBudget: truth.baseVariableBudget,
+    adjustedVariableBudget: truth.adjustedVariableBudget,
+    effectiveVariableBudgetFinal: truth.effectiveVariableBudget,
+    baseDailyRate: truth.baseDailyRate,
+    variableSavingsRate: truth.projectedSavingsRate,
+    rolloverEgpFinal: truth.rolloverEgp,
+    fixedManualOverBudgetCount: truth.fixedManualOverBudgetCount,
+    majorPctOfBudget: truth.majorPctOfBudget,
+  })
+}
+
+const snapshot_2026_04: MonthSnapshot = withManualBucketCalibration({
   month: "2026-04",
   isoDate: "2026-04-01",
   closedAt: "2026-05-01T08:14:00Z",
@@ -161,18 +478,32 @@ const snapshot_2026_04: MonthSnapshot = {
   majorTotal: 480,
   majorCount: 1,
   majorTransactions: majorTransactions_2026_04,
+  closedMonthVerdict: "withinPlan",
+  wholeBudgetCloseout: {
+    adjustedBudgetTotal: 6200,
+    spentTotal: 6020,
+    remainder: 180,
+    manualFixedUnusedTotal: 60,
+    manualFixedOverspendTotal: 280,
+    fixedSpentTotal: 1900,
+    variableSpentTotal: 3640,
+    majorSpentTotal: 480,
+    verdict: "underBudget",
+  },
+  // No injections, actual stays within the final effective plan.
   injectionTotal: 0,
   injectionCount: 0,
   variableReceivedTotal: 200,
-  effectiveVariableBudgetFinal: 3620,
+  baseVariableBudget: 4360,
+  adjustedVariableBudget: 4560,
+  effectiveVariableBudgetFinal: 3800,
   baseDailyRate: 145,
   variableSavingsRate: 16,
-  rolloverEgpFinal: -20,
+  rolloverEgpFinal: 160,
   overspentDays: 4,
   dailyVariableCumulative: [
-    170, 335, 495, 650, 800, 945, 1085, 1225, 1360, 1490, 1615, 1740, 1860, 1980, 2100,
-    2220, 2340, 2460, 2580, 2700, 2810, 2910, 3005, 3100, 3190, 3280, 3370, 3460, 3550,
-    3640,
+    170, 335, 495, 650, 800, 945, 1085, 1225, 1360, 1490, 1615, 1740, 1860, 1980, 2100, 2220, 2340,
+    2460, 2580, 2700, 2810, 2910, 3005, 3100, 3190, 3280, 3370, 3460, 3550, 3640,
   ],
   weeklySpend: [820, 940, 880, 1000],
   weeklyBudgetTarget: 845,
@@ -239,9 +570,9 @@ const snapshot_2026_04: MonthSnapshot = {
       ],
     },
   ],
-}
+})
 
-const snapshot_2026_03: MonthSnapshot = {
+const snapshot_2026_03: MonthSnapshot = withManualBucketCalibration({
   month: "2026-03",
   isoDate: "2026-03-01",
   closedAt: "2026-04-02T20:11:00Z",
@@ -257,24 +588,38 @@ const snapshot_2026_03: MonthSnapshot = {
     { id: "fb-rent", spent: 800, transactionCount: 1 },
     { id: "fb-spotify", spent: 100, transactionCount: 1 },
     { id: "fb-phone-installment", spent: 300, transactionCount: 1 },
-    { id: "fb-coffee", spent: 180, transactionCount: 8 },
+    { id: "fb-coffee", spent: 240, transactionCount: 8 },
     { id: "fb-groceries", spent: 160, transactionCount: 5 },
   ],
   majorTotal: 720,
   majorCount: 3,
   majorTransactions: majorTransactions_2026_03,
+  closedMonthVerdict: "adjustedInFlight",
+  wholeBudgetCloseout: {
+    adjustedBudgetTotal: 6280,
+    spentTotal: 5660,
+    remainder: 620,
+    manualFixedUnusedTotal: 80,
+    manualFixedOverspendTotal: 0,
+    fixedSpentTotal: 1640,
+    variableSpentTotal: 3300,
+    majorSpentTotal: 720,
+    verdict: "underBudget",
+  },
+  // Injections push the effective plan up; actual still lands under it.
   injectionTotal: 200,
   injectionCount: 1,
   variableReceivedTotal: 0,
+  baseVariableBudget: 4360,
+  adjustedVariableBudget: 4560,
   effectiveVariableBudgetFinal: 3640,
   baseDailyRate: 141,
   variableSavingsRate: 18,
   rolloverEgpFinal: 340,
   overspentDays: 2,
   dailyVariableCumulative: [
-    80, 165, 255, 345, 440, 535, 630, 720, 815, 910, 1010, 1110, 1210, 1310, 1410, 1510,
-    1615, 1720, 1830, 1940, 2055, 2170, 2290, 2410, 2535, 2660, 2790, 2920, 3055, 3190,
-    3300,
+    80, 165, 255, 345, 440, 535, 630, 720, 815, 910, 1010, 1110, 1210, 1310, 1410, 1510, 1615, 1720,
+    1830, 1940, 2055, 2170, 2290, 2410, 2535, 2660, 2790, 2920, 3055, 3190, 3300,
   ],
   weeklySpend: [780, 740, 850, 720, 210],
   weeklyBudgetTarget: 822,
@@ -322,9 +667,9 @@ const snapshot_2026_03: MonthSnapshot = {
     },
   ],
   fixedTransfers: [],
-}
+})
 
-const snapshot_2026_02: MonthSnapshot = {
+const snapshot_2026_02: MonthSnapshot = withManualBucketCalibration({
   month: "2026-02",
   isoDate: "2026-02-01",
   closedAt: "2026-03-07T03:00:00Z",
@@ -340,23 +685,38 @@ const snapshot_2026_02: MonthSnapshot = {
     { id: "fb-rent", spent: 800, transactionCount: 1 },
     { id: "fb-spotify", spent: 100, transactionCount: 1 },
     { id: "fb-phone-installment", spent: 300, transactionCount: 1 },
-    { id: "fb-coffee", spent: 240, transactionCount: 11 },
-    { id: "fb-groceries", spent: 340, transactionCount: 6 },
+    { id: "fb-coffee", spent: 200, transactionCount: 11 },
+    { id: "fb-groceries", spent: 240, transactionCount: 6 },
   ],
   majorTotal: 0,
   majorCount: 0,
   majorTransactions: [],
+  closedMonthVerdict: "outranThePlan",
+  wholeBudgetCloseout: {
+    adjustedBudgetTotal: 6000,
+    spentTotal: 5460,
+    remainder: 540,
+    manualFixedUnusedTotal: 0,
+    manualFixedOverspendTotal: 0,
+    fixedSpentTotal: 1640,
+    variableSpentTotal: 3820,
+    majorSpentTotal: 0,
+    verdict: "underBudget",
+  },
   injectionTotal: 0,
   injectionCount: 0,
   variableReceivedTotal: 0,
+  baseVariableBudget: 4360,
+  adjustedVariableBudget: 4360,
+  // No injections and actual outruns the effective plan.
   effectiveVariableBudgetFinal: 2720,
   baseDailyRate: 156,
   variableSavingsRate: 11,
   rolloverEgpFinal: -380,
   overspentDays: 6,
   dailyVariableCumulative: [
-    170, 335, 495, 650, 800, 945, 1085, 1225, 1360, 1495, 1625, 1755, 1880, 2005, 2150,
-    2295, 2435, 2575, 2705, 2835, 2965, 3095, 3220, 3345, 3465, 3585, 3700, 3820,
+    170, 335, 495, 650, 800, 945, 1085, 1225, 1360, 1495, 1625, 1755, 1880, 2005, 2150, 2295, 2435,
+    2575, 2705, 2835, 2965, 3095, 3220, 3345, 3465, 3585, 3700, 3820,
   ],
   weeklySpend: [1010, 980, 920, 910],
   weeklyBudgetTarget: 952,
@@ -417,7 +777,7 @@ const snapshot_2026_02: MonthSnapshot = {
       ],
     },
   ],
-}
+})
 
 const liveFixedBucketsActual: FixedBucketActual[] = [
   { id: "fb-rent", spent: 800, transactionCount: 1 },
@@ -427,7 +787,7 @@ const liveFixedBucketsActual: FixedBucketActual[] = [
   { id: "fb-groceries", spent: 110, transactionCount: 4 },
 ]
 
-const liveMonth_2026_05: LiveMonthAnalysis = {
+const liveMonth_2026_05: LiveMonthAnalysis = withManualBucketCalibration({
   month: "2026-05",
   isoDate: "2026-05-01",
   daysTracked: 18,
@@ -448,9 +808,23 @@ const liveMonth_2026_05: LiveMonthAnalysis = {
   majorTotal: 900,
   majorCount: 3,
   majorTransactions: majorTransactions_2026_05,
+  closedMonthVerdict: null,
+  wholeBudgetCloseout: {
+    adjustedBudgetTotal: 6095,
+    spentTotal: 4340,
+    remainder: 1755,
+    manualFixedUnusedTotal: 95,
+    manualFixedOverspendTotal: 0,
+    fixedSpentTotal: 1620,
+    variableSpentTotal: 1820,
+    majorSpentTotal: 900,
+    verdict: "underBudget",
+  },
   injectionTotal: 0,
   injectionCount: 0,
   variableReceivedTotal: 0,
+  baseVariableBudget: 4360,
+  adjustedVariableBudget: 4360,
 
   effectiveVariableBudget: 3760,
   baseDailyRate: 141,
@@ -462,8 +836,7 @@ const liveMonth_2026_05: LiveMonthAnalysis = {
   monthProgressPct: 58,
   overspentDaysMtd: 3,
   dailyVariableCumulative: [
-    80, 170, 265, 350, 460, 560, 665, 755, 875, 970, 1070, 1180, 1270, 1375, 1495, 1590,
-    1705, 1820,
+    80, 170, 265, 350, 460, 560, 665, 755, 875, 970, 1070, 1180, 1270, 1375, 1495, 1590, 1705, 1820,
   ],
   weeklySpend: [560, 520, 480, 260],
   weeklyBudgetTarget: 875,
@@ -537,7 +910,7 @@ const liveMonth_2026_05: LiveMonthAnalysis = {
       ],
     },
   ],
-}
+})
 
 const liveMonth_firstMonth: LiveMonthAnalysis = {
   ...liveMonth_2026_05,
@@ -576,8 +949,8 @@ const liveMonth_atRisk: LiveMonthAnalysis = {
   projectedSavings: -280,
   projectedSavingsRate: -7,
   dailyVariableCumulative: [
-    220, 430, 635, 825, 1005, 1175, 1340, 1500, 1650, 1785, 1910, 2030, 2145, 2255, 2355,
-    2450, 2530, 2600,
+    220, 430, 635, 825, 1005, 1175, 1340, 1500, 1650, 1785, 1910, 2030, 2145, 2255, 2355, 2450,
+    2530, 2600,
   ],
   weeklySpend: [720, 760, 680, 440],
   dayOfWeekSpend: [440, 260, 380, 340, 460, 480, 240],
@@ -644,8 +1017,8 @@ const liveMonth_over: LiveMonthAnalysis = {
   projectedSavings: -1240,
   projectedSavingsRate: -33,
   dailyVariableCumulative: [
-    180, 390, 610, 840, 1080, 1330, 1590, 1835, 2070, 2300, 2520, 2755, 2995, 3245, 3505,
-    3760, 4000, 4240,
+    180, 390, 610, 840, 1080, 1330, 1590, 1835, 2070, 2300, 2520, 2755, 2995, 3245, 3505, 3760,
+    4000, 4240,
   ],
   weeklySpend: [980, 1120, 1240, 900],
   dayOfWeekSpend: [580, 420, 560, 480, 680, 820, 700],
@@ -706,10 +1079,21 @@ export function getAnalyticsDataForScenario(
 }
 
 export function snapshotToView(snapshot: MonthSnapshot): LiveMonthAnalysis {
-  const budgetUsedPct = Math.round(
-    (snapshot.totalVariableSpent / Math.max(1, snapshot.effectiveVariableBudgetFinal)) * 100,
-  )
-  return {
+  const truth = deriveMonthTruthMetrics({
+    monthlyBudget: snapshot.monthlyBudget,
+    fixedTotalBudget: snapshot.fixedTotalBudget,
+    totalVariableSpent: snapshot.totalVariableSpent,
+    majorTotal: snapshot.majorTotal,
+    injectionTotal: snapshot.injectionTotal,
+    variableReceivedTotal: snapshot.variableReceivedTotal,
+    daysTracked: snapshot.daysInMonth,
+    daysRemaining: 0,
+    daysInMonth: snapshot.daysInMonth,
+    fixedBuckets: snapshot.fixedBuckets,
+    fixedBucketsActual: snapshot.fixedBucketsActual,
+  })
+
+  return withManualBucketCalibration({
     month: snapshot.month,
     isoDate: snapshot.isoDate,
     daysTracked: snapshot.daysInMonth,
@@ -717,30 +1101,50 @@ export function snapshotToView(snapshot: MonthSnapshot): LiveMonthAnalysis {
     daysInMonth: snapshot.daysInMonth,
     status: "closed",
     closedBy: snapshot.closedBy,
-    monthlyState: "onTrack",
+    monthlyState: truth.monthlyState,
 
     monthlyBudget: snapshot.monthlyBudget,
     fixedTotalBudget: snapshot.fixedTotalBudget,
     fixedBuckets: snapshot.fixedBuckets,
 
     totalVariableSpent: snapshot.totalVariableSpent,
-    fixedTotalSpent: snapshot.fixedTotalSpent,
-    fixedOverspend: snapshot.fixedOverspend,
+    fixedTotalSpent: sumFixedTotalSpent(snapshot.fixedBucketsActual),
+    fixedOverspend: Math.max(
+      0,
+      sumFixedTotalSpent(snapshot.fixedBucketsActual) - snapshot.fixedTotalBudget,
+    ),
     fixedBucketsActual: snapshot.fixedBucketsActual,
     majorTotal: snapshot.majorTotal,
     majorCount: snapshot.majorCount,
     majorTransactions: snapshot.majorTransactions,
+    closedMonthVerdict: deriveClosedMonthVerdict({
+      actualVariableSpent: truth.actualVariableSpent,
+      effectiveVariableBudget: truth.effectiveVariableBudget,
+      injectionTotal: snapshot.injectionTotal,
+    }),
+    wholeBudgetCloseout: deriveWholeBudgetCloseout({
+      monthlyBudget: snapshot.monthlyBudget,
+      fixedTotalBudget: snapshot.fixedTotalBudget,
+      injectionTotal: snapshot.injectionTotal,
+      variableReceivedTotal: snapshot.variableReceivedTotal,
+      fixedBuckets: snapshot.fixedBuckets,
+      fixedBucketsActual: snapshot.fixedBucketsActual,
+      totalVariableSpent: snapshot.totalVariableSpent,
+      majorTotal: snapshot.majorTotal,
+    }),
     injectionTotal: snapshot.injectionTotal,
     injectionCount: snapshot.injectionCount,
     variableReceivedTotal: snapshot.variableReceivedTotal,
 
-    effectiveVariableBudget: snapshot.effectiveVariableBudgetFinal,
-    baseDailyRate: snapshot.baseDailyRate,
+    baseVariableBudget: truth.baseVariableBudget,
+    adjustedVariableBudget: truth.adjustedVariableBudget,
+    effectiveVariableBudget: truth.effectiveVariableBudget,
+    baseDailyRate: truth.baseDailyRate,
     todaysRate: 0,
-    variableSavingsRateMtd: snapshot.variableSavingsRate,
-    rolloverEgp: snapshot.rolloverEgpFinal,
-    pacingDeltaPct: 0,
-    budgetUsedPct,
+    variableSavingsRateMtd: truth.projectedSavingsRate,
+    rolloverEgp: truth.rolloverEgp,
+    pacingDeltaPct: truth.budgetUsedPct - 100,
+    budgetUsedPct: truth.budgetUsedPct,
     monthProgressPct: 100,
     overspentDaysMtd: snapshot.overspentDays,
     dailyVariableCumulative: snapshot.dailyVariableCumulative,
@@ -749,27 +1153,24 @@ export function snapshotToView(snapshot: MonthSnapshot): LiveMonthAnalysis {
     dayOfWeekSpend: snapshot.dayOfWeekSpend,
     largestVariableDay: snapshot.largestVariableDay,
     largestVariableTxn: snapshot.largestVariableTxn,
-    fixedManualOverBudgetCount: snapshot.fixedManualOverBudgetCount,
-    majorPctOfBudget: snapshot.majorPctOfBudget,
+    fixedManualOverBudgetCount: truth.fixedManualOverBudgetCount,
+    majorPctOfBudget: truth.majorPctOfBudget,
 
     projectionConfidenceDay: snapshot.daysInMonth,
-    avgDailySpend: Math.round(snapshot.totalVariableSpent / snapshot.daysInMonth),
+    avgDailySpend: truth.avgDailySpend,
     projectedEndSpend: snapshot.totalVariableSpent,
-    projectedSavings: Math.max(
-      0,
-      snapshot.effectiveVariableBudgetFinal - snapshot.totalVariableSpent,
-    ),
-    projectedSavingsRate: snapshot.variableSavingsRate,
+    projectedSavings: truth.effectiveVariableBudget - snapshot.totalVariableSpent,
+    projectedSavingsRate: truth.projectedSavingsRate,
 
     paymentMethods: snapshot.paymentMethods,
     fixedTransfers: snapshot.fixedTransfers ?? [],
-  }
+  })
 }
 
 export function getMonthView(data: AnalyticsData, monthId: string): LiveMonthAnalysis {
-  if (monthId === data.current.month) return data.current
+  if (monthId === data.current.month) return normalizeLiveMonth(data.current)
   const snapshot = data.snapshots.find((s) => s.month === monthId)
-  return snapshot ? snapshotToView(snapshot) : data.current
+  return snapshot ? snapshotToView(normalizeSnapshot(snapshot)) : normalizeLiveMonth(data.current)
 }
 
 export function getAnalyticsMonthOptions(data: AnalyticsData): AnalyticsMonthOption[] {

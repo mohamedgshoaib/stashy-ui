@@ -710,15 +710,32 @@
         "title": "Where the budget went",
         "subtitle": "How this month's spending split across plan and reality."
       },
-      "improving": {
-        "title": "Are you improving?",
-        "subtitle": "How this month compares to your closed months."
+      "landed": {
+        "title": "How the month landed",
+        "subtitle": "A look back at how each month ended"
       }
     },
     "monthlyHealth": {
       "badgeOnTrack": "On track",
       "badgeAtRisk": "At risk",
       "badgeOver": "Over budget",
+      "closed": {
+        "badge": {
+          "withinPlan": "Closed within plan",
+          "adjustedInFlight": "Closed after adjustment",
+          "outranThePlan": "Closed over plan"
+        },
+        "heroLabel": {
+          "withinPlan": "left in the month",
+          "adjustedInFlight": "left after adjustments",
+          "outranThePlan": "over the final cap"
+        },
+        "context": {
+          "withinPlan": "This month closed with {amount} EGP still inside the final variable cap.",
+          "adjustedInFlight": "This month still closed with {amount} EGP left after injections expanded the cap.",
+          "outranThePlan": "This month closed {amount} EGP above the final variable cap."
+        }
+      },
       "heroLabelAhead": "ahead of pace",
       "heroLabelBehind": "behind pace",
       "heroLabelOver": "over your budget",
@@ -842,18 +859,81 @@
       "budgetTotal": "of {budget} EGP",
       "injectionNote": "+ {amount} EGP injected"
     },
-    "trends": {
-      "title": "Savings rate trend",
-      "savingsRateLabel": "Savings rate",
-      "savingsRateMtdLabel": "Savings rate (MTD)",
-      "deltaPositive": "+{delta}% vs {month}",
-      "deltaNegative": "{delta}% vs {month}",
-      "deltaNeutral": "Same as {month}",
-      "baseRateChangedReason": "Base rate changed because fixed expenses changed by {delta}.",
-      "baseRateUnchangedReason": "Base rate unchanged — fixed expenses stayed the same.",
-      "autoClosedBadge": "Auto-closed",
-      "firstMonthPrompt": "Close {month} at month end to unlock your first comparison.",
-      "closeMonthCta": "Close {month}"
+    "howMonthLanded": {
+      "title": "How the month landed",
+      "subtitle": "See how the whole month settled once everything lands.",
+      "subtitleClosed": "A closeout view for {month}: what was left or over, and what moved it there.",
+      "teaser": {
+        "badge": "{month} · in progress",
+        "title": "This month is still unfolding.",
+        "body": "When {month} ends, Stashy will show you how the plan held up - what fit, what flexed, what to learn for next month."
+      },
+      "verdict": {
+        "badge": "{month} · closed"
+      },
+      "verdictWhole": {
+        "underBudget": "Finished under budget.",
+        "exactBudget": "Landed right on budget.",
+        "overBudget": "Finished over budget."
+      },
+      "summary": {
+        "deltaLabel": "Month result",
+        "withinPlan": "Stayed inside the plan",
+        "adjustedInFlight": "Landed inside the adjusted plan",
+        "outranThePlan": "Finished above the plan"
+      },
+      "summaryWhole": {
+        "underBudget": "Left room in the month budget",
+        "exactBudget": "Used the month budget exactly",
+        "overBudget": "Spent above the month budget",
+        "spentLabel": "Whole month spent",
+        "budgetLabel": "Adjusted month budget"
+      },
+      "bar": {
+        "labelStart": "0",
+        "labelPlan": "plan · {plan}",
+        "labelPlanInj": "+inj · {planPlusInjection}",
+        "labelSpent": "spent · {totalSpent}"
+      },
+      "injections": {
+        "eyebrow": "Injections",
+        "label": "Added mid-month",
+        "value": "+{amount} EGP",
+        "sub": "{count, plural, one {1 injection} other {# injections}} · raised the month budget from {basePlan} to {adjustedPlan}"
+      },
+      "budgetBreakdown": {
+        "eyebrow": "Budget path",
+        "title": "How the result formed",
+        "subtitle": "From {base} to a final close of {final}.",
+        "baseLabel": "Monthly budget",
+        "adjustedLabel": "Adjusted month budget",
+        "finalLabel": "Whole month landed",
+        "variableHint": "This bridges the first card into the final whole-month result.",
+        "rows": {
+          "injection": "Budget injection added room",
+          "received": "Received money expanded the month",
+          "manualFixedReturned": "Unused manual fixed returned",
+          "manualFixedOverspend": "Manual fixed overspend pulled it down",
+          "variableLeft": "Variable close left",
+          "variableOver": "Variable close went over",
+          "variableExact": "Variable close landed exactly"
+        }
+      },
+      "manualFixed": {
+        "title": "Manual fixed settlement",
+        "metaLine": "{actual} of {plan}",
+        "summaryCount": "{count, plural, one {1 bucket changed the final result} other {# buckets changed the final result}}",
+        "returnedLabel": "returned",
+        "pressureLabel": "pressure",
+        "viewAllTitle": "View all manual fixed shifts"
+      },
+      "popup": {
+        "title": "Manual fixed details",
+        "subtitle": "{month} · {verdict} · {summary}",
+        "summaryUnder": "{amount} under plan",
+        "summaryOver": "{amount} over plan",
+        "summaryExact": "exactly on plan"
+      }
     },
     "upgrade": {
       "title": "Unlock Analytics",

@@ -710,15 +710,32 @@
         "title": "أين ذهبت ميزانيتك",
         "subtitle": "كيف توزع إنفاق هذا الشهر بين الخطة والواقع."
       },
-      "improving": {
-        "title": "هل تتحسن؟",
-        "subtitle": "كيف يقارن هذا الشهر بأشهرك المغلقة."
+      "landed": {
+        "title": "كيف انتهى الشهر",
+        "subtitle": "نظرة راجعة على كيف انتهى كل شهر"
       }
     },
     "monthlyHealth": {
       "badgeOnTrack": "في المسار الصحيح",
       "badgeAtRisk": "في خطر",
       "badgeOver": "تجاوز الميزانية",
+      "closed": {
+        "badge": {
+          "withinPlan": "أُغلق داخل الخطة",
+          "adjustedInFlight": "أُغلق بعد تعديل الخطة",
+          "outranThePlan": "أُغلق فوق الخطة"
+        },
+        "heroLabel": {
+          "withinPlan": "متبقٍ في الشهر",
+          "adjustedInFlight": "متبقٍ بعد التعديلات",
+          "outranThePlan": "فوق السقف النهائي"
+        },
+        "context": {
+          "withinPlan": "أُغلق هذا الشهر مع بقاء {amount} جنيه داخل السقف المتغير النهائي.",
+          "adjustedInFlight": "أُغلق هذا الشهر مع بقاء {amount} جنيه بعد أن وسّعت حقن الميزانية السقف النهائي.",
+          "outranThePlan": "أُغلق هذا الشهر فوق السقف المتغير النهائي بمقدار {amount} جنيه."
+        }
+      },
       "heroLabelAhead": "متقدم عن الإيقاع",
       "heroLabelBehind": "متأخر عن الإيقاع",
       "heroLabelOver": "تجاوز ميزانيتك",
@@ -842,18 +859,81 @@
       "budgetTotal": "من {budget} جنيه",
       "injectionNote": "+ {amount} جنيه مُضاف"
     },
-    "trends": {
-      "title": "اتجاه معدل التوفير",
-      "savingsRateLabel": "معدل التوفير",
-      "savingsRateMtdLabel": "معدل التوفير (حتى الآن)",
-      "deltaPositive": "+{delta}% مقارنة بـ {month}",
-      "deltaNegative": "{delta}% مقارنة بـ {month}",
-      "deltaNeutral": "مماثل لـ {month}",
-      "baseRateChangedReason": "تغير المعدل الأساسي لأن المصروفات الثابتة تغيرت بمقدار {delta}.",
-      "baseRateUnchangedReason": "المعدل الأساسي لم يتغير — بقيت المصروفات الثابتة كما هي.",
-      "autoClosedBadge": "أُغلِق تلقائياً",
-      "firstMonthPrompt": "أغلق {month} في نهاية الشهر لفتح أول مقارنة.",
-      "closeMonthCta": "إغلاق {month}"
+    "howMonthLanded": {
+      "title": "كيف انتهى الشهر",
+      "subtitle": "راجع كيف استقر الشهر كله بعد أن تُغلق كل الحركة.",
+      "subtitleClosed": "قراءة ختامية لشهر {month}: ماذا بقي أو تجاوز، وما الذي أوصل الشهر إلى هذه النتيجة.",
+      "teaser": {
+        "badge": "{month} · قيد التنفيذ",
+        "title": "هذا الشهر ما زال يتشكل.",
+        "body": "عندما ينتهي {month}، سيُريك ستاشي كيف صمدت الخطة: ما الذي اتسع له الشهر، وما الذي اضطر أن يلين، وما الذي يستحق أن تتعلمه للشهر القادم."
+      },
+      "verdict": {
+        "badge": "{month} · مُغلق"
+      },
+      "verdictWhole": {
+        "underBudget": "انتهى تحت الميزانية.",
+        "exactBudget": "انتهى تمامًا على الميزانية.",
+        "overBudget": "انتهى فوق الميزانية."
+      },
+      "summary": {
+        "deltaLabel": "نتيجة الشهر",
+        "withinPlan": "انتهى داخل الخطة",
+        "adjustedInFlight": "انتهى داخل الخطة المعدلة",
+        "outranThePlan": "أنهى الشهر فوق الخطة"
+      },
+      "summaryWhole": {
+        "underBudget": "ترك هامشًا داخل ميزانية الشهر",
+        "exactBudget": "استخدم ميزانية الشهر بالكامل",
+        "overBudget": "صرف فوق ميزانية الشهر",
+        "spentLabel": "إجمالي ما صُرف في الشهر",
+        "budgetLabel": "ميزانية الشهر بعد التسوية"
+      },
+      "bar": {
+        "labelStart": "0",
+        "labelPlan": "الخطة · {plan}",
+        "labelPlanInj": "+دعم · {planPlusInjection}",
+        "labelSpent": "المصروف · {totalSpent}"
+      },
+      "injections": {
+        "eyebrow": "الدعم",
+        "label": "أُضيف أثناء الشهر",
+        "value": "+{amount} جنيه",
+        "sub": "{count, plural, =0 {0 مرات دعم} one {مرة دعم واحدة} two {مرتا دعم} few {# مرات دعم} many {# مرة دعم} other {# مرة دعم}} · رفعت ميزانية الشهر من {basePlan} إلى {adjustedPlan}"
+      },
+      "budgetBreakdown": {
+        "eyebrow": "مسار الميزانية",
+        "title": "كيف تكوّنت النتيجة",
+        "subtitle": "من {base} إلى إغلاق نهائي قدره {final}.",
+        "baseLabel": "ميزانية الشهر",
+        "adjustedLabel": "ميزانية الشهر بعد التعديل",
+        "finalLabel": "كيف انتهى الشهر كله",
+        "variableHint": "هذه هي الحلقة التي تربط البطاقة الأولى بنتيجة الشهر النهائية.",
+        "rows": {
+          "injection": "دعم الميزانية أعطى مساحة إضافية",
+          "received": "المبلغ الوارد وسّع مساحة الشهر",
+          "manualFixedReturned": "فائض الثابت اليدوي عاد للشهر",
+          "manualFixedOverspend": "تجاوز الثابت اليدوي ضغط على النتيجة",
+          "variableLeft": "إغلاق المتغير ترك",
+          "variableOver": "إغلاق المتغير تجاوز",
+          "variableExact": "إغلاق المتغير انتهى تمامًا"
+        }
+      },
+      "manualFixed": {
+        "title": "تسوية الثابت اليدوي",
+        "metaLine": "{actual} من {plan}",
+        "summaryCount": "{count, plural, =0 {لم تغيّر أي مظاريف النتيجة} one {مظروف واحد غيّر النتيجة النهائية} two {مظروفان غيّرا النتيجة النهائية} few {# مظاريف غيّرت النتيجة النهائية} many {# مظروفًا غيّر النتيجة النهائية} other {# مظروف غيّر النتيجة النهائية}}",
+        "returnedLabel": "عاد للشهر",
+        "pressureLabel": "ضغط",
+        "viewAllTitle": "عرض كل تحركات الثابت اليدوي"
+      },
+      "popup": {
+        "title": "تفاصيل الثابت اليدوي",
+        "subtitle": "{month} · {verdict} · {summary}",
+        "summaryUnder": "{amount} تحت الخطة",
+        "summaryOver": "{amount} فوق الخطة",
+        "summaryExact": "تماماً على الخطة"
+      }
     },
     "upgrade": {
       "title": "افتح التحليلات",

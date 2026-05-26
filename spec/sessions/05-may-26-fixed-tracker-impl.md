@@ -338,8 +338,8 @@ Starting from the approved `ANALYTICS_REDESIGN_PLAN.md`. The previous analytics 
   - Created `components/analytics/payment-method-card.tsx`
   - Four filter chips (All/Variable/Fixed/Major) with `min-h-12` touch targets; Recharts horizontal `BarChart` with `activeDataKey` driven by filter state
 
-- **Phase 8 — TrendsCard**
-  - Created `components/analytics/trends-card.tsx`
+- **Phase 8 — closed-month trend card**
+  - Created the then-current Section 3 trend card component
   - Recharts `LineChart` sparkline with custom `dot` prop to highlight selected month; Q9 delta annotation with signed savings rate change + `baseRateChangeReason`; no-previous-month CTA
 
 - **Phase 9 — Rewire analytics-screen.tsx**
