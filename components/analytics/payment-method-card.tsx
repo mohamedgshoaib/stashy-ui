@@ -288,18 +288,42 @@ export function PaymentMethodCard({ month, prevPaymentMethods }: PaymentMethodCa
             </span>
           </div>
 
-          {/* Row 3+: budget bar (in-progress only) */}
-          {isInProgress && (
+          {/* Row 3+: budget bar (in-progress) or spend-type chips (closed) */}
+          {isInProgress ? (
             <BudgetBar
               grandTotal={grandTotal}
               monthlyBudget={month.monthlyBudget}
               injectionTotal={month.injectionTotal}
-              fixedSpent={month.fixedTotalSpent}
-              variableSpent={month.totalVariableSpent}
-              majorSpent={month.majorTotal}
+              fixedSpent={month.wholeBudgetCloseout.fixedSpentTotal}
+              variableSpent={month.wholeBudgetCloseout.variableSpentTotal}
+              majorSpent={month.wholeBudgetCloseout.majorSpentTotal}
               locale={locale}
               t={t}
             />
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {month.wholeBudgetCloseout.fixedSpentTotal > 0 && (
+                <span className="inline-flex items-center rounded-full bg-fixed-subtle px-2.5 py-0.5 text-xs font-medium text-fixed">
+                  <span dir="ltr" className="tabular-nums">
+                    {formatAnalyticsCurrency(locale, month.wholeBudgetCloseout.fixedSpentTotal)}
+                  </span>
+                </span>
+              )}
+              {month.wholeBudgetCloseout.variableSpentTotal > 0 && (
+                <span className="inline-flex items-center rounded-full bg-variable-subtle px-2.5 py-0.5 text-xs font-medium text-variable">
+                  <span dir="ltr" className="tabular-nums">
+                    {formatAnalyticsCurrency(locale, month.wholeBudgetCloseout.variableSpentTotal)}
+                  </span>
+                </span>
+              )}
+              {month.wholeBudgetCloseout.majorSpentTotal > 0 && (
+                <span className="inline-flex items-center rounded-full bg-major-subtle px-2.5 py-0.5 text-xs font-medium text-major">
+                  <span dir="ltr" className="tabular-nums">
+                    {formatAnalyticsCurrency(locale, month.wholeBudgetCloseout.majorSpentTotal)}
+                  </span>
+                </span>
+              )}
+            </div>
           )}
         </div>
 
