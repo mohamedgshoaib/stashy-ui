@@ -9,7 +9,6 @@ import {
   formatAnalyticsCurrency,
   formatAnalyticsMonthLabel,
   formatAnalyticsMonthShort,
-  formatAnalyticsNumber,
 } from "@/components/analytics/formatters"
 import { HowMonthLandedPopup } from "@/components/analytics/how-month-landed-popup"
 import type {
@@ -257,19 +256,29 @@ export function HowMonthLandedCard({ month }: HowMonthLandedCardProps) {
     .sort((a, b) => b.absDelta - a.absDelta)
   const inlineManualRows = bucketsWithDelta.slice(0, 3)
   const hiddenManualCount = Math.max(0, bucketsWithDelta.length - inlineManualRows.length)
-  const totalSpentForBreakdown = wholeMonthSpent
-  const fixedPct =
-    totalSpentForBreakdown > 0 ? (wholeBudget.fixedSpentTotal / totalSpentForBreakdown) * 100 : 0
-  const variablePct =
-    totalSpentForBreakdown > 0 ? (wholeBudget.variableSpentTotal / totalSpentForBreakdown) * 100 : 0
-  const majorPct =
-    totalSpentForBreakdown > 0 ? (wholeBudget.majorSpentTotal / totalSpentForBreakdown) * 100 : 0
-  const showSpendBreakdown = wholeMonthSpent > 0
   const showBudgetBreakdown =
     month.injectionTotal > 0 ||
     month.variableReceivedTotal > 0 ||
     wholeBudget.manualFixedUnusedTotal > 0 ||
     wholeBudget.manualFixedOverspendTotal > 0
+  const variableOutcome =
+    month.rolloverEgp > 0
+      ? {
+          label: t("howMonthLanded.budgetBreakdown.rows.variableLeft"),
+          amount: month.rolloverEgp,
+          toneClassName: semanticTextClass.income,
+        }
+      : month.rolloverEgp < 0
+        ? {
+            label: t("howMonthLanded.budgetBreakdown.rows.variableOver"),
+            amount: month.rolloverEgp,
+            toneClassName: semanticTextClass.expense,
+          }
+        : {
+            label: t("howMonthLanded.budgetBreakdown.rows.variableExact"),
+            amount: 0,
+            toneClassName: semanticTextClass.fixed,
+          }
   const budgetChangeRows: BudgetChangeRow[] = [
     ...(month.injectionTotal > 0
       ? [
@@ -418,7 +427,7 @@ export function HowMonthLandedCard({ month }: HowMonthLandedCardProps) {
                   <p className="text-xs leading-[1.5] text-text-secondary text-pretty">
                     {t("howMonthLanded.budgetBreakdown.subtitle", {
                       base: formatAnalyticsCurrency(locale, month.monthlyBudget),
-                      final: formatAnalyticsCurrency(locale, adjustedBudgetTotal),
+                      final: formatAnalyticsCurrency(locale, wholeBudget.remainder),
                     })}
                   </p>
                 </div>
@@ -458,99 +467,54 @@ export function HowMonthLandedCard({ month }: HowMonthLandedCardProps) {
 
                   <div className="flex items-center justify-between gap-3 border-t border-border-subtle pt-2">
                     <p className="text-xs font-medium text-text-secondary">
-                      {t("howMonthLanded.budgetBreakdown.finalLabel")}
+                      {t("howMonthLanded.budgetBreakdown.adjustedLabel")}
                     </p>
                     <p dir="ltr" className="text-sm font-semibold tabular-nums text-foreground">
                       {formatAnalyticsCurrency(locale, adjustedBudgetTotal)}
                     </p>
                   </div>
-                </div>
-              </div>
-            </div>
-          ) : null}
 
-          {showSpendBreakdown ? (
-            <div className="rounded-[var(--radius-md)] bg-surface-offset p-4 shadow-ring">
-              <div className="space-y-3">
-                <div className="space-y-1">
-                  <p className="text-[0.6875rem] uppercase tracking-[0.08em] text-text-tertiary">
-                    {t("howMonthLanded.spendBreakdown.eyebrow")}
-                  </p>
-                  <p className="text-sm font-medium text-foreground">
-                    {t("howMonthLanded.spendBreakdown.title")}
-                  </p>
-                </div>
-
-                <div
-                  dir="ltr"
-                  className="flex h-2 overflow-hidden rounded-full bg-surface-2 shadow-ring"
-                >
-                  <div className="h-full bg-fixed" style={{ width: `${fixedPct}%` }} />
-                  <div className="h-full bg-variable" style={{ width: `${variablePct}%` }} />
-                  {wholeBudget.majorSpentTotal > 0 ? (
-                    <div className="h-full bg-major" style={{ width: `${majorPct}%` }} />
-                  ) : null}
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-fixed-subtle px-2.5 py-1 text-xs font-medium text-fixed">
-                    <span>{t("howMonthLanded.spendBreakdown.fixedLabel")}</span>
-                    <span dir="ltr" className="tabular-nums">
-                      {formatAnalyticsCurrency(locale, wholeBudget.fixedSpentTotal)}
-                    </span>
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-variable-subtle px-2.5 py-1 text-xs font-medium text-variable">
-                    <span>{t("howMonthLanded.spendBreakdown.variableLabel")}</span>
-                    <span dir="ltr" className="tabular-nums">
-                      {formatAnalyticsCurrency(locale, wholeBudget.variableSpentTotal)}
-                    </span>
-                  </span>
-                  {wholeBudget.majorSpentTotal > 0 ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-major-subtle px-2.5 py-1 text-xs font-medium text-major">
-                      <span>{t("howMonthLanded.spendBreakdown.majorLabel")}</span>
-                      <span dir="ltr" className="tabular-nums">
-                        {formatAnalyticsCurrency(locale, wholeBudget.majorSpentTotal)}
-                      </span>
-                    </span>
-                  ) : null}
-                </div>
-              </div>
-            </div>
-          ) : null}
-
-          {month.injectionCount > 0 ? (
-            <div
-              className={cn(
-                "rounded-[var(--radius-md)] p-4 shadow-ring",
-                semanticSurfaceClass.injection,
-              )}
-            >
-              <div className="space-y-2.5">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[0.6875rem] uppercase tracking-[0.08em] text-injection/80">
-                      {t("howMonthLanded.injections.eyebrow")}
-                    </p>
-                    <p className="mt-1 text-sm font-medium text-injection">
-                      {t("howMonthLanded.injections.label")}
+                  <div className="space-y-1.5 border-t border-border-subtle pt-2">
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="min-w-0 flex-1 text-xs text-text-secondary">
+                        {variableOutcome.label}
+                      </p>
+                      <p
+                        dir="ltr"
+                        className={cn(
+                          "shrink-0 text-xs font-semibold tabular-nums",
+                          variableOutcome.toneClassName,
+                        )}
+                      >
+                        {variableOutcome.amount > 0 ? "+" : variableOutcome.amount < 0 ? "−" : ""}
+                        {formatAnalyticsCurrency(locale, Math.abs(variableOutcome.amount))}
+                      </p>
+                    </div>
+                    <p className="text-xs leading-[1.5] text-text-secondary text-pretty">
+                      {t("howMonthLanded.budgetBreakdown.variableHint")}
                     </p>
                   </div>
-                  <p
-                    dir="ltr"
-                    className="shrink-0 text-sm font-semibold tabular-nums text-foreground"
-                  >
-                    {t("howMonthLanded.injections.value", {
-                      amount: formatAnalyticsNumber(locale, month.injectionTotal),
-                    })}
-                  </p>
+
+                  <div className="flex items-center justify-between gap-3 border-t border-border-subtle pt-2">
+                    <p className="text-xs font-medium text-text-secondary">
+                      {t("howMonthLanded.budgetBreakdown.finalLabel")}
+                    </p>
+                    <p
+                      dir="ltr"
+                      className={cn(
+                        "text-sm font-semibold tabular-nums",
+                        wholeBudget.remainder > 0
+                          ? semanticTextClass.income
+                          : wholeBudget.remainder < 0
+                            ? semanticTextClass.expense
+                            : "text-foreground",
+                      )}
+                    >
+                      {wholeBudget.remainder > 0 ? "+" : wholeBudget.remainder < 0 ? "−" : ""}
+                      {formatAnalyticsCurrency(locale, Math.abs(wholeBudget.remainder))}
+                    </p>
+                  </div>
                 </div>
-                <p className="max-w-[31ch] text-xs leading-[1.5] text-injection/85 text-pretty">
-                  {t("howMonthLanded.injections.sub", {
-                    count: month.injectionCount,
-                    basePlan: formatAnalyticsCurrency(locale, month.monthlyBudget),
-                    adjustedPlan: formatAnalyticsCurrency(locale, adjustedBudgetTotal),
-                  })}
-                </p>
               </div>
             </div>
           ) : null}

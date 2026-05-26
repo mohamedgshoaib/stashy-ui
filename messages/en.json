@@ -904,28 +904,21 @@
       "budgetBreakdown": {
         "eyebrow": "Budget path",
         "title": "How the month budget changed",
-        "subtitle": "Started from {base}, then landed at an adjusted month budget of {final}.",
+        "subtitle": "Started from {base}, then settled into a final month result of {final}.",
         "baseLabel": "Monthly budget",
+        "adjustedLabel": "Adjusted month budget",
         "finalLabel": "Adjusted month budget",
+        "variableHint": "This is the same variable close result shown in the first card before manual fixed return is added back.",
         "rows": {
           "injection": "Budget injections raised the month budget",
           "received": "Received variable money raised the month budget",
           "manualFixedReturned": "Unused manual fixed returned to the month",
           "manualFixedReturnedDetail": "{amount} stayed unused in manual fixed buckets, so it helped the month result.",
           "manualFixedOverspend": "Manual fixed overspend added pressure",
-          "manualFixedOverspendDetail": "{amount} went above manual fixed plan and pulled against the month result."
-        }
-      },
-      "spendBreakdown": {
-        "eyebrow": "Where it went",
-        "title": "What the whole month spent",
-        "fixedLabel": "Fixed spent",
-        "variableLabel": "Variable spent",
-        "majorLabel": "Major spent",
-        "rows": {
-          "fixed": "Fixed spent",
-          "variable": "Variable spent",
-          "major": "Major spent"
+          "manualFixedOverspendDetail": "{amount} went above manual fixed plan and pulled against the month result.",
+          "variableLeft": "Variable close left",
+          "variableOver": "Variable close went over",
+          "variableExact": "Variable close landed exactly"
         }
       },
       "manualFixed": {

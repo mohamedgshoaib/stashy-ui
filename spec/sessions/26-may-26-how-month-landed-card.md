@@ -144,6 +144,11 @@ Analytics Section 3 was still mounted as the old `TrendsCard`, framing the scree
     - April: Point A `180`, manual fixed unused `0`, Point B `180`
     - March: Point A `540`, manual fixed unused `80`, Point B `620`
     - February: Point A `540`, manual fixed unused `0`, Point B `540`
+- Refocused `HowMonthLandedCard` around closeout meaning instead of composition reporting:
+  - removed the `Where it went` spend-composition section because it was repeating information already covered by earlier analytics cards and payment-method reporting
+  - removed the separate injections tile because its information already belongs in the budget path
+  - strengthened the budget path to be the card's single explanation surface by keeping injections, received-variable money, manual fixed returned, manual fixed overspend pressure, and adding the explicit variable close result from Card 1
+  - updated the budget-path copy so users can see how the first card's variable leftover/overrun connects into the final whole-month landed result
 - Updated `lib/sandbox-budget.ts` helper math so fixed remaining cannot inflate totals and the home strip follows the same cap assumptions.
 - Verification results:
   - `pnpm typecheck` passed
@@ -157,6 +162,7 @@ Analytics Section 3 was still mounted as the old `TrendsCard`, framing the scree
   - latest cap-clarity verification: `pnpm typecheck` passed, `pnpm build` passed, required touched-file `oxfmt --check` passed; `pnpm lint` still fails only on the same two unrelated pre-existing issues
   - latest Point A / Point B verification: `pnpm typecheck` passed, `pnpm build` passed, required touched-file `oxfmt --check` passed; `pnpm lint` still fails only on the same two unrelated pre-existing issues
   - latest Point B correction verification: `pnpm typecheck` passed, `pnpm build` passed, required touched-file `oxfmt --check` passed; `pnpm lint` still fails only on the same two unrelated pre-existing issues
+  - latest Section 3 refocus verification: `pnpm typecheck` passed, `pnpm build` passed, required touched-file `oxfmt --check` passed; `pnpm lint` still fails only on the same two unrelated pre-existing issues
   - required grep for `TrendsCard`, `trends-card`, `Analytics.trends`, `Analytics.section.improving`, `close-month-action`, and `CloseMonthAction` returned zero matches
 
 ---
@@ -184,6 +190,7 @@ Analytics Section 3 was still mounted as the old `TrendsCard`, framing the scree
 - In whole-month closeout, unused manual fixed improves the month result without requiring an explicit transfer, but recurring/installment fixed leftover does not auto-return to the month result.
 - Point B arithmetic must be anchored to Point A plus allowed manual-fixed return, not to raw fixed actuals alone; otherwise the whole-month card drifts in months where no manual-fixed leftover exists.
 - Closed months should never use rounded projection math for their final Point A remainder; exact actuals are required once the month is closed.
+- Section 3 should stay tightly focused on "what was left or over" and "why," not re-explain where spending went. Spend composition belongs to earlier analytics sections; the budget path is now the single explanatory spine for closeout logic.
 - The old Section 3 references were removed repo-wide to satisfy the explicit cleanup verification gate for this work block.
 
 ---
