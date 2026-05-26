@@ -710,9 +710,9 @@
         "title": "أين ذهبت ميزانيتك",
         "subtitle": "كيف توزع إنفاق هذا الشهر بين الخطة والواقع."
       },
-      "improving": {
-        "title": "هل تتحسن؟",
-        "subtitle": "كيف يقارن هذا الشهر بأشهرك المغلقة."
+      "landed": {
+        "title": "كيف انتهى الشهر",
+        "subtitle": "نظرة راجعة على كيف انتهى كل شهر"
       }
     },
     "monthlyHealth": {
@@ -842,18 +842,52 @@
       "budgetTotal": "من {budget} جنيه",
       "injectionNote": "+ {amount} جنيه مُضاف"
     },
-    "trends": {
-      "title": "اتجاه معدل التوفير",
-      "savingsRateLabel": "معدل التوفير",
-      "savingsRateMtdLabel": "معدل التوفير (حتى الآن)",
-      "deltaPositive": "+{delta}% مقارنة بـ {month}",
-      "deltaNegative": "{delta}% مقارنة بـ {month}",
-      "deltaNeutral": "مماثل لـ {month}",
-      "baseRateChangedReason": "تغير المعدل الأساسي لأن المصروفات الثابتة تغيرت بمقدار {delta}.",
-      "baseRateUnchangedReason": "المعدل الأساسي لم يتغير — بقيت المصروفات الثابتة كما هي.",
-      "autoClosedBadge": "أُغلِق تلقائياً",
-      "firstMonthPrompt": "أغلق {month} في نهاية الشهر لفتح أول مقارنة.",
-      "closeMonthCta": "إغلاق {month}"
+    "howMonthLanded": {
+      "teaser": {
+        "eyebrow": "{month} · قيد التنفيذ",
+        "title": "الشهر ما زال يُكتب.",
+        "body": "عندما ينتهي {month}، سيُريك ستاشي كيف صمدت الخطة: ما الذي اتسع له الشهر، وما الذي اضطر أن يلين، وما الذي يستحق أن تتعلمه للشهر القادم."
+      },
+      "verdict": {
+        "withinPlan": "داخل الخطة.",
+        "adjustedInFlight": "تعدّلت الخطة أثناء الشهر.",
+        "outranThePlan": "تجاوز المسار الخطة.",
+        "eyebrowClosed": "{month} · مُغلق",
+        "supportWithinPlan": "تم صرف {totalSpent} من {plan}. وتبقى {remainder}.",
+        "supportAdjustedInFlight": "تم صرف {totalSpent}؛ وكانت الخطة بعد الدعم {planPlusInjection}.",
+        "supportOutran": "تم صرف {totalSpent} من خطة قدرها {plan}. وبزيادة {overage}."
+      },
+      "bar": {
+        "labelStart": "0",
+        "labelPlan": "الخطة · {plan}",
+        "labelPlanInj": "+دعم · {planPlusInjection}",
+        "labelSpent": "المصروف · {totalSpent}"
+      },
+      "injections": {
+        "eyebrow": "الدعم",
+        "label": "أُضيف أثناء الشهر",
+        "value": "+{amount} جنيه",
+        "sub": "{count, plural, =0 {0 مرات دعم} one {مرة دعم واحدة} two {مرتا دعم} few {# مرات دعم} many {# مرة دعم} other {# مرة دعم}} · رفعت الخطة من {basePlan} إلى {adjustedPlan}"
+      },
+      "variable": {
+        "eyebrow": "المتغير",
+        "planLabelDefault": "من خطة {plan}",
+        "planLabelAdjusted": "من المعدل {plan}",
+        "subUnder": "{delta} تحت الخطة",
+        "subOver": "{delta} فوق الخطة",
+        "majorSuffix": " · {amount} صُنّف كمصروف كبير"
+      },
+      "manualFixed": {
+        "eyebrow": "الثابت اليدوي",
+        "metaLine": "{actual} من {plan}",
+        "andNMore": "{count, plural, one {وواحد إضافي} two {واثنان إضافيان} few {و# إضافية} many {و# إضافية} other {و# إضافية}}"
+      },
+      "popup": {
+        "header": "{month} · {verdict} · {summary}",
+        "summaryUnder": "{amount} تحت الخطة",
+        "summaryOver": "{amount} فوق الخطة",
+        "summaryExact": "تماماً على الخطة"
+      }
     },
     "upgrade": {
       "title": "افتح التحليلات",

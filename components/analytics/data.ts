@@ -4,6 +4,7 @@ import type {
   FixedBucketActual,
   FixedBucketPlan,
   LiveMonthAnalysis,
+  ManualBucketCalibration,
   MajorTransaction,
   MonthSnapshot,
 } from "@/components/analytics/types"
@@ -139,7 +140,35 @@ const majorTransactions_2026_05_atRisk: MajorTransaction[] = [
   },
 ]
 
-const snapshot_2026_04: MonthSnapshot = {
+export function deriveManualBucketCalibration(
+  fixedBuckets: FixedBucketPlan[],
+  fixedBucketsActual: FixedBucketActual[],
+): ManualBucketCalibration[] {
+  const actualById = new Map(fixedBucketsActual.map((bucket) => [bucket.id, bucket.spent]))
+
+  return fixedBuckets
+    .filter((bucket) => bucket.type === "manual")
+    .map((bucket) => ({
+      bucketId: bucket.id,
+      name: bucket.name,
+      planned: bucket.budget,
+      actual: actualById.get(bucket.id) ?? 0,
+    }))
+}
+
+export function withManualBucketCalibration<
+  T extends { fixedBuckets: FixedBucketPlan[]; fixedBucketsActual: FixedBucketActual[] },
+>(month: T): T & { manualBucketCalibration: ManualBucketCalibration[] } {
+  return {
+    ...month,
+    manualBucketCalibration: deriveManualBucketCalibration(
+      month.fixedBuckets,
+      month.fixedBucketsActual,
+    ),
+  }
+}
+
+const snapshot_2026_04: MonthSnapshot = withManualBucketCalibration({
   month: "2026-04",
   isoDate: "2026-04-01",
   closedAt: "2026-05-01T08:14:00Z",
@@ -161,18 +190,18 @@ const snapshot_2026_04: MonthSnapshot = {
   majorTotal: 480,
   majorCount: 1,
   majorTransactions: majorTransactions_2026_04,
+  // No injections, actual stays within the final effective plan.
   injectionTotal: 0,
   injectionCount: 0,
   variableReceivedTotal: 200,
-  effectiveVariableBudgetFinal: 3620,
+  effectiveVariableBudgetFinal: 3800,
   baseDailyRate: 145,
   variableSavingsRate: 16,
-  rolloverEgpFinal: -20,
+  rolloverEgpFinal: 160,
   overspentDays: 4,
   dailyVariableCumulative: [
-    170, 335, 495, 650, 800, 945, 1085, 1225, 1360, 1490, 1615, 1740, 1860, 1980, 2100,
-    2220, 2340, 2460, 2580, 2700, 2810, 2910, 3005, 3100, 3190, 3280, 3370, 3460, 3550,
-    3640,
+    170, 335, 495, 650, 800, 945, 1085, 1225, 1360, 1490, 1615, 1740, 1860, 1980, 2100, 2220, 2340,
+    2460, 2580, 2700, 2810, 2910, 3005, 3100, 3190, 3280, 3370, 3460, 3550, 3640,
   ],
   weeklySpend: [820, 940, 880, 1000],
   weeklyBudgetTarget: 845,
@@ -239,9 +268,9 @@ const snapshot_2026_04: MonthSnapshot = {
       ],
     },
   ],
-}
+})
 
-const snapshot_2026_03: MonthSnapshot = {
+const snapshot_2026_03: MonthSnapshot = withManualBucketCalibration({
   month: "2026-03",
   isoDate: "2026-03-01",
   closedAt: "2026-04-02T20:11:00Z",
@@ -257,12 +286,13 @@ const snapshot_2026_03: MonthSnapshot = {
     { id: "fb-rent", spent: 800, transactionCount: 1 },
     { id: "fb-spotify", spent: 100, transactionCount: 1 },
     { id: "fb-phone-installment", spent: 300, transactionCount: 1 },
-    { id: "fb-coffee", spent: 180, transactionCount: 8 },
+    { id: "fb-coffee", spent: 240, transactionCount: 8 },
     { id: "fb-groceries", spent: 160, transactionCount: 5 },
   ],
   majorTotal: 720,
   majorCount: 3,
   majorTransactions: majorTransactions_2026_03,
+  // Injections push the effective plan up; actual still lands under it.
   injectionTotal: 200,
   injectionCount: 1,
   variableReceivedTotal: 0,
@@ -272,9 +302,8 @@ const snapshot_2026_03: MonthSnapshot = {
   rolloverEgpFinal: 340,
   overspentDays: 2,
   dailyVariableCumulative: [
-    80, 165, 255, 345, 440, 535, 630, 720, 815, 910, 1010, 1110, 1210, 1310, 1410, 1510,
-    1615, 1720, 1830, 1940, 2055, 2170, 2290, 2410, 2535, 2660, 2790, 2920, 3055, 3190,
-    3300,
+    80, 165, 255, 345, 440, 535, 630, 720, 815, 910, 1010, 1110, 1210, 1310, 1410, 1510, 1615, 1720,
+    1830, 1940, 2055, 2170, 2290, 2410, 2535, 2660, 2790, 2920, 3055, 3190, 3300,
   ],
   weeklySpend: [780, 740, 850, 720, 210],
   weeklyBudgetTarget: 822,
@@ -322,9 +351,9 @@ const snapshot_2026_03: MonthSnapshot = {
     },
   ],
   fixedTransfers: [],
-}
+})
 
-const snapshot_2026_02: MonthSnapshot = {
+const snapshot_2026_02: MonthSnapshot = withManualBucketCalibration({
   month: "2026-02",
   isoDate: "2026-02-01",
   closedAt: "2026-03-07T03:00:00Z",
@@ -340,8 +369,8 @@ const snapshot_2026_02: MonthSnapshot = {
     { id: "fb-rent", spent: 800, transactionCount: 1 },
     { id: "fb-spotify", spent: 100, transactionCount: 1 },
     { id: "fb-phone-installment", spent: 300, transactionCount: 1 },
-    { id: "fb-coffee", spent: 240, transactionCount: 11 },
-    { id: "fb-groceries", spent: 340, transactionCount: 6 },
+    { id: "fb-coffee", spent: 200, transactionCount: 11 },
+    { id: "fb-groceries", spent: 240, transactionCount: 6 },
   ],
   majorTotal: 0,
   majorCount: 0,
@@ -349,14 +378,15 @@ const snapshot_2026_02: MonthSnapshot = {
   injectionTotal: 0,
   injectionCount: 0,
   variableReceivedTotal: 0,
+  // No injections and actual outruns the effective plan.
   effectiveVariableBudgetFinal: 2720,
   baseDailyRate: 156,
   variableSavingsRate: 11,
   rolloverEgpFinal: -380,
   overspentDays: 6,
   dailyVariableCumulative: [
-    170, 335, 495, 650, 800, 945, 1085, 1225, 1360, 1495, 1625, 1755, 1880, 2005, 2150,
-    2295, 2435, 2575, 2705, 2835, 2965, 3095, 3220, 3345, 3465, 3585, 3700, 3820,
+    170, 335, 495, 650, 800, 945, 1085, 1225, 1360, 1495, 1625, 1755, 1880, 2005, 2150, 2295, 2435,
+    2575, 2705, 2835, 2965, 3095, 3220, 3345, 3465, 3585, 3700, 3820,
   ],
   weeklySpend: [1010, 980, 920, 910],
   weeklyBudgetTarget: 952,
@@ -417,7 +447,7 @@ const snapshot_2026_02: MonthSnapshot = {
       ],
     },
   ],
-}
+})
 
 const liveFixedBucketsActual: FixedBucketActual[] = [
   { id: "fb-rent", spent: 800, transactionCount: 1 },
@@ -427,7 +457,7 @@ const liveFixedBucketsActual: FixedBucketActual[] = [
   { id: "fb-groceries", spent: 110, transactionCount: 4 },
 ]
 
-const liveMonth_2026_05: LiveMonthAnalysis = {
+const liveMonth_2026_05: LiveMonthAnalysis = withManualBucketCalibration({
   month: "2026-05",
   isoDate: "2026-05-01",
   daysTracked: 18,
@@ -462,8 +492,7 @@ const liveMonth_2026_05: LiveMonthAnalysis = {
   monthProgressPct: 58,
   overspentDaysMtd: 3,
   dailyVariableCumulative: [
-    80, 170, 265, 350, 460, 560, 665, 755, 875, 970, 1070, 1180, 1270, 1375, 1495, 1590,
-    1705, 1820,
+    80, 170, 265, 350, 460, 560, 665, 755, 875, 970, 1070, 1180, 1270, 1375, 1495, 1590, 1705, 1820,
   ],
   weeklySpend: [560, 520, 480, 260],
   weeklyBudgetTarget: 875,
@@ -537,7 +566,7 @@ const liveMonth_2026_05: LiveMonthAnalysis = {
       ],
     },
   ],
-}
+})
 
 const liveMonth_firstMonth: LiveMonthAnalysis = {
   ...liveMonth_2026_05,
@@ -576,8 +605,8 @@ const liveMonth_atRisk: LiveMonthAnalysis = {
   projectedSavings: -280,
   projectedSavingsRate: -7,
   dailyVariableCumulative: [
-    220, 430, 635, 825, 1005, 1175, 1340, 1500, 1650, 1785, 1910, 2030, 2145, 2255, 2355,
-    2450, 2530, 2600,
+    220, 430, 635, 825, 1005, 1175, 1340, 1500, 1650, 1785, 1910, 2030, 2145, 2255, 2355, 2450,
+    2530, 2600,
   ],
   weeklySpend: [720, 760, 680, 440],
   dayOfWeekSpend: [440, 260, 380, 340, 460, 480, 240],
@@ -644,8 +673,8 @@ const liveMonth_over: LiveMonthAnalysis = {
   projectedSavings: -1240,
   projectedSavingsRate: -33,
   dailyVariableCumulative: [
-    180, 390, 610, 840, 1080, 1330, 1590, 1835, 2070, 2300, 2520, 2755, 2995, 3245, 3505,
-    3760, 4000, 4240,
+    180, 390, 610, 840, 1080, 1330, 1590, 1835, 2070, 2300, 2520, 2755, 2995, 3245, 3505, 3760,
+    4000, 4240,
   ],
   weeklySpend: [980, 1120, 1240, 900],
   dayOfWeekSpend: [580, 420, 560, 480, 680, 820, 700],
@@ -709,7 +738,7 @@ export function snapshotToView(snapshot: MonthSnapshot): LiveMonthAnalysis {
   const budgetUsedPct = Math.round(
     (snapshot.totalVariableSpent / Math.max(1, snapshot.effectiveVariableBudgetFinal)) * 100,
   )
-  return {
+  return withManualBucketCalibration({
     month: snapshot.month,
     isoDate: snapshot.isoDate,
     daysTracked: snapshot.daysInMonth,
@@ -763,7 +792,7 @@ export function snapshotToView(snapshot: MonthSnapshot): LiveMonthAnalysis {
 
     paymentMethods: snapshot.paymentMethods,
     fixedTransfers: snapshot.fixedTransfers ?? [],
-  }
+  })
 }
 
 export function getMonthView(data: AnalyticsData, monthId: string): LiveMonthAnalysis {

@@ -710,9 +710,9 @@
         "title": "Where the budget went",
         "subtitle": "How this month's spending split across plan and reality."
       },
-      "improving": {
-        "title": "Are you improving?",
-        "subtitle": "How this month compares to your closed months."
+      "landed": {
+        "title": "How the month landed",
+        "subtitle": "A look back at how each month ended"
       }
     },
     "monthlyHealth": {
@@ -842,18 +842,52 @@
       "budgetTotal": "of {budget} EGP",
       "injectionNote": "+ {amount} EGP injected"
     },
-    "trends": {
-      "title": "Savings rate trend",
-      "savingsRateLabel": "Savings rate",
-      "savingsRateMtdLabel": "Savings rate (MTD)",
-      "deltaPositive": "+{delta}% vs {month}",
-      "deltaNegative": "{delta}% vs {month}",
-      "deltaNeutral": "Same as {month}",
-      "baseRateChangedReason": "Base rate changed because fixed expenses changed by {delta}.",
-      "baseRateUnchangedReason": "Base rate unchanged — fixed expenses stayed the same.",
-      "autoClosedBadge": "Auto-closed",
-      "firstMonthPrompt": "Close {month} at month end to unlock your first comparison.",
-      "closeMonthCta": "Close {month}"
+    "howMonthLanded": {
+      "teaser": {
+        "eyebrow": "{month} · in progress",
+        "title": "The month is still being written.",
+        "body": "When {month} ends, Stashy will show you how the plan held up - what fit, what flexed, what to learn for next month."
+      },
+      "verdict": {
+        "withinPlan": "Within plan.",
+        "adjustedInFlight": "Adjusted in flight.",
+        "outranThePlan": "Outran the plan.",
+        "eyebrowClosed": "{month} · closed",
+        "supportWithinPlan": "Spent {totalSpent} of {plan}. {remainder} left.",
+        "supportAdjustedInFlight": "Spent {totalSpent}; plan + injection was {planPlusInjection}.",
+        "supportOutran": "Spent {totalSpent} of {plan} plan. {overage} over."
+      },
+      "bar": {
+        "labelStart": "0",
+        "labelPlan": "plan · {plan}",
+        "labelPlanInj": "+inj · {planPlusInjection}",
+        "labelSpent": "spent · {totalSpent}"
+      },
+      "injections": {
+        "eyebrow": "Injections",
+        "label": "Added mid-month",
+        "value": "+{amount} EGP",
+        "sub": "{count, plural, one {1 injection} other {# injections}} · raised the plan from {basePlan} to {adjustedPlan}"
+      },
+      "variable": {
+        "eyebrow": "Variable",
+        "planLabelDefault": "of {plan} plan",
+        "planLabelAdjusted": "of {plan} adjusted",
+        "subUnder": "{delta} under plan",
+        "subOver": "{delta} over plan",
+        "majorSuffix": " · {amount} flagged as Major"
+      },
+      "manualFixed": {
+        "eyebrow": "Manual fixed",
+        "metaLine": "{actual} of {plan}",
+        "andNMore": "{count, plural, one {And 1 more} other {And # more}}"
+      },
+      "popup": {
+        "header": "{month} · {verdict} · {summary}",
+        "summaryUnder": "{amount} under plan",
+        "summaryOver": "{amount} over plan",
+        "summaryExact": "exactly on plan"
+      }
     },
     "upgrade": {
       "title": "Unlock Analytics",

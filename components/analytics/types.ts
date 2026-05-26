@@ -1,11 +1,6 @@
 export type FixedBucketType = "manual" | "recurring" | "installment"
 
-export type FixedBucketIconKey =
-  | "rent"
-  | "spotify"
-  | "phone-installment"
-  | "coffee"
-  | "groceries"
+export type FixedBucketIconKey = "rent" | "spotify" | "phone-installment" | "coffee" | "groceries"
 
 export type FixedBucketPlan = {
   id: string
@@ -60,6 +55,14 @@ export type MajorTransaction = {
   paymentMethodName: string
 }
 
+// Plan-vs-actual for a single manual fixed bucket at month close.
+export type ManualBucketCalibration = {
+  bucketId: string
+  name: string
+  planned: number
+  actual: number
+}
+
 export type MonthSnapshot = {
   month: string
   isoDate: string
@@ -78,6 +81,7 @@ export type MonthSnapshot = {
   majorTotal: number
   majorCount: number
   majorTransactions: MajorTransaction[]
+  manualBucketCalibration: ManualBucketCalibration[]
   injectionTotal: number
   injectionCount: number
   variableReceivedTotal: number
@@ -121,6 +125,7 @@ export type LiveMonthAnalysis = {
   majorTotal: number
   majorCount: number
   majorTransactions: MajorTransaction[]
+  manualBucketCalibration: ManualBucketCalibration[]
   injectionTotal: number
   injectionCount: number
   variableReceivedTotal: number

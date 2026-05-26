@@ -37,7 +37,7 @@ This plan replaces the current Analytics screen with a redesigned version organi
 - `components/analytics/budget-composition-card.tsx`
 - `components/analytics/spending-rhythm-card.tsx`
 - `components/analytics/payment-method-card.tsx`
-- `components/analytics/trends-card.tsx`
+- `components/analytics/how-month-landed-card.tsx`
 
 **Files that are NOT touched:**
 
@@ -65,9 +65,9 @@ The redesigned screen is a single vertical scroll divided into three labeled sec
   SpendingRhythmCard       Q5 weekly BarChart + daily rate reference line
   PaymentMethodCard        Q6 horizontal BarChart + filter chips
 
-── SECTION 3: Are you improving ──────────────────
+── SECTION 3: historical closed-month comparison ──────────────────
 
-  TrendsCard          Q8 savings rate sparkline + Q9 delta annotation
+  Section 3 trend card          Q8 savings rate sparkline + Q9 delta annotation
 
 [AnalyticsUpgradeGate — unchanged, shown when plan = "free"]
 ```
@@ -537,15 +537,15 @@ Run `pnpm typecheck` and `pnpm lint`.
 
 ---
 
-## Phase 8 — TrendsCard (Q8 + Q9)
+## Phase 8 — historical Section 3 trend card (Q8 + Q9)
 
-Create `components/analytics/trends-card.tsx`.
+Create the then-current Section 3 trend card component.
 
 This card answers two related questions as a single unit:
 - **Q8:** "Am I getting better over time?" — shown as a Recharts `LineChart` sparkline of `savingsRate` across all available months
 - **Q9:** "Why is this month different from last month?" — shown as a delta annotation below the sparkline
 
-This card replaces `MonthComparisonCard`. It accepts the full list of months plus the currently selected month.
+This card replaced `MonthComparisonCard`. It accepted the full list of months plus the currently selected month.
 
 ### Visual spec
 
@@ -576,7 +576,7 @@ This card replaces `MonthComparisonCard`. It accepts the full list of months plu
 
 **Props:**
 ```ts
-interface TrendsCardProps {
+interface Section3TrendCardProps {
   months: AnalyticsMonth[]        // full array — for sparkline data
   selectedMonth: AnalyticsMonth   // currently viewed month
   previousMonth: AnalyticsMonth | null
@@ -606,7 +606,7 @@ Edit `components/analytics/analytics-screen.tsx`.
    - `BudgetCompositionCard` from `@/components/analytics/budget-composition-card`
    - `SpendingRhythmCard` from `@/components/analytics/spending-rhythm-card`
    - `PaymentMethodCard` from `@/components/analytics/payment-method-card`
-   - `TrendsCard` from `@/components/analytics/trends-card`
+   - the Section 3 trend card component
    - Keep `ProjectionCard` and `AnalyticsUpgradeGate` from `analytics-cards.tsx`
    - Keep `analyticsMonths` and `ANALYTICS_PLAN` from `@/components/analytics/data`
 
@@ -623,8 +623,8 @@ Edit `components/analytics/analytics-screen.tsx`.
   <SpendingRhythmCard month={selectedMonth} />
   <PaymentMethodCard month={selectedMonth} />
 
-  <SectionLabel label={t("section.improving")} />
-  <TrendsCard
+  <SectionLabel label={t("section historical comparison")} />
+  <Section3TrendCard
     months={analyticsMonths}
     selectedMonth={selectedMonth}
     previousMonth={previousMonth}
@@ -731,7 +731,7 @@ pnpm exec oxfmt --check \
   components/analytics/budget-composition-card.tsx \
   components/analytics/spending-rhythm-card.tsx \
   components/analytics/payment-method-card.tsx \
-  components/analytics/trends-card.tsx \
+  components/analytics/section-3-trend-card.tsx \
   components/analytics/section-label.tsx \
   components/analytics/analytics-cards.tsx \
   components/analytics/analytics-screen.tsx \
@@ -815,8 +815,8 @@ Before declaring the implementation complete, confirm all of the following:
 - [ ] Filter chips in PaymentMethodCard change the chart data correctly for all four filter states
 - [ ] RolloverCard dot grid shows correct dot counts and states for each month
 - [ ] SpendingRhythmCard reference line renders for all months
-- [ ] TrendsCard sparkline shows all available months' savings rates
-- [ ] TrendsCard shows Close Month CTA when no previous month exists
+- [ ] Historical Section 3 sparkline shows all available months' savings rates
+- [ ] Historical Section 3 card shows Close Month CTA when no previous month exists
 - [ ] ProjectionCard shows correct confidence framing for each mock month (Feb = late, Mar = late, Apr = sweet)
 - [ ] No raw hex values or hardcoded color strings anywhere in new files
 - [ ] No dynamic Tailwind width classes (`w-[36%]` style) anywhere in new files

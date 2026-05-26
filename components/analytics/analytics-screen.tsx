@@ -9,14 +9,14 @@ import { AnalyticsUpgradeGate } from "@/components/analytics/analytics-cards"
 import { BudgetCompositionCard } from "@/components/analytics/budget-composition-card"
 import { getMonthView, getPreviousSnapshot } from "@/components/analytics/data"
 import { FixedAnalysisCard } from "@/components/analytics/fixed-analysis-card"
-import { MethodObligationCard } from "@/components/analytics/method-obligation-card"
-import { formatAnalyticsMonthLabel } from "@/components/analytics/formatters"
 import { FlaggedAsMajorCard } from "@/components/analytics/flagged-as-major-card"
+import { formatAnalyticsMonthLabel } from "@/components/analytics/formatters"
+import { HowMonthLandedCard } from "@/components/analytics/how-month-landed-card"
+import { MethodObligationCard } from "@/components/analytics/method-obligation-card"
 import { MonthPickerDrawer } from "@/components/analytics/month-picker-drawer"
 import { MonthlyHealthCard } from "@/components/analytics/monthly-health-card"
 import { PaymentMethodCard } from "@/components/analytics/payment-method-card"
 import { SectionHeader } from "@/components/analytics/section-header"
-import { TrendsCard } from "@/components/analytics/trends-card"
 import { VariableAnalysisCard } from "@/components/analytics/variable-analysis-card"
 import { AppBottomNavigation } from "@/components/app-bottom-navigation"
 import { navItems } from "@/components/home/home-data"
@@ -32,7 +32,8 @@ export function AnalyticsScreen() {
   const locale = useLocale() as Locale
   const t = useTranslations("Analytics")
   const direction = getDirectionForLocale(locale)
-  const { monthlyBudgetState, plan, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun } = useSandboxStore()
+  const { monthlyBudgetState, plan, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun } =
+    useSandboxStore()
   const analyticsData = React.useMemo(() => {
     return getSandboxAnalyticsData({
       monthlyBudgetState,
@@ -66,12 +67,16 @@ export function AnalyticsScreen() {
                 <span className="font-semibold text-foreground">{selectedMonth.daysTracked}</span>
                 <span className="text-text-tertiary">{t("meta.labelTracked")}</span>
               </span>
-              <span className="text-border-subtle" aria-hidden="true">·</span>
+              <span className="text-border-subtle" aria-hidden="true">
+                ·
+              </span>
               <span className="text-sm tabular-nums">
                 <span className="font-semibold text-foreground">{selectedMonth.daysRemaining}</span>
                 <span className="text-text-tertiary">{t("meta.labelLeft")}</span>
               </span>
-              <span className="text-border-subtle" aria-hidden="true">·</span>
+              <span className="text-border-subtle" aria-hidden="true">
+                ·
+              </span>
               <span className="inline-flex items-center gap-1 rounded-full bg-surface-offset px-2 py-0.5 text-xs font-medium text-text-secondary">
                 <span
                   className={cn(
@@ -83,7 +88,8 @@ export function AnalyticsScreen() {
                 />
                 {selectedMonth.status === "inProgress" ? t("month.inProgress") : t("month.closed")}
               </span>
-            </div>          </div>
+            </div>{" "}
+          </div>
 
           <Button
             type="button"
@@ -125,10 +131,10 @@ export function AnalyticsScreen() {
             <FlaggedAsMajorCard month={selectedMonth} data={analyticsData} />
 
             <SectionHeader
-              title={t("section.improving.title")}
-              subtitle={t("section.improving.subtitle")}
+              title={t("section.landed.title")}
+              subtitle={t("section.landed.subtitle")}
             />
-            <TrendsCard data={analyticsData} selectedMonth={selectedMonth} />
+            <HowMonthLandedCard month={selectedMonth} />
           </div>
         )}
       </main>

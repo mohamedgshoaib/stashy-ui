@@ -15,6 +15,7 @@ import {
 import {
   getAnalyticsDataForScenario,
   getPreviousSnapshot,
+  withManualBucketCalibration,
 } from "@/components/analytics/data";
 import type {
   AnalyticsData,
@@ -123,6 +124,12 @@ export function getSandboxAnalyticsData(config: SandboxBudgetConfig): AnalyticsD
       },
     };
   }
+
+  data = {
+    ...data,
+    current: withManualBucketCalibration(data.current),
+    snapshots: data.snapshots.map((snapshot) => withManualBucketCalibration(snapshot)),
+  };
 
   return data;
 }
