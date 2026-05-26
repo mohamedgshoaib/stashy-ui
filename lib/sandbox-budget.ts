@@ -1,8 +1,14 @@
 import {
+  Alert01Icon,
   ArrowDownLeft01Icon,
   BankIcon,
+  Building01Icon,
+  CafeIcon,
   CreditCardIcon,
+  DiscAlbumIcon,
   PackageReceiveIcon,
+  SmartPhone01Icon,
+  ShoppingBag01Icon,
   Wallet01Icon,
 } from "@hugeicons/core-free-icons";
 
@@ -12,6 +18,7 @@ import {
 } from "@/components/analytics/data";
 import type {
   AnalyticsData,
+  FixedBucketIconKey,
   LiveMonthAnalysis,
   MonthSnapshot,
 } from "@/components/analytics/types";
@@ -233,69 +240,188 @@ export function getHomeDailyRate(
   };
 }
 
+type VariableTemplate = {
+  id: string;
+  label: string;
+  note: string;
+  dayAbs: number;
+  pct: number; // proportion of `remaining`; last entry uses actual remainder
+  method: "card" | "cash" | "bank";
+};
+
+const VARIABLE_HISTORY_ICON = Wallet01Icon;
+const MAJOR_HISTORY_ICON = Alert01Icon;
+
+function getFixedBucketIcon(iconKey: FixedBucketIconKey) {
+  switch (iconKey) {
+    case "rent":
+      return Building01Icon;
+    case "spotify":
+      return DiscAlbumIcon;
+    case "phone-installment":
+      return SmartPhone01Icon;
+    case "coffee":
+      return CafeIcon;
+    case "groceries":
+      return ShoppingBag01Icon;
+  }
+}
+
 function getVariableHistoryRows(month: LiveMonthAnalysis): HistoryTransaction[] {
   const pureVariableTotal = month.totalVariableSpent;
   if (pureVariableTotal <= 0) return [];
 
   const largestAmount = Math.min(
     pureVariableTotal,
-    month.largestVariableTxn?.amount ?? Math.round(pureVariableTotal * 0.4),
+    month.largestVariableTxn?.amount ?? Math.round(pureVariableTotal * 0.15),
   );
-  const remainder = Math.max(0, pureVariableTotal - largestAmount);
-  const secondAmount = remainder > 0 ? Math.round(remainder * 0.58) : 0;
-  const thirdAmount = Math.max(0, remainder - secondAmount);
-  const largestDay = month.largestVariableDay ? Number(month.largestVariableDay.date.slice(-2)) : month.daysTracked;
+  const largestDateISO =
+    month.largestVariableDay?.date ?? getMonthDayIso(month, Math.max(1, month.daysTracked - 9));
+  const largestDay = Number(largestDateISO.slice(-2));
+  const dt = month.daysTracked;
 
-  const rows: HistoryTransaction[] = [
+  // Anchor row: the month's single biggest variable transaction
+  const anchor: HistoryTransaction = {
+    id: `${month.month}-variable-main`,
+    descriptionLabel: month.largestVariableTxn?.description ?? "Daily variable spending",
+    note: "Largest variable transaction this month",
+    budgetTypeKey: "variable",
+    typeCategory: "variable",
+    amountValue: largestAmount,
+    amount: formatCurrency(largestAmount),
+    date: "",
+    dateISO: largestDateISO,
+    direction: "expense",
+    icon: VARIABLE_HISTORY_ICON,
+    methodIcon: CreditCardIcon,
+    methodTone: "card",
+  };
+
+  const remaining = Math.max(0, pureVariableTotal - largestAmount);
+  if (remaining <= 0) return [anchor];
+
+  // Ten supporting rows spread across 8 distinct day slots.
+  // dayAbs values are chosen to deliberately land on the same days as fixed
+  // buckets (dt, dt-1, dt-2, dt-4) and known major transactions (ld+3, ld-1)
+  // so the day-grouping UI is exercised across many dates.
+  //
+  // Proportions of `remaining` — first 9 are fixed; last one absorbs rounding.
+  const templates: VariableTemplate[] = [
     {
-      id: `${month.month}-variable-main`,
-      descriptionLabel: month.largestVariableTxn?.description ?? "Daily variable spending",
-      note: "Derived from the live month variable pace",
-      budgetTypeKey: "variable",
-      typeCategory: "variable",
-      amountValue: largestAmount,
-      amount: formatCurrency(largestAmount),
-      date: "",
-      dateISO: month.largestVariableDay?.date ?? getMonthDayIso(month, Math.max(1, largestDay)),
-      direction: "expense",
-      methodIcon: CreditCardIcon,
-      methodTone: "card",
+      id: "restaurant",
+      label: "Restaurant dinner",
+      note: "Variable spending",
+      dayAbs: dt,
+      pct: 0.17,
+      method: "card",
+    },
+    {
+      id: "cafe-snacks",
+      label: "Coffee & snacks",
+      note: "Variable spending",
+      dayAbs: dt - 1,
+      pct: 0.04,
+      method: "cash",
+    },
+    {
+      id: "supermarket",
+      label: "Supermarket run",
+      note: "Variable spending",
+      dayAbs: dt - 2,
+      pct: 0.14,
+      method: "card",
+    },
+    {
+      id: "household",
+      label: "Household supplies",
+      note: "Variable spending",
+      dayAbs: dt - 4,
+      pct: 0.09,
+      method: "cash",
+    },
+    {
+      id: "online",
+      label: "Online shopping",
+      note: "Variable spending",
+      dayAbs: Math.max(1, Math.min(dt, largestDay + 3)),
+      pct: 0.11,
+      method: "card",
+    },
+    {
+      id: "transport",
+      label: "Transport & Uber",
+      note: "Variable spending",
+      dayAbs: largestDay, // same day as anchor → triggers day group
+      pct: 0.06,
+      method: "cash",
+    },
+    {
+      id: "pharmacy",
+      label: "Pharmacy",
+      note: "Variable spending",
+      dayAbs: Math.max(1, largestDay - 1),
+      pct: 0.07,
+      method: "cash",
+    },
+    {
+      id: "groceries",
+      label: "Groceries and basics",
+      note: "Variable spending",
+      dayAbs: Math.max(1, largestDay - 3),
+      pct: 0.13,
+      method: "cash",
+    },
+    {
+      id: "cafe-meeting",
+      label: "Café & meeting",
+      note: "Variable spending",
+      dayAbs: Math.max(1, largestDay - 6),
+      pct: 0.04,
+      method: "cash",
+    },
+    {
+      id: "errands",
+      label: "Errands & services",
+      note: "Variable spending — remainder",
+      dayAbs: Math.max(1, largestDay - 6), // same day as café → triggers day group
+      pct: 0, // remainder
+      method: "cash",
     },
   ];
 
-  if (secondAmount > 0) {
-    rows.push({
-      id: `${month.month}-variable-secondary`,
-      descriptionLabel: "Groceries and basics",
-      note: "Variable allocation",
-      budgetTypeKey: "variable",
-      typeCategory: "variable",
-      amountValue: secondAmount,
-      amount: formatCurrency(secondAmount),
-      date: "",
-      dateISO: getMonthDayIso(month, Math.max(1, largestDay - 4)),
-      direction: "expense",
-      methodIcon: Wallet01Icon,
-      methodTone: "cash",
-    });
-  }
+  const fixedPctTotal = templates.reduce((sum, t) => sum + t.pct, 0);
+  let allocated = 0;
+  const rows: HistoryTransaction[] = [anchor];
 
-  if (thirdAmount > 0) {
+  templates.forEach((t, i) => {
+    const isLast = i === templates.length - 1;
+    const amount = isLast
+      ? Math.max(0, remaining - allocated)
+      : Math.round(remaining * t.pct);
+
+    if (amount <= 0) return;
+
+    if (!isLast) allocated += amount;
+
     rows.push({
-      id: `${month.month}-variable-tertiary`,
-      descriptionLabel: "Transport and errands",
-      note: "Variable allocation",
+      id: `${month.month}-variable-${t.id}`,
+      descriptionLabel: t.label,
+      note: t.note,
       budgetTypeKey: "variable",
       typeCategory: "variable",
-      amountValue: thirdAmount,
-      amount: formatCurrency(thirdAmount),
+      amountValue: amount,
+      amount: formatCurrency(amount),
       date: "",
-      dateISO: getMonthDayIso(month, Math.max(1, largestDay - 9)),
+      dateISO: getMonthDayIso(month, t.dayAbs),
       direction: "expense",
-      methodIcon: Wallet01Icon,
-      methodTone: "cash",
+      icon: VARIABLE_HISTORY_ICON,
+      methodIcon: t.method === "cash" ? Wallet01Icon : t.method === "bank" ? BankIcon : CreditCardIcon,
+      methodTone: t.method,
     });
-  }
+  });
+
+  // Suppress the fixedPctTotal reference so TS does not complain about unused
+  void fixedPctTotal;
 
   return rows;
 }
@@ -320,6 +446,7 @@ function getFixedHistoryRows(month: LiveMonthAnalysis): HistoryTransaction[] {
         date: "",
         dateISO: getMonthDayIso(month, Math.max(1, month.daysTracked - index)),
         direction: "expense",
+        icon: getFixedBucketIcon(bucket.iconKey),
         methodIcon: bucket.type === "manual" ? Wallet01Icon : CreditCardIcon,
         methodTone: bucket.type === "manual" ? "cash" : "card",
       });
@@ -340,6 +467,7 @@ function getMajorHistoryRows(month: LiveMonthAnalysis): HistoryTransaction[] {
     date: "",
     dateISO: transaction.date || getMonthDayIso(month, Math.max(1, month.daysTracked - index)),
     direction: "expense",
+    icon: MAJOR_HISTORY_ICON,
     methodIcon: BankIcon,
     methodTone: transaction.paymentMethodName === "Cash" ? "cash" : "bank",
   }));
@@ -360,6 +488,7 @@ function getReceivedHistoryRows(month: LiveMonthAnalysis): HistoryTransaction[] 
       date: "",
       dateISO: getMonthDayIso(month, Math.max(1, month.daysTracked - 2)),
       direction: "received",
+      icon: ArrowDownLeft01Icon,
       methodIcon: ArrowDownLeft01Icon,
       methodTone: "bank",
     });
@@ -377,6 +506,7 @@ function getReceivedHistoryRows(month: LiveMonthAnalysis): HistoryTransaction[] 
       date: "",
       dateISO: getMonthDayIso(month, Math.max(1, month.daysTracked - 5)),
       direction: "received",
+      icon: PackageReceiveIcon,
       methodIcon: PackageReceiveIcon,
       methodTone: "card",
     });

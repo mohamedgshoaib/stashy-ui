@@ -197,6 +197,14 @@ The `PaymentMethodCard` BudgetBar was correctly using `bg-variable` (Ledger Gray
   - Updated `components/tracker/tracker-overview.tsx` to derive fixed budget / paid / remaining from the shared month model instead of hardcoded values.
 - Verification
   - `pnpm typecheck` passed after the refactor.
+- History icon identity pass
+  - Added a dedicated `icon` field to `HistoryTransaction` so the visible history avatar is no longer tied to payment-method metadata.
+  - Updated `components/history/history-row.tsx` to render `transaction.icon` instead of `transaction.methodIcon`.
+  - Kept `methodTone` and `methodIcon` in the data model so filtering and future method-specific UI can continue to work without conflating payment method with transaction identity.
+  - Extended `FixedBucketPlan` with `iconKey` and populated the analytics `FIXED_PLAN` with per-bucket icon metadata.
+  - Updated shared history projection in `lib/sandbox-budget.ts` so fixed rows now use bucket-owned icons, variable rows use one shared variable icon, and major rows use one shared major icon.
+  - Updated the legacy static `components/history/history-data.ts` mock so it still satisfies the expanded history transaction type.
+  - `pnpm typecheck` passed after the icon-model refactor.
 
 ## Decisions Made
 
@@ -205,6 +213,10 @@ The `PaymentMethodCard` BudgetBar was correctly using `bg-variable` (Ledger Gray
 - The active analytics month remains the canonical numeric source for this pass because it already carried the richest month-level budget model and scenario controls.
 - `major` is now treated consistently as a subset of variable allocation in both home and analytics progress bars.
 - Tracker fixed-item detail mocks were left intact in this pass; only tracker surfaces that were directly conflicting with shared budget totals were rewired.
+- History row icons should communicate transaction identity first, not payment method.
+- Fixed icons are now owned by the fixed bucket plan itself via `iconKey`, which is a better long-term bridge for user-configurable fixed-item icons than inferring from bucket type.
+- Variable history rows intentionally use one calm shared icon (`Wallet01Icon`) across all variable entries to reduce visual noise.
+- Major history rows intentionally use one shared burden icon (`Alert01Icon`) across all major entries to make the category read consistently regardless of underlying payment method.
 
 ---
 
@@ -213,3 +225,4 @@ The `PaymentMethodCard` BudgetBar was correctly using `bg-variable` (Ledger Gray
 1. Manual browser verification is still needed across home, analytics, history, and tracker to confirm the new shared numbers read correctly in-context and across RTL.
 2. Tracker fixed-item internals still come from `data/fixed-tracker-mock.ts`, so the tracker detail cards are not yet fully unified with the shared month ledger.
 3. `pnpm lint` continues to fail on the same two pre-existing unrelated issues (no new failures).
+4. Fixed bucket icon metadata currently exists only in the analytics/shared sandbox plan path; if tracker creation/edit flows become the source of truth later, that icon field will need to be propagated there as well.

@@ -31,11 +31,23 @@ export function deriveRhythmCharacter(
 }
 
 const FIXED_PLAN: FixedBucketPlan[] = [
-  { id: "fb-rent", name: "Rent", budget: 800, type: "recurring" },
-  { id: "fb-spotify", name: "Spotify", budget: 100, type: "recurring" },
-  { id: "fb-phone-installment", name: "Phone installment", budget: 300, type: "installment" },
-  { id: "fb-coffee", name: "Coffee", budget: 200, type: "manual" },
-  { id: "fb-groceries", name: "Groceries", budget: 240, type: "manual" },
+  { id: "fb-rent", name: "Rent", budget: 800, type: "recurring", iconKey: "rent" },
+  { id: "fb-spotify", name: "Spotify", budget: 100, type: "recurring", iconKey: "spotify" },
+  {
+    id: "fb-phone-installment",
+    name: "Phone installment",
+    budget: 300,
+    type: "installment",
+    iconKey: "phone-installment",
+  },
+  { id: "fb-coffee", name: "Coffee", budget: 200, type: "manual", iconKey: "coffee" },
+  {
+    id: "fb-groceries",
+    name: "Groceries",
+    budget: 240,
+    type: "manual",
+    iconKey: "groceries",
+  },
 ]
 
 const majorTransactions_2026_04: MajorTransaction[] = [

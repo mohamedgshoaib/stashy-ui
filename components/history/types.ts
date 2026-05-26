@@ -24,6 +24,7 @@ export type HistoryTransaction = {
   date: string;
   dateISO: string;
   direction: HistoryDirection;
+  icon: IconSvgElement;
   methodIcon: IconSvgElement;
   methodTone: "cash" | "card" | "bank";
   isTransfer?: boolean;
