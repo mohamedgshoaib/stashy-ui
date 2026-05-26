@@ -136,17 +136,6 @@ export function BudgetPathCard({ month }: BudgetPathCardProps) {
           },
         ]
       : []),
-    ...(month.variableReceivedTotal > 0
-      ? [
-          {
-            id: "received",
-            label: t("howMonthLanded.budgetBreakdown.rows.received"),
-            amount: month.variableReceivedTotal,
-            amountClassName: semanticTextClass.income,
-            emphasis: "delta" as const,
-          },
-        ]
-      : []),
     ...(hasAdjustedBudget
       ? [
           {

@@ -260,7 +260,7 @@ export function PaymentMethodCard({ month, prevPaymentMethods }: PaymentMethodCa
   const t = useTranslations("Analytics")
 
   const activeMethods = month.paymentMethods.filter((m) => m.total > 0)
-  const grandTotal = activeMethods.reduce((sum, m) => sum + m.total, 0)
+  const grandTotal = activeMethods.reduce((sum, m) => sum + m.total, 0) - month.variableReceivedTotal
   const isInProgress = month.status === "inProgress"
   const formattedHeroNumber = new Intl.NumberFormat(locale).format(grandTotal)
 

@@ -238,9 +238,9 @@ function deriveWholeBudgetCloseout({
   )
   const fixedOverspendTotal = Math.max(0, sumFixedTotalSpent(fixedBucketsActual) - fixedTotalBudget)
   const fixedSpentTotal = fixedTotalBudget + fixedOverspendTotal
-  const spentTotal = fixedSpentTotal + totalVariableSpent + majorTotal
-  const adjustedBudgetTotal =
-    monthlyBudget + injectionTotal + variableReceivedTotal + manualFixedUnusedTotal
+  const netVariableSpent = Math.max(0, totalVariableSpent - variableReceivedTotal)
+  const spentTotal = fixedSpentTotal + netVariableSpent + majorTotal
+  const adjustedBudgetTotal = monthlyBudget + injectionTotal + manualFixedUnusedTotal
   const remainder = adjustedBudgetTotal - spentTotal
   const verdict = remainder > 0 ? "underBudget" : remainder < 0 ? "overBudget" : "exactBudget"
 
@@ -251,7 +251,7 @@ function deriveWholeBudgetCloseout({
     manualFixedUnusedTotal,
     manualFixedOverspendTotal,
     fixedSpentTotal,
-    variableSpentTotal: totalVariableSpent,
+    variableSpentTotal: netVariableSpent,
     majorSpentTotal: majorTotal,
     verdict,
   }
@@ -285,12 +285,9 @@ function deriveMonthTruthMetrics({
   const fixedTotalSpent = sumFixedTotalSpent(fixedBucketsActual)
   const fixedOverspend = Math.max(0, fixedTotalSpent - fixedTotalBudget)
   const baseVariableBudget = Math.max(0, monthlyBudget - fixedTotalBudget)
-  const adjustedVariableBudget = Math.max(
-    0,
-    baseVariableBudget + injectionTotal + variableReceivedTotal,
-  )
+  const adjustedVariableBudget = Math.max(0, baseVariableBudget + injectionTotal)
   const effectiveVariableBudget = Math.max(0, adjustedVariableBudget - fixedOverspend - majorTotal)
-  const actualVariableSpent = totalVariableSpent
+  const actualVariableSpent = Math.max(0, totalVariableSpent - variableReceivedTotal)
   const remainingVariableBudget = effectiveVariableBudget - actualVariableSpent
   const budgetUsedPct = Math.round(
     (actualVariableSpent / Math.max(1, effectiveVariableBudget)) * 100,
