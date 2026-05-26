@@ -8,7 +8,6 @@ import * as React from "react";
 
 import { AppBottomNavigation } from "@/components/app-bottom-navigation";
 import { navItems } from "@/components/home/home-data";
-import { historyTransactions } from "@/components/history/history-data";
 import {
   defaultHistoryFilterState,
   getActiveHistoryFilterCount,
@@ -26,8 +25,14 @@ import { Separator } from "@/components/ui/separator";
 import { heroSurfaceClass, statTileClass } from "@/lib/design-system-classes";
 import { semanticSurfaceClass, semanticTextClass } from "@/lib/semantic-styles";
 import { getDirectionForLocale } from "@/lib/i18n";
+import {
+  getHistoryPresetRange,
+  getHistoryTransactions,
+  getSandboxAnalyticsData,
+} from "@/lib/sandbox-budget";
 import { cn } from "@/lib/utils";
 import type { Locale } from "@/i18n/routing";
+import { useSandboxStore } from "@/store/sandbox-store";
 
 export function HistoryScreen() {
   const t = useTranslations("History");
@@ -35,6 +40,7 @@ export function HistoryScreen() {
   const locale = useLocale() as Locale;
   const direction = getDirectionForLocale(locale);
   const searchParams = useSearchParams();
+  const { monthlyBudgetState, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun } = useSandboxStore();
   const [filterState, setFilterState] = React.useState<HistoryFilterState>(() => {
     const filter = searchParams.get("filter");
     const validTypes = ["all", "variable", "monthly", "budget", "major"] as const;
@@ -46,11 +52,21 @@ export function HistoryScreen() {
       : defaultHistoryFilterState;
   });
   const [drawerOpen, setDrawerOpen] = React.useState(false);
-  const items = historyTransactions;
+  const analyticsData = React.useMemo(
+    () =>
+      getSandboxAnalyticsData({
+        monthlyBudgetState,
+        budgetInjection,
+        analyticsHistoryMode,
+        fixedBudgetOverrun,
+      }),
+    [monthlyBudgetState, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun],
+  );
+  const items = React.useMemo(() => getHistoryTransactions(analyticsData.current), [analyticsData]);
 
   const filteredItems = React.useMemo(
-    () => filterHistoryTransactions(items, filterState),
-    [filterState, items],
+    () => filterHistoryTransactions(items, filterState, analyticsData.current),
+    [analyticsData, filterState, items],
   );
   const filterCount = React.useMemo(
     () => getActiveHistoryFilterCount(filterState),
@@ -285,12 +301,13 @@ export function HistoryScreen() {
 function filterHistoryTransactions(
   items: HistoryTransaction[],
   filters: HistoryFilterState,
+  month: Parameters<typeof getHistoryPresetRange>[0],
 ) {
   const { direction, from, method, preset, to, type } = filters;
   const resolvedRange =
     from || to
       ? { from: from || null, to: to || null }
-      : getPresetRange(preset);
+      : getHistoryPresetRange(month, preset);
 
   return items.filter((item) => {
     if (item.isTransfer && type !== "all") {
@@ -315,22 +332,6 @@ function filterHistoryTransactions(
 
     return isWithinRange(item.dateISO, resolvedRange.from, resolvedRange.to);
   });
-}
-
-function getPresetRange(preset: string) {
-  if (preset === "today") {
-    return { from: "2026-04-25", to: "2026-04-25" };
-  }
-
-  if (preset === "thisWeek") {
-    return { from: "2026-04-14", to: "2026-04-25" };
-  }
-
-  if (preset === "thisMonth") {
-    return { from: "2026-04-01", to: "2026-04-30" };
-  }
-
-  return null;
 }
 
 function isWithinRange(
@@ -391,16 +392,16 @@ function getHistoryOverview(items: HistoryTransaction[]) {
         item.direction === "expense" &&
         (item.typeCategory === "variable" || item.typeCategory === "major"),
     )
-    .reduce((sum, item) => sum + parseAmount(item.amount), 0);
+    .reduce((sum, item) => sum + getNumericAmount(item), 0);
 
   const received = items
     .filter(
       (item) =>
         !item.isTransfer &&
         item.direction === "received" &&
-        item.typeCategory === "variable",
+        (item.typeCategory === "variable" || item.budgetTypeKey === "injection"),
     )
-    .reduce((sum, item) => sum + parseAmount(item.amount), 0);
+    .reduce((sum, item) => sum + getNumericAmount(item), 0);
 
   return {
     spent: formatAmount(spent),
@@ -437,7 +438,7 @@ function groupTransactionsByDate(items: HistoryTransaction[], locale: string) {
     groups[item.dateISO].transactions.push(item);
     
     // Calculate daily total: expenses are negative, received/transfers are positive
-    const numeric = parseAmount(item.amount);
+    const numeric = getNumericAmount(item);
     if (item.direction === "expense") {
       groups[item.dateISO].totalNumeric -= numeric;
     } else {
@@ -456,6 +457,10 @@ function groupTransactionsByDate(items: HistoryTransaction[], locale: string) {
 function parseAmount(value: string) {
   const numeric = Number(value.replaceAll(/[^\d.-]/g, ""));
   return Math.abs(numeric);
+}
+
+function getNumericAmount(item: HistoryTransaction) {
+  return item.amountValue ?? parseAmount(item.amount);
 }
 
 function formatAmount(value: number, showSign = false) {

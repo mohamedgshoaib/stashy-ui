@@ -182,15 +182,34 @@ The `PaymentMethodCard` BudgetBar was correctly using `bg-variable` (Ledger Gray
 - `components/home/home-data.ts`
   - Added `majorSpent: 3000` to `mockBudgetStrip` (aligned with `mockMajorExpensesRow.totalAmount`).
 - `pnpm typecheck` passed clean.
+- Shared budget source refactor
+  - Added `lib/sandbox-budget.ts` as a shared scenario-aware month projection layer built on top of analytics data.
+  - Moved sandbox scenario patching out of `AnalyticsScreen` into `getSandboxAnalyticsData(...)` so home, analytics, history, and tracker read the same active-month numbers.
+- Home
+  - Rewired `components/home-screen.tsx` and `components/home/home-content.tsx` to derive budget strip, major row, upcoming payments, and daily-rate values from the shared month model instead of separate home-only mocks.
+- Analytics
+  - Updated `components/analytics/payment-method-card.tsx` so `major` is treated as part of the variable allocation, not additive on top of it.
+- History
+  - Extended `components/history/types.ts` with optional numeric `amountValue`.
+  - Rewired `components/history-screen.tsx` to derive history rows and preset date ranges from the shared month model instead of `components/history/history-data.ts`.
+- Tracker
+  - Updated `components/tracker/tracker-transfer-drawer.tsx` to read `daysRemaining` from the shared month model.
+  - Updated `components/tracker/tracker-overview.tsx` to derive fixed budget / paid / remaining from the shared month model instead of hardcoded values.
+- Verification
+  - `pnpm typecheck` passed after the refactor.
 
 ## Decisions Made
 
 - Only the "Remaining this month" card (`BudgetStripCard`) was touched, as explicitly requested.
 - Bar height kept at `h-2` (compact, consistent with the card's `size="sm"` layout) rather than scaling up to `h-3`.
+- The active analytics month remains the canonical numeric source for this pass because it already carried the richest month-level budget model and scenario controls.
+- `major` is now treated consistently as a subset of variable allocation in both home and analytics progress bars.
+- Tracker fixed-item detail mocks were left intact in this pass; only tracker surfaces that were directly conflicting with shared budget totals were rewired.
 
 ---
 
 ## Open Blockers
 
-1. Manual browser visual verification of the corrected bar on the homepage was not performed in this environment.
-2. `pnpm lint` continues to fail on the same two pre-existing unrelated issues (no new failures).
+1. Manual browser verification is still needed across home, analytics, history, and tracker to confirm the new shared numbers read correctly in-context and across RTL.
+2. Tracker fixed-item internals still come from `data/fixed-tracker-mock.ts`, so the tracker detail cards are not yet fully unified with the shared month ledger.
+3. `pnpm lint` continues to fail on the same two pre-existing unrelated issues (no new failures).

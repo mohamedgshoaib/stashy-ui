@@ -104,12 +104,15 @@ function BudgetBar({
 }: BudgetBarProps) {
   const hasInjection = injectionTotal > 0
   const totalCapacity = monthlyBudget + injectionTotal
+  const variableSpendExcludingMajor = Math.max(0, variableSpent - majorSpent)
 
   // Compute each segment as a share of total capacity, sequentially capped so
   // they never collectively exceed 100 %.
   const fixedPct = totalCapacity > 0 ? Math.min((fixedSpent / totalCapacity) * 100, 100) : 0
   const variablePct =
-    totalCapacity > 0 ? Math.min((variableSpent / totalCapacity) * 100, 100 - fixedPct) : 0
+    totalCapacity > 0
+      ? Math.min((variableSpendExcludingMajor / totalCapacity) * 100, 100 - fixedPct)
+      : 0
   const majorPct =
     totalCapacity > 0
       ? Math.min((majorSpent / totalCapacity) * 100, 100 - fixedPct - variablePct)
@@ -155,9 +158,11 @@ function BudgetBar({
             <span dir="ltr" className="tabular-nums">{formatAnalyticsCurrency(locale, fixedSpent)}</span>
           </span>
         )}
-        {variableSpent > 0 && (
+        {variableSpendExcludingMajor > 0 && (
           <span className="inline-flex items-center rounded-full bg-variable-subtle px-2.5 py-0.5 text-xs font-medium text-variable">
-            <span dir="ltr" className="tabular-nums">{formatAnalyticsCurrency(locale, variableSpent)}</span>
+            <span dir="ltr" className="tabular-nums">
+              {formatAnalyticsCurrency(locale, variableSpendExcludingMajor)}
+            </span>
           </span>
         )}
         {majorSpent > 0 && (
