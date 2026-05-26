@@ -27,7 +27,6 @@ type CalibrationRow = ManualBucketCalibration & {
 type BarGeometry = {
   fillPct: number
   planTickPct: number
-  isOver: boolean
 }
 
 type HowMonthLandedPopupProps = {
@@ -45,7 +44,6 @@ function getBarGeometry(actual: number, plan: number): BarGeometry {
     return {
       fillPct: 0,
       planTickPct: 100,
-      isOver: false,
     }
   }
 
@@ -53,14 +51,12 @@ function getBarGeometry(actual: number, plan: number): BarGeometry {
     return {
       fillPct: (actual / plan) * 100,
       planTickPct: 100,
-      isOver: false,
     }
   }
 
   return {
     fillPct: 100,
     planTickPct: (plan / actual) * 100,
-    isOver: true,
   }
 }
 
@@ -83,6 +79,7 @@ function getManualRowTone(row: CalibrationRow) {
 function CalibrationTile({ row, locale }: { row: CalibrationRow; locale: string }) {
   const geometry = getBarGeometry(row.actual, row.planned)
   const tone = getManualRowTone(row)
+  const t = useTranslations("Analytics")
 
   return (
     <div className="space-y-2 rounded-[var(--radius-sm)] bg-surface-offset px-3 py-3 shadow-ring">
@@ -90,8 +87,10 @@ function CalibrationTile({ row, locale }: { row: CalibrationRow; locale: string 
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium text-foreground">{row.name}</p>
           <p dir="ltr" className="mt-1 text-[11px] tabular-nums text-text-secondary">
-            {formatAnalyticsCurrency(locale, row.actual)} of{" "}
-            {formatAnalyticsCurrency(locale, row.planned)}
+            {t("howMonthLanded.manualFixed.metaLine", {
+              actual: formatAnalyticsCurrency(locale, row.actual),
+              plan: formatAnalyticsCurrency(locale, row.planned),
+            })}
           </p>
         </div>
         <p

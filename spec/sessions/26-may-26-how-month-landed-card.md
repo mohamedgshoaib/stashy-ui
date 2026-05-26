@@ -149,6 +149,18 @@ Analytics Section 3 was still mounted as the old `TrendsCard`, framing the scree
   - removed the separate injections tile because its information already belongs in the budget path
   - strengthened the budget path to be the card's single explanation surface by keeping injections, received-variable money, manual fixed returned, manual fixed overspend pressure, and adding the explicit variable close result from Card 1
   - updated the budget-path copy so users can see how the first card's variable leftover/overrun connects into the final whole-month landed result
+- Reworked `HowMonthLandedCard` again from a UI/UX perspective after the logic was finalized:
+  - audited the card as a hierarchy problem rather than a math problem and identified the main issues as too many competing nested panels, receipt-style breakdown rows, and overexposed manual-fixed detail in the default state
+  - redesigned the card around one dominant result module, one visual budget stepper, and one collapsed manual-fixed settlement handoff to the drawer
+  - replaced the receipt-like budget breakdown rows with a compact stepper flow so the user can scan the path from base budget to final close without reading a dense stack of dividers
+  - collapsed manual-fixed detail on the card into a compact summary with net impact plus affected-bucket count, leaving bucket-level detail to the drawer
+  - shortened English and Arabic copy across the card so labels support the visual structure instead of carrying the experience through paragraphs
+  - fixed the manual-fixed drawer rows to use localized `metaLine` copy instead of a hardcoded English `of` string so Arabic detail view remains product-grade
+- Applied a follow-up refinement pass from design review feedback:
+  - softened the top-module side stats panel so it no longer competes with the verdict and main result amount
+  - elevated both `Monthly Budget` and `Adjusted Budget` into stronger anchor milestones inside the budget path instead of leaving only the adjusted budget visually emphasized
+  - corrected the on-card manual-fixed summary model so it no longer nets returned manual fixed against manual fixed overspend
+  - rewrote the summary to show returned amount and overspend pressure as separate facts, which matches Stashy's product logic that manual overspend already reduces the variable side rather than canceling returned leftover in one synthetic remainder
 - Updated `lib/sandbox-budget.ts` helper math so fixed remaining cannot inflate totals and the home strip follows the same cap assumptions.
 - Verification results:
   - `pnpm typecheck` passed
@@ -163,6 +175,8 @@ Analytics Section 3 was still mounted as the old `TrendsCard`, framing the scree
   - latest Point A / Point B verification: `pnpm typecheck` passed, `pnpm build` passed, required touched-file `oxfmt --check` passed; `pnpm lint` still fails only on the same two unrelated pre-existing issues
   - latest Point B correction verification: `pnpm typecheck` passed, `pnpm build` passed, required touched-file `oxfmt --check` passed; `pnpm lint` still fails only on the same two unrelated pre-existing issues
   - latest Section 3 refocus verification: `pnpm typecheck` passed, `pnpm build` passed, required touched-file `oxfmt --check` passed; `pnpm lint` still fails only on the same two unrelated pre-existing issues
+  - latest UI/UX redesign verification: `pnpm typecheck` passed, `pnpm build` passed, required touched-file `oxfmt --check` passed; `pnpm lint` still fails only on the same two unrelated pre-existing issues
+  - latest feedback-fix verification: `pnpm typecheck` passed, `pnpm build` passed, required touched-file `oxfmt --check` passed; `pnpm lint` still fails only on the same two unrelated pre-existing issues
   - required grep for `TrendsCard`, `trends-card`, `Analytics.trends`, `Analytics.section.improving`, `close-month-action`, and `CloseMonthAction` returned zero matches
 
 ---
@@ -191,6 +205,8 @@ Analytics Section 3 was still mounted as the old `TrendsCard`, framing the scree
 - Point B arithmetic must be anchored to Point A plus allowed manual-fixed return, not to raw fixed actuals alone; otherwise the whole-month card drifts in months where no manual-fixed leftover exists.
 - Closed months should never use rounded projection math for their final Point A remainder; exact actuals are required once the month is closed.
 - Section 3 should stay tightly focused on "what was left or over" and "why," not re-explain where spending went. Spend composition belongs to earlier analytics sections; the budget path is now the single explanatory spine for closeout logic.
+- Once the logic became stable, the remaining quality problem in Section 3 was hierarchy, not content. The card now works better when it behaves like one closeout story with a visual path and a collapsed detail handoff, rather than three mini analytics modules stacked together.
+- The manual-fixed summary must never imply a netted fixed result. Returned unused manual fixed and manual fixed overspend pressure are separate facts in Stashy and need to stay separate in UI summary language.
 - The old Section 3 references were removed repo-wide to satisfy the explicit cleanup verification gate for this work block.
 
 ---
