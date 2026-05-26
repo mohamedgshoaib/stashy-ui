@@ -140,7 +140,7 @@ function StepperRow({ row, locale }: { row: StepRow; locale: string }) {
       <span
         aria-hidden="true"
         className={cn(
-          "absolute start-2 rounded-full",
+          "absolute start-[0.3125rem] rounded-full",
           isAnchor ? "top-3 size-3 shadow-ring" : "top-3.5 size-2.5",
           row.markerClassName,
         )}
@@ -164,7 +164,7 @@ function StepperRow({ row, locale }: { row: StepRow; locale: string }) {
         </div>
         <p
           dir="ltr"
-          className={cn("shrink-0 pt-0.5 text-sm font-semibold tabular-nums", row.amountClassName)}
+          className={cn("shrink-0 whitespace-nowrap pt-0.5 text-sm font-semibold tabular-nums", row.amountClassName)}
         >
           {amountPrefix}
           {formatAnalyticsCurrency(locale, Math.abs(row.amount))}
@@ -369,60 +369,38 @@ export function HowMonthLandedCard({ month }: HowMonthLandedCardProps) {
 
           <div className="rounded-[var(--radius-md)] bg-surface-offset p-4 shadow-ring">
             <div className="space-y-4">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="min-w-0 flex-1 space-y-2.5">
-                  <span className="inline-flex items-center rounded-full bg-card px-2.5 py-1 text-xs font-medium text-text-secondary shadow-ring">
-                    {t("howMonthLanded.verdict.badge", { month: monthShort })}
-                  </span>
-                  <p className="max-w-[14ch] text-[1.25rem] font-medium leading-[1.2] text-foreground text-balance">
-                    {t(`howMonthLanded.verdictWhole.${verdict}`)}
-                  </p>
-                  <div>
-                    <p className="text-[0.6875rem] uppercase tracking-[0.08em] text-text-tertiary">
-                      {t("howMonthLanded.summary.deltaLabel")}
-                    </p>
-                    <p
-                      dir="ltr"
-                      className={cn(
-                        "mt-1 text-[2rem] font-semibold leading-none tracking-[-0.04em] tabular-nums",
-                        summaryTone.amountTextClass,
-                      )}
-                    >
-                      {remainder > 0 ? "+" : remainder < 0 ? "−" : ""}
-                      {formatAnalyticsCurrency(locale, Math.abs(remainder))}
-                    </p>
-                  </div>
-                </div>
+              <div className="space-y-2.5">
+                <span className="inline-flex items-center rounded-full bg-card px-2.5 py-1 text-xs font-medium text-text-secondary shadow-ring">
+                  {t("howMonthLanded.verdict.badge", { month: monthShort })}
+                </span>
+                <p className="text-[1.25rem] font-medium leading-[1.2] text-foreground text-balance">
+                  {t(`howMonthLanded.verdictWhole.${verdict}`)}
+                </p>
+              </div>
 
-                <div className="min-w-[8.5rem] rounded-[var(--radius-sm)] bg-surface-2/80 px-2.5 py-2.5 shadow-ring">
-                  <div className="mt-2 space-y-2">
-                    <div className="flex items-start justify-between gap-3">
-                      <p className="text-[11px] text-text-secondary">
-                        {t("howMonthLanded.summaryWhole.spentLabel")}
-                      </p>
-                      <p
-                        dir="ltr"
-                        className={cn(
-                          "text-sm font-semibold tabular-nums",
-                          summaryTone.actualValueClass,
-                        )}
-                      >
-                        {formatAnalyticsCurrency(locale, wholeMonthSpent)}
-                      </p>
-                    </div>
-                    <div className="flex items-start justify-between gap-3 border-t border-border-subtle pt-2">
-                      <p className="text-[11px] text-text-secondary">
-                        {t("howMonthLanded.summaryWhole.budgetLabel")}
-                      </p>
-                      <p dir="ltr" className="text-sm font-semibold tabular-nums text-foreground">
-                        {formatAnalyticsCurrency(locale, adjustedBudgetTotal)}
-                      </p>
-                    </div>
-                  </div>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm text-text-secondary">
+                    {t("howMonthLanded.summaryWhole.spentLabel")}
+                  </p>
+                  <p
+                    dir="ltr"
+                    className={cn("text-sm font-semibold tabular-nums whitespace-nowrap", summaryTone.actualValueClass)}
+                  >
+                    {formatAnalyticsCurrency(locale, wholeMonthSpent)}
+                  </p>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm text-text-secondary">
+                    {t("howMonthLanded.summaryWhole.budgetLabel")}
+                  </p>
+                  <p dir="ltr" className="text-sm font-semibold tabular-nums whitespace-nowrap text-foreground">
+                    {formatAnalyticsCurrency(locale, adjustedBudgetTotal)}
+                  </p>
                 </div>
               </div>
 
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 <div dir="ltr" className="h-2.5 rounded-full bg-card shadow-ring">
                   <Bar
                     actual={wholeMonthSpent}
@@ -433,9 +411,18 @@ export function HowMonthLandedCard({ month }: HowMonthLandedCardProps) {
                   />
                 </div>
 
-                <div className="flex items-center justify-between gap-3 px-1 text-[11px] text-text-secondary">
-                  <p>{t(`howMonthLanded.summaryWhole.${verdict}`)}</p>
-                  <p dir="ltr" className="tabular-nums">
+                <div className="flex items-baseline justify-between gap-3 px-0.5">
+                  <p className="min-w-0 flex-1 truncate text-xs text-text-secondary">
+                    {t(`howMonthLanded.summaryWhole.${verdict}`)}
+                  </p>
+                  <p
+                    dir="ltr"
+                    className={cn(
+                      "shrink-0 whitespace-nowrap text-[1.375rem] font-semibold leading-none tracking-[-0.03em] tabular-nums",
+                      summaryTone.amountTextClass,
+                    )}
+                  >
+                    {remainder > 0 ? "+" : remainder < 0 ? "−" : ""}
                     {formatAnalyticsCurrency(locale, totalDelta)}
                   </p>
                 </div>
@@ -443,8 +430,8 @@ export function HowMonthLandedCard({ month }: HowMonthLandedCardProps) {
             </div>
           </div>
 
-          <div className="space-y-3">
-            <div className="space-y-1">
+          <div className="space-y-2">
+            <div className="space-y-1 px-0.5">
               <p className="text-[0.6875rem] uppercase tracking-[0.08em] text-text-tertiary">
                 {t("howMonthLanded.budgetBreakdown.eyebrow")}
               </p>
@@ -463,7 +450,7 @@ export function HowMonthLandedCard({ month }: HowMonthLandedCardProps) {
               <div className="relative space-y-2">
                 <div
                   aria-hidden="true"
-                  className="absolute bottom-3 start-[0.5rem] top-3 w-px bg-border-subtle"
+                  className="absolute bottom-3 start-[0.6875rem] top-3 w-px bg-border-subtle"
                 />
 
                 {stepRows.map((row) => (
@@ -477,64 +464,59 @@ export function HowMonthLandedCard({ month }: HowMonthLandedCardProps) {
             <button
               type="button"
               onClick={() => setPopupOpen(true)}
-              className="-m-1 flex min-h-12 w-full items-center gap-3 rounded-[calc(var(--radius-sm)+4px)] p-1 text-start transition-[transform,opacity] duration-200 ease-[var(--ease-stashy)] active:scale-[0.96] hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/20"
+              className="-m-1 flex min-h-12 w-full rounded-[calc(var(--radius-sm)+4px)] p-1 text-start transition-[transform,opacity] duration-200 ease-[var(--ease-stashy)] active:scale-[0.96] hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/20"
             >
-              <div className="flex min-h-14 w-full items-center justify-between gap-3 rounded-[var(--radius-md)] bg-surface-offset px-4 py-3 shadow-ring">
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-foreground">
-                    {t("howMonthLanded.manualFixed.title")}
-                  </p>
-                  <p className="mt-1 text-xs leading-[1.45] text-text-secondary text-pretty">
-                    {t("howMonthLanded.manualFixed.summaryCount", {
-                      count: bucketsWithDelta.length,
-                    })}
-                  </p>
+              <div className="flex w-full flex-col gap-3 rounded-[var(--radius-md)] bg-surface-offset px-4 py-3.5 shadow-ring">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-foreground">
+                      {t("howMonthLanded.manualFixed.title")}
+                    </p>
+                    <p className="mt-0.5 text-xs leading-[1.45] text-text-secondary text-pretty">
+                      {t("howMonthLanded.manualFixed.summaryCount", {
+                        count: bucketsWithDelta.length,
+                      })}
+                    </p>
+                  </div>
+                  <HugeiconsIcon
+                    icon={ArrowRight01Icon}
+                    size={16}
+                    aria-hidden="true"
+                    className="mt-0.5 shrink-0 text-text-tertiary rtl:rotate-180"
+                  />
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2.5">
+                {wholeBudget.manualFixedUnusedTotal > 0 || wholeBudget.manualFixedOverspendTotal > 0 ? (
+                  <div className="flex items-center gap-2">
                     {wholeBudget.manualFixedUnusedTotal > 0 ? (
-                      <div className="rounded-[var(--radius-sm)] bg-card px-2.5 py-2 shadow-ring">
+                      <div className="rounded-[var(--radius-sm)] bg-card px-2.5 py-1.5 shadow-ring">
                         <p
                           dir="ltr"
-                          className={cn(
-                            "text-sm font-semibold tabular-nums",
-                            semanticTextClass.income,
-                          )}
+                          className={cn("text-sm font-semibold tabular-nums", semanticTextClass.income)}
                         >
                           +{formatAnalyticsCurrency(locale, wholeBudget.manualFixedUnusedTotal)}
                         </p>
-                        <p className="mt-1 text-[11px] text-text-secondary">
+                        <p className="mt-0.5 text-[11px] text-text-secondary">
                           {t("howMonthLanded.manualFixed.returnedLabel")}
                         </p>
                       </div>
                     ) : null}
 
                     {wholeBudget.manualFixedOverspendTotal > 0 ? (
-                      <div className="rounded-[var(--radius-sm)] bg-card px-2.5 py-2 shadow-ring">
+                      <div className="rounded-[var(--radius-sm)] bg-card px-2.5 py-1.5 shadow-ring">
                         <p
                           dir="ltr"
-                          className={cn(
-                            "text-sm font-semibold tabular-nums",
-                            semanticTextClass.expense,
-                          )}
+                          className={cn("text-sm font-semibold tabular-nums", semanticTextClass.expense)}
                         >
                           {formatAnalyticsCurrency(locale, wholeBudget.manualFixedOverspendTotal)}
                         </p>
-                        <p className="mt-1 text-[11px] text-text-secondary">
+                        <p className="mt-0.5 text-[11px] text-text-secondary">
                           {t("howMonthLanded.manualFixed.pressureLabel")}
                         </p>
                       </div>
                     ) : null}
                   </div>
-
-                  <HugeiconsIcon
-                    icon={ArrowRight01Icon}
-                    size={16}
-                    aria-hidden="true"
-                    className="shrink-0 text-text-tertiary rtl:rotate-180"
-                  />
-                </div>
+                ) : null}
               </div>
             </button>
           ) : null}

@@ -217,3 +217,52 @@ Analytics Section 3 was still mounted as the old `TrendsCard`, framing the scree
    - `components/tracker/tracker-transfer-drawer.tsx` — unused `surfacePanelClass` import
    - `components/settings/settings-sections.tsx` — unused `SubSectionHeader` declaration
 2. Manual browser verification in the sandbox UI was not performed in this environment. A visual pass is still recommended for teaser atmosphere, drawer scroll feel, and Arabic bidi rendering.
+
+---
+
+# Session 2 — HowMonthLandedCard UI/UX audit and structural fix
+
+**Time:** Continuous with session 1 (same day, user-initiated review after visual inspection)
+
+---
+
+## Status at Session Start
+
+Session 1 shipped the card's logic and hierarchy redesign, but a visual audit of the rendered output revealed five concrete layout problems in the closed-month mode.
+
+---
+
+## Completed This Session
+
+- Audited five structural UI/UX issues identified from a screenshot review:
+  1. Two-column flex layout in the summary surface causing collision between verdict text and the side stats mini-panel on narrow mobile widths
+  2. The big result amount (`+620 EGP`) floating unanchored inside the left flex column instead of reading as the bar's outcome
+  3. Stepper dot/line misalignment: connector line at `start-[0.5rem]` (8px) clipped the left edge of dots positioned at `start-2` (also 8px) with `size-3`/`size-2.5` widths — line was not centered on the dots
+  4. Budget path section header (`BUDGET PATH` eyebrow + title + subtitle) visually disconnected from the stepper card below it due to equal spacing above and below
+  5. Manual fixed settlement button: title/description fought horizontally with the chip pills, causing 3-line title wrapping on narrow screens
+- Implemented all five fixes in `components/analytics/how-month-landed-card.tsx`:
+  - Replaced the two-column `flex flex-wrap items-start justify-between` layout with a single-column `space-y-4` stack: badge → verdict headline → stat rows (spent/budget) → bar → result caption
+  - Moved the big result amount from the left column to the bar caption row, sized at `text-[1.375rem]` with `items-baseline` alignment against the verdict label
+  - Fixed stepper alignment: dots moved from `start-2` → `start-[0.3125rem]`, connector line moved from `start-[0.5rem]` → `start-[0.6875rem]` (now centered on both dot sizes)
+  - Tightened budget path header-to-card gap from `space-y-3` → `space-y-2`, added `px-0.5` optical indent to the header block
+  - Restructured manual fixed settlement button: title + chevron on top row (full-width minus icon), description on second line, chips row below as flex — removes all wrapping
+- Removed the floating side stats mini-panel (`min-w-[8.5rem] bg-surface-2/80`) entirely; its content now lives as clean full-width stat rows inside the main surface
+- Removed the orphaned `MONTH RESULT` eyebrow label (no longer needed; result amount is self-evident as the bar caption)
+- Verified: `get_errors` returned no TypeScript errors on the touched file
+
+---
+
+## Decisions Made
+
+- The result amount belongs below the bar, not mid-column. The bar establishes the comparison context; the amount is its resolution.
+- The side stats panel was removed rather than repositioned — it duplicated information that reads more clearly as inline rows with the verdict headline above them.
+- Stepper alignment uses `start-[0.3125rem]` / `start-[0.6875rem]` because those values center the `size-3` (12px) anchor dots and `size-2.5` (10px) delta dots on the same 1px line (centers at 11px and 10px respectively — close enough visually).
+- The budget path section header uses `px-0.5` to visually inset it as a label for the card below, not a standalone section element.
+- Chip pills in the manual fixed button now live on a separate row below title+desc, not horizontally beside them. This preserves the two separate-fact display of returned vs. pressure without layout collapse.
+
+---
+
+## Open Blockers
+
+1. Pre-existing `pnpm lint` failures unchanged (same two unrelated files).
+2. Visual review pending in sandbox browser after user reviews this session's changes.
