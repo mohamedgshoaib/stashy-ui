@@ -29,6 +29,8 @@ export type BudgetStrip = {
   variableSpent: number;
   variableRemaining: number;
 
+  majorSpent: number;
+
   totalRemaining: number;
   daysRemaining: number;
 };

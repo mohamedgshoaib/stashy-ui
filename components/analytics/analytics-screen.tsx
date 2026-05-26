@@ -7,7 +7,7 @@ import * as React from "react"
 
 import { AnalyticsUpgradeGate } from "@/components/analytics/analytics-cards"
 import { BudgetCompositionCard } from "@/components/analytics/budget-composition-card"
-import { getAnalyticsDataForScenario, getMonthView, getPreviousSnapshot } from "@/components/analytics/data"
+import { getMonthView, getPreviousSnapshot } from "@/components/analytics/data"
 import { FixedAnalysisCard } from "@/components/analytics/fixed-analysis-card"
 import { MethodObligationCard } from "@/components/analytics/method-obligation-card"
 import { formatAnalyticsMonthLabel } from "@/components/analytics/formatters"
@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { type Locale } from "@/i18n/routing"
 import { getDirectionForLocale } from "@/lib/i18n"
+import { getSandboxAnalyticsData } from "@/lib/sandbox-budget"
 import { cn } from "@/lib/utils"
 import { useSandboxStore } from "@/store/sandbox-store"
 
@@ -32,68 +33,14 @@ export function AnalyticsScreen() {
   const t = useTranslations("Analytics")
   const direction = getDirectionForLocale(locale)
   const { monthlyBudgetState, plan, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun } = useSandboxStore()
-  const baseAnalyticsData = getAnalyticsDataForScenario(monthlyBudgetState)
-
-  // Patch live month based on sandbox settings — closed months are unaffected
   const analyticsData = React.useMemo(() => {
-    let data = baseAnalyticsData
-
-    // Patch budget injection
-    if (budgetInjection === "with" && data.current.status === "inProgress") {
-      data = {
-        ...data,
-        current: { ...data.current, injectionTotal: 1000, injectionCount: 1 },
-      }
-    }
-
-    // Patch first-month (no history) mode
-    if (analyticsHistoryMode === "firstMonth") {
-      data = { ...data, snapshots: [] }
-    }
-
-    // Patch with-history mode: give April different manual budgets + remove fb-spotify
-    // so both FixedAnalysisCard and MethodObligationCard show meaningful deltas.
-    //
-    // FixedAnalysisCard: April manual total 360 vs May 440 → +80 EGP "raised" badge + caveat line
-    // MethodObligationCard: Spotify absent from April → reason = "newRecurring" → note fires
-    //   (committed delta stays +20 EGP from the underlying paymentMethods amounts)
-    if (analyticsHistoryMode === "withHistory" && data.snapshots.length > 0) {
-      const [latestSnapshot, ...rest] = data.snapshots
-      data = {
-        ...data,
-        snapshots: [
-          {
-            ...latestSnapshot,
-            fixedBuckets: latestSnapshot.fixedBuckets
-              .filter((b) => b.id !== "fb-spotify") // make Spotify look new in May
-              .map((b) => {
-                if (b.id === "fb-coffee") return { ...b, budget: 160 }
-                if (b.id === "fb-groceries") return { ...b, budget: 200 }
-                return b
-              }),
-          },
-          ...rest,
-        ],
-      }
-    }
-
-    // Patch fixed budget overruns — make manual buckets exceed their budgets
-    if (fixedBudgetOverrun === "some" && data.current.status === "inProgress") {
-      data = {
-        ...data,
-        current: {
-          ...data.current,
-          fixedBucketsActual: data.current.fixedBucketsActual.map((a) => {
-            if (a.id === "fb-coffee") return { ...a, spent: 240 } // over 200 budget
-            if (a.id === "fb-groceries") return { ...a, spent: 320 } // over 240 budget
-            return a
-          }),
-        },
-      }
-    }
-
-    return data
-  }, [baseAnalyticsData, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun])
+    return getSandboxAnalyticsData({
+      monthlyBudgetState,
+      budgetInjection,
+      analyticsHistoryMode,
+      fixedBudgetOverrun,
+    })
+  }, [monthlyBudgetState, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun])
   const [selectedMonthId, setSelectedMonthId] = React.useState<string>(analyticsData.current.month)
   const [monthPickerOpen, setMonthPickerOpen] = React.useState(false)
 

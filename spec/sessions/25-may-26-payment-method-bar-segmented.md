@@ -155,3 +155,109 @@ Analytics Section 2 had already been reshaped around the newer Fixed, Variable, 
 2. `pnpm lint` continues to fail on the same pre-existing unrelated issues, unchanged from Session 1:
    - `components/tracker/tracker-transfer-drawer.tsx` — unused `surfacePanelClass` import
    - `components/settings/settings-sections.tsx` — unused `SubSectionHeader` declaration
+
+---
+
+# Session 3 — BudgetStripCard progress bar color fix
+
+**Time:** Follow-up block
+
+---
+
+## Status at Session Start
+
+The `PaymentMethodCard` BudgetBar was correctly using `bg-variable` (Ledger Gray) for the variable spend segment after Session 1. However, the homepage `BudgetStripCard` in `components/home/budget-strip.tsx` was still using `bg-warning` (Amber `#b3883b`) for its variable-spent segment — semantically wrong because variable spending is not a warning state. The track was also using `bg-variable-subtle` instead of the system-standard `bg-surface-offset shadow-ring`.
+
+---
+
+## Completed This Session
+
+- `components/home/budget-strip.tsx`
+  - Changed the variable-spent segment from `bg-warning` → `bg-variable` (Ledger Gray `#7a7266`) to align with the `PaymentMethodCard` segmented bar pattern.
+  - Changed the track from `bg-variable-subtle` → `bg-surface-offset shadow-ring` to match the analysis page reference.
+  - Added sequential-capped `majorPct` computation following the same pattern as `PaymentMethodCard`.
+  - Added conditional `bg-major` segment (Ochre Ledger `#9a7a33`) after the variable segment, only rendered when `majorPct > 0`.
+- `components/home/types.ts`
+  - Added `majorSpent: number` field to the `BudgetStrip` type.
+- `components/home/home-data.ts`
+  - Added `majorSpent: 3000` to `mockBudgetStrip` (aligned with `mockMajorExpensesRow.totalAmount`).
+- `pnpm typecheck` passed clean.
+- Shared budget source refactor
+  - Added `lib/sandbox-budget.ts` as a shared scenario-aware month projection layer built on top of analytics data.
+  - Moved sandbox scenario patching out of `AnalyticsScreen` into `getSandboxAnalyticsData(...)` so home, analytics, history, and tracker read the same active-month numbers.
+- Home
+  - Rewired `components/home-screen.tsx` and `components/home/home-content.tsx` to derive budget strip, major row, upcoming payments, and daily-rate values from the shared month model instead of separate home-only mocks.
+- Analytics
+  - Updated `components/analytics/payment-method-card.tsx` so `major` is treated as part of the variable allocation, not additive on top of it.
+- History
+  - Extended `components/history/types.ts` with optional numeric `amountValue`.
+  - Rewired `components/history-screen.tsx` to derive history rows and preset date ranges from the shared month model instead of `components/history/history-data.ts`.
+- Tracker
+  - Updated `components/tracker/tracker-transfer-drawer.tsx` to read `daysRemaining` from the shared month model.
+  - Updated `components/tracker/tracker-overview.tsx` to derive fixed budget / paid / remaining from the shared month model instead of hardcoded values.
+- Verification
+  - `pnpm typecheck` passed after the refactor.
+- History icon identity pass
+  - Added a dedicated `icon` field to `HistoryTransaction` so the visible history avatar is no longer tied to payment-method metadata.
+  - Updated `components/history/history-row.tsx` to render `transaction.icon` instead of `transaction.methodIcon`.
+  - Kept `methodTone` and `methodIcon` in the data model so filtering and future method-specific UI can continue to work without conflating payment method with transaction identity.
+  - Extended `FixedBucketPlan` with `iconKey` and populated the analytics `FIXED_PLAN` with per-bucket icon metadata.
+  - Updated shared history projection in `lib/sandbox-budget.ts` so fixed rows now use bucket-owned icons, variable rows use one shared variable icon, and major rows use one shared major icon.
+  - Updated the legacy static `components/history/history-data.ts` mock so it still satisfies the expanded history transaction type.
+  - `pnpm typecheck` passed after the icon-model refactor.
+- Tracker fixed-item icon pass
+  - Added `icon` to `FixedExpenseItem` in `components/tracker/types.ts`.
+  - Populated all tracker mock fixed items in `data/fixed-tracker-mock.ts` with item-specific icons so each recurring, installment, and manual budget now owns its own visual identity.
+  - Updated tracker cards to render the item icon on the left:
+    - `components/tracker/cards/subscription-card.tsx`
+    - `components/tracker/cards/installment-card.tsx`
+    - `components/tracker/cards/budget-card.tsx`
+  - Updated `components/tracker/fixed-detail-sheet.tsx` header to reuse the same item icon for the selected fixed item.
+  - `pnpm typecheck` passed after the tracker icon pass.
+- Tracker add-drawer icon picker + local save pass
+  - Added a shared tracker fixed-icon catalog in `components/tracker/fixed-icons.ts` with icon keys, icon resolution, and type-aware defaults.
+  - Extended `FixedExpenseItem` with `iconKey` so tracker items can persist a stable icon selection instead of only a resolved icon object.
+  - Updated `data/fixed-tracker-mock.ts` to use the shared icon catalog and stable `iconKey` values.
+  - Reworked `components/tracker/tracker-add-drawer.tsx` to:
+    - prefill icon choice in edit mode
+    - reset icon choice intelligently when changing add type in create mode
+    - show an icon preview row
+    - offer a type-aware icon picker grid
+    - emit a full fixed-item payload on save instead of only closing the drawer
+  - Updated `components/tracker/tracker-fixed-tab.tsx` to own local `items` state, apply add/edit saves immediately, and recompute summary/installment overview from the live local list.
+  - Updated `components/tracker/tracker-transfer-drawer.tsx` to read destination budgets from the current local items list instead of the static mock import.
+  - Added tracker add-drawer icon-picker copy to `messages/en.json` and `messages/ar.json`.
+  - `pnpm typecheck` passed after the add-drawer/save-flow refactor.
+- Tracker icon-picker UX rework
+  - Replaced the old duplicated icon preview card + inline chooser grid in `components/tracker/tracker-add-drawer.tsx` with a single compact icon field row in the main form.
+  - Added an internal drawer subview for icon picking so icon browsing is separated from the rest of the fixed-item form.
+  - Added search within the icon picker plus `Recommended` / `All icons` filtering so the interaction can scale to larger icon libraries.
+  - Extended `components/tracker/fixed-icons.ts` icon metadata with `keywords` and `recommendedFor` to support searchable, type-aware filtering instead of the old hardcoded small-list logic.
+  - Picker selection now lives in one clear place only: the icon tiles themselves. The main form only shows the final selected icon row with a disclosure affordance.
+  - `pnpm typecheck` passed after the picker UX rework.
+
+## Decisions Made
+
+- Only the "Remaining this month" card (`BudgetStripCard`) was touched, as explicitly requested.
+- Bar height kept at `h-2` (compact, consistent with the card's `size="sm"` layout) rather than scaling up to `h-3`.
+- The active analytics month remains the canonical numeric source for this pass because it already carried the richest month-level budget model and scenario controls.
+- `major` is now treated consistently as a subset of variable allocation in both home and analytics progress bars.
+- Tracker fixed-item detail mocks were left intact in this pass; only tracker surfaces that were directly conflicting with shared budget totals were rewired.
+- History row icons should communicate transaction identity first, not payment method.
+- Fixed icons are now owned by the fixed bucket plan itself via `iconKey`, which is a better long-term bridge for user-configurable fixed-item icons than inferring from bucket type.
+- Variable history rows intentionally use one calm shared icon (`Wallet01Icon`) across all variable entries to reduce visual noise.
+- Major history rows intentionally use one shared burden icon (`Alert01Icon`) across all major entries to make the category read consistently regardless of underlying payment method.
+- Tracker fixed cards and detail sheets should use item-owned icons instead of relying only on section-level type icons so the user can visually distinguish fixed items at a glance.
+- The tracker fixed add drawer should let the user choose an icon during create/edit, and that choice should be reflected immediately in the fixed tab instead of being a UI-only control.
+- The tracker icon picker should scale to a larger icon library, so the main form must stay compact and the browsing surface must be searchable and independently scrollable.
+
+---
+
+## Open Blockers
+
+1. Manual browser verification is still needed across home, analytics, history, and tracker to confirm the new shared numbers read correctly in-context and across RTL.
+2. Tracker fixed-item internals still come from `data/fixed-tracker-mock.ts`, so the tracker detail cards are not yet fully unified with the shared month ledger.
+3. `pnpm lint` continues to fail on the same two pre-existing unrelated issues (no new failures).
+4. Fixed bucket icon metadata currently exists only in the analytics/shared sandbox plan path; if tracker creation/edit flows become the source of truth later, that icon field will need to be propagated there as well.
+5. Tracker fixed add/edit persistence is currently local to `TrackerFixedTab` state only; other mock consumers such as `home-drawer.tsx` still read the static exported `fixedItems` snapshot.
+6. The current picker supports search and recommended/all filtering, but it does not yet expose broader grouped taxonomy chips beyond that first scale pass.

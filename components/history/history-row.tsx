@@ -186,7 +186,7 @@ export function HistoryRow({
         )}
       >
         <HugeiconsIcon
-          icon={transaction.methodIcon}
+          icon={transaction.icon}
           size={20}
           aria-hidden="true"
         />

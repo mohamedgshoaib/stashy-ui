@@ -1,8 +1,9 @@
+import { HugeiconsIcon } from "@hugeicons/react"
 import { useTranslations } from "next-intl"
 
 import type { FixedExpenseItem } from "@/components/tracker/types"
 import { surfacePanelClass } from "@/lib/design-system-classes"
-import { semanticSurfaceClass } from "@/lib/semantic-styles"
+import { semanticSurfaceClass, semanticTextClass } from "@/lib/semantic-styles"
 import { cn } from "@/lib/utils"
 
 type SubscriptionCardProps = {
@@ -32,6 +33,15 @@ export function SubscriptionCard({ item, onTap }: SubscriptionCardProps) {
       )}
       onClick={() => onTap(item)}
     >
+      <span
+        className={cn(
+          "flex size-10 shrink-0 items-center justify-center rounded-full bg-background/80 shadow-ring-sm",
+          semanticTextClass.fixed,
+        )}
+      >
+        <HugeiconsIcon icon={item.icon} size={20} aria-hidden="true" />
+      </span>
+
       {/* Name + type label */}
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold text-foreground">{item.name}</p>

@@ -21,13 +21,17 @@ export function BudgetStripCard({ data }: BudgetStripProps) {
     variableTotal,
     variableSpent,
     variableRemaining,
+    majorSpent,
     totalRemaining,
     daysRemaining,
   } = data;
 
   const total = fixedTotal + variableTotal;
   const fixedPct = total > 0 ? (fixedTotal / total) * 100 : 0;
-  const varSpentPct = total > 0 ? (variableSpent / total) * 100 : 0;
+  // Split variable segment: pure variable (excluding major) + major carved out of it.
+  // majorSpent is already included in variableSpent, so the total bar fill stays unchanged.
+  const varPurePct = total > 0 ? Math.min(((variableSpent - majorSpent) / total) * 100, 100 - fixedPct) : 0;
+  const majorPct   = total > 0 ? Math.min((majorSpent / total) * 100, 100 - fixedPct - varPurePct) : 0;
 
   return (
     <Card size="sm" className="py-3">
@@ -47,7 +51,7 @@ export function BudgetStripCard({ data }: BudgetStripProps) {
 
       {/* Segmented composition bar */}
       <div
-        className="my-3 flex h-2 overflow-hidden rounded-full bg-variable-subtle"
+        className="my-3 flex h-2 overflow-hidden rounded-full bg-surface-offset shadow-ring"
         aria-label="Budget composition"
       >
         <div
@@ -55,9 +59,15 @@ export function BudgetStripCard({ data }: BudgetStripProps) {
           style={{ width: `${fixedPct}%` }}
         />
         <div
-          className="bg-warning"
-          style={{ width: `${varSpentPct}%` }}
+          className="bg-variable"
+          style={{ width: `${varPurePct}%` }}
         />
+        {majorPct > 0 && (
+          <div
+            className="bg-major"
+            style={{ width: `${majorPct}%` }}
+          />
+        )}
       </div>
 
       {/* Bottom row */}

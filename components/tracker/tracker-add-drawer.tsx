@@ -1,9 +1,12 @@
 "use client"
 
 import {
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
   BankIcon,
   Calendar03Icon,
   CreditCardIcon,
+  Search01Icon,
   Layers01Icon,
   MoneyBag02Icon,
   RepeatIcon,
@@ -13,6 +16,12 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { useLocale, useTranslations } from "next-intl"
 import * as React from "react"
 
+import {
+  getDefaultTrackerFixedIconKey,
+  getTrackerFixedIconOption,
+  getTrackerFixedIcon,
+  TRACKER_FIXED_ICON_OPTIONS,
+} from "@/components/tracker/fixed-icons"
 import type { FixedExpenseItem } from "@/components/tracker/types"
 import { Button } from "@/components/ui/button"
 import {
@@ -35,6 +44,30 @@ import type { Locale } from "@/i18n/routing"
 
 type AddType = "budget" | "recurring" | "installment"
 type PaymentMethodValue = "cash" | "card" | "bank"
+type IconPickerView = "form" | "iconPicker"
+type IconFilter = "recommended" | "all"
+type FixedItemDraft = Pick<
+  FixedExpenseItem,
+  | "id"
+  | "name"
+  | "iconKey"
+  | "icon"
+  | "type"
+  | "budget"
+  | "paid"
+  | "remaining"
+  | "progressPct"
+  | "progressClass"
+  | "status"
+  | "paymentStatus"
+  | "nextPaymentDate"
+  | "installmentsTotal"
+  | "installmentsPaid"
+  | "installmentsRemaining"
+  | "installmentProgressClass"
+  | "endDate"
+  | "transactions"
+>
 
 const typeMap: Record<FixedExpenseItem["type"], AddType> = {
   manual: "budget",
@@ -47,6 +80,105 @@ type TrackerAddDrawerProps = {
   onOpenChange: (open: boolean) => void
   editItem?: FixedExpenseItem | null
   defaultAddType?: AddType
+  onSave?: (item: FixedItemDraft) => void
+}
+
+function progressClass(pct: number): string {
+  const capped = Math.min(Math.round(pct), 100)
+  return `basis-[${capped}%]`
+}
+
+function installmentProgressClass(paid: number, total: number): string {
+  const pct = total > 0 ? Math.round((paid / total) * 100) : 0
+  return `basis-[${pct}%]`
+}
+
+function inferPaymentMethod(item: FixedExpenseItem): PaymentMethodValue {
+  if (item.type === "manual") return "cash"
+  return item.paymentStatus === "paid" ? "card" : "bank"
+}
+
+function toExpenseType(addType: AddType): FixedExpenseItem["type"] {
+  if (addType === "budget") return "manual"
+  return addType
+}
+
+function createDateLabel(dateString: string): string {
+  if (!dateString) return ""
+
+  const date = new Date(`${dateString}T00:00:00`)
+  if (Number.isNaN(date.getTime())) return ""
+
+  return new Intl.DateTimeFormat("en", { month: "short", day: "numeric" }).format(date)
+}
+
+function createInstallmentEndLabel(dateString: string): string | null {
+  if (!dateString) return null
+
+  const date = new Date(`${dateString}T00:00:00`)
+  if (Number.isNaN(date.getTime())) return null
+
+  return new Intl.DateTimeFormat("en", { month: "short", year: "numeric" }).format(date)
+}
+
+function buildFixedItemDraft({
+  addType,
+  amount,
+  editItem,
+  endDate,
+  iconKey,
+  name,
+  startDate,
+  totalInstallments,
+}: {
+  addType: AddType
+  amount: string
+  editItem?: FixedExpenseItem | null
+  endDate: string
+  iconKey: FixedExpenseItem["iconKey"]
+  name: string
+  startDate: string
+  totalInstallments: string
+}): FixedItemDraft {
+  const type = toExpenseType(addType)
+  const budget = Math.max(0, Number(amount) || 0)
+  const isInstallment = type === "installment"
+  const isRecurring = type === "recurring"
+  const installmentsTotal = isInstallment ? Math.max(1, Number(totalInstallments) || 1) : null
+  const installmentsPaid = editItem?.type === "installment"
+    ? editItem.installmentsPaid
+    : isInstallment
+      ? 0
+      : null
+  const installmentsRemaining =
+    installmentsTotal !== null && installmentsPaid !== null
+      ? Math.max(0, installmentsTotal - installmentsPaid)
+      : null
+
+  return {
+    id: editItem?.id ?? `draft-${type}-${Date.now()}`,
+    name: name.trim(),
+    iconKey,
+    icon: getTrackerFixedIcon(iconKey),
+    type,
+    budget,
+    paid: editItem?.paid ?? 0,
+    remaining: Math.max(0, budget - (editItem?.paid ?? 0)),
+    progressPct: budget > 0 ? ((editItem?.paid ?? 0) / budget) * 100 : 0,
+    progressClass: progressClass(budget > 0 ? ((editItem?.paid ?? 0) / budget) * 100 : 0),
+    status: editItem?.status ?? "on_track",
+    paymentStatus: type === "manual" ? "unpaid" : editItem?.paymentStatus ?? "unpaid",
+    nextPaymentDate: isRecurring ? createDateLabel(startDate) : editItem?.nextPaymentDate ?? null,
+    installmentsTotal,
+    installmentsPaid,
+    installmentsRemaining,
+    installmentProgressClass:
+      installmentsTotal !== null && installmentsPaid !== null
+        ? installmentProgressClass(installmentsPaid, installmentsTotal)
+        : null,
+    endDate: isInstallment ? createInstallmentEndLabel(endDate) : null,
+    transactions: editItem?.transactions ?? [],
+  }
 }
 
 // ─── Date helpers ─────────────────────────────────────────────────────────────
@@ -80,7 +212,13 @@ function monthsBetween(startStr: string, endStr: string): number {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export function TrackerAddDrawer({ open, onOpenChange, editItem, defaultAddType = "budget" }: TrackerAddDrawerProps) {
+export function TrackerAddDrawer({
+  open,
+  onOpenChange,
+  editItem,
+  defaultAddType = "budget",
+  onSave,
+}: TrackerAddDrawerProps) {
   const t = useTranslations("Tracker.add")
   const locale = useLocale() as Locale
   const direction = getDirectionForLocale(locale)
@@ -89,6 +227,12 @@ export function TrackerAddDrawer({ open, onOpenChange, editItem, defaultAddType 
   const [addType, setAddType] = React.useState<AddType>(defaultAddType)
   const [name, setName] = React.useState("")
   const [amount, setAmount] = React.useState("")
+  const [iconKey, setIconKey] = React.useState<FixedExpenseItem["iconKey"]>(
+    getDefaultTrackerFixedIconKey("manual"),
+  )
+  const [view, setView] = React.useState<IconPickerView>("form")
+  const [iconFilter, setIconFilter] = React.useState<IconFilter>("recommended")
+  const [iconSearch, setIconSearch] = React.useState("")
   const [paymentMethod, setPaymentMethod] = React.useState<PaymentMethodValue>("cash")
   const [startDate, setStartDate] = React.useState(getTodayString)
   const [endDate, setEndDate] = React.useState("")
@@ -99,6 +243,10 @@ export function TrackerAddDrawer({ open, onOpenChange, editItem, defaultAddType 
     setAddType(defaultAddType)
     setName("")
     setAmount("")
+    setIconKey(getDefaultTrackerFixedIconKey(toExpenseType(defaultAddType)))
+    setView("form")
+    setIconFilter("recommended")
+    setIconSearch("")
     setPaymentMethod("cash")
     setStartDate(getTodayString())
     setEndDate("")
@@ -112,17 +260,30 @@ export function TrackerAddDrawer({ open, onOpenChange, editItem, defaultAddType 
       setAddType(typeMap[editItem.type])
       setName(editItem.name)
       setAmount(String(editItem.budget))
-      setPaymentMethod("cash")
+      setIconKey(editItem.iconKey)
+      setPaymentMethod(inferPaymentMethod(editItem))
       if (editItem.type === "installment") {
         const count = editItem.installmentsTotal ?? 0
         setTotalInstallments(count > 0 ? String(count) : "")
       }
     } else if (open && !editItem) {
       setAddType(defaultAddType)
+      setIconKey(getDefaultTrackerFixedIconKey(toExpenseType(defaultAddType)))
     } else if (!open) {
       reset()
     }
   }, [open, editItem, defaultAddType, reset])
+
+  React.useEffect(() => {
+    if (editItem || !open) return
+    setIconKey(getDefaultTrackerFixedIconKey(toExpenseType(addType)))
+  }, [addType, editItem, open])
+
+  React.useEffect(() => {
+    if (!open) return
+    setIconFilter("recommended")
+    setIconSearch("")
+  }, [addType, open])
 
   function handleTotalInstallmentsChange(value: string) {
     setTotalInstallments(value)
@@ -167,16 +328,148 @@ export function TrackerAddDrawer({ open, onOpenChange, editItem, defaultAddType 
 
   const syncReady = addType === "installment" && totalInstallments !== "" && endDate !== ""
   const needsPaymentMethod = addType === "recurring" || addType === "installment"
+  const selectedIcon = getTrackerFixedIcon(iconKey)
+  const selectedIconOption = getTrackerFixedIconOption(iconKey)
+  const expenseType = toExpenseType(addType)
+  const iconOptions = React.useMemo(() => {
+    const query = iconSearch.trim().toLowerCase()
+    const baseOptions =
+      iconFilter === "recommended"
+        ? TRACKER_FIXED_ICON_OPTIONS.filter((option) => option.recommendedFor.includes(expenseType))
+        : TRACKER_FIXED_ICON_OPTIONS
+
+    return baseOptions.filter((option) => {
+      if (!query) return true
+
+      const haystack = [option.labelKey, ...option.keywords].join(" ").toLowerCase()
+      return haystack.includes(query)
+    })
+  }, [expenseType, iconFilter, iconSearch])
+
+  const disclosureIcon = direction === "rtl" ? ArrowLeft01Icon : ArrowRight01Icon
+
+  const handleSave = () => {
+    onSave?.(
+      buildFixedItemDraft({
+        addType,
+        amount,
+        editItem,
+        endDate,
+        iconKey,
+        name,
+        startDate,
+        totalInstallments,
+      }),
+    )
+    onOpenChange(false)
+  }
+
+  const handleIconSelect = (nextIconKey: FixedExpenseItem["iconKey"]) => {
+    setIconKey(nextIconKey)
+    setView("form")
+  }
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="bottom">
       <DrawerContent dir={direction} className="mx-auto max-w-sm">
         <DrawerHeader className="text-start">
-          <DrawerTitle>{isEdit ? t("editTitle") : t("title")}</DrawerTitle>
-          <DrawerDescription>{t(`description.${addType}`)}</DrawerDescription>
+          <div className="flex items-center gap-3">
+            {view === "iconPicker" ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                className="shrink-0"
+                onClick={() => setView("form")}
+                aria-label={t("fields.backToForm")}
+              >
+                <HugeiconsIcon icon={direction === "rtl" ? ArrowRight01Icon : ArrowLeft01Icon} size={16} aria-hidden="true" />
+              </Button>
+            ) : null}
+            <div className="min-w-0 text-start">
+              <DrawerTitle>{view === "iconPicker" ? t("fields.chooseIcon") : isEdit ? t("editTitle") : t("title")}</DrawerTitle>
+              {view !== "iconPicker" ? <DrawerDescription>{t(`description.${addType}`)}</DrawerDescription> : null}
+            </div>
+          </div>
         </DrawerHeader>
 
-        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 pb-2">
+        {view === "iconPicker" ? (
+          <div className="min-h-0 flex flex-1 flex-col gap-4 overflow-hidden px-4 pb-2">
+            <div className="relative shrink-0">
+              <input
+                type="search"
+                value={iconSearch}
+                onChange={(e) => setIconSearch(e.target.value)}
+                placeholder={t("fields.searchIcons")}
+                className={cn(inputFieldClass, "pe-10")}
+              />
+              <HugeiconsIcon
+                icon={Search01Icon}
+                size={17}
+                aria-hidden="true"
+                className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-text-secondary"
+              />
+            </div>
+
+            <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+              {([
+                { key: "recommended", label: t("fields.recommendedIcons") },
+                { key: "all", label: t("fields.allIcons") },
+              ] as const).map((filter) => {
+                const isActive = iconFilter === filter.key
+                return (
+                  <Button
+                    key={filter.key}
+                    type="button"
+                    variant={isActive ? "default" : "outline"}
+                    size="xs"
+                    className="h-10 min-h-10 shrink-0 rounded-full px-4 text-[0.8125rem] font-medium"
+                    onClick={() => setIconFilter(filter.key)}
+                  >
+                    {filter.label}
+                  </Button>
+                )
+              })}
+            </div>
+
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-1">
+              {iconOptions.length > 0 ? (
+                <div className="grid grid-cols-4 gap-2">
+                  {iconOptions.map((option) => {
+                    const isSelected = option.key === iconKey
+
+                    return (
+                      <button
+                        key={option.key}
+                        type="button"
+                        className={cn(
+                          "flex min-h-[4.75rem] flex-col items-center justify-center gap-1.5 rounded-[var(--radius-sm)] px-2 py-2 text-center shadow-ring transition-colors active:scale-[0.96]",
+                          isSelected ? semanticSurfaceClass.fixed : "bg-surface-offset text-text-secondary",
+                        )}
+                        onClick={() => handleIconSelect(option.key)}
+                      >
+                        <HugeiconsIcon
+                          icon={option.icon}
+                          size={18}
+                          aria-hidden="true"
+                          className={isSelected ? "text-fixed" : "text-text-secondary"}
+                        />
+                        <span className="text-[0.625rem] font-semibold leading-tight">
+                          {t(`fields.iconOptions.${option.labelKey}`)}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="flex min-h-32 items-center justify-center rounded-[var(--radius-sm)] bg-surface-offset px-4 text-center text-sm text-text-secondary shadow-ring">
+                  {t("fields.noIconsFound")}
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 pb-2">
           {/* Type selector — read-only in edit mode */}
           <div className="flex gap-1.5 rounded-full bg-surface-offset p-1">
             {typeConfig.map(({ key, icon }) => (
@@ -208,6 +501,25 @@ export function TrackerAddDrawer({ open, onOpenChange, editItem, defaultAddType 
               placeholder={t(`fields.namePlaceholder.${addType}`)}
               className={inputFieldClass}
             />
+          </FormField>
+
+          <FormField label={t("fields.icon")}>
+            <button
+              type="button"
+              className="flex min-h-14 w-full items-center gap-3 rounded-[var(--radius-sm)] bg-surface-offset px-3 py-2.5 text-start shadow-ring transition-colors active:scale-[0.96]"
+              onClick={() => setView("iconPicker")}
+            >
+              <span className={cn("flex size-10 shrink-0 items-center justify-center rounded-full bg-card shadow-ring-sm", semanticSurfaceClass.fixed)}>
+                <HugeiconsIcon icon={selectedIcon} size={20} aria-hidden="true" className="text-fixed" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-foreground">
+                  {t(`fields.iconOptions.${selectedIconOption.labelKey}`)}
+                </p>
+                <p className="text-xs text-text-tertiary">{t("fields.tapToChange")}</p>
+              </div>
+              <HugeiconsIcon icon={disclosureIcon} size={16} aria-hidden="true" className="shrink-0 text-text-secondary" />
+            </button>
           </FormField>
 
           {/* Amount */}
@@ -295,7 +607,8 @@ export function TrackerAddDrawer({ open, onOpenChange, editItem, defaultAddType 
               )}
             </>
           )}
-        </div>
+          </div>
+        )}
 
         <DrawerFooter>
           <div className="grid grid-cols-2 gap-2">
@@ -304,13 +617,19 @@ export function TrackerAddDrawer({ open, onOpenChange, editItem, defaultAddType 
                 {t("cancel")}
               </Button>
             </DrawerClose>
-            <button
-              type="button"
-              className="inline-flex min-h-12 w-full items-center justify-center rounded-[var(--radius-sm)] bg-fixed px-4 text-[1.0625rem] font-semibold text-primary-foreground shadow-soft transition-[background-color,transform] duration-200 ease-[var(--ease-stashy)] active:scale-[0.96] hover:opacity-90"
-              onClick={() => onOpenChange(false)}
-            >
-              {isEdit ? t("saveEdit") : t("save")}
-            </button>
+            {view === "iconPicker" ? (
+              <Button type="button" variant="default" onClick={() => setView("form")}>
+                {t("fields.done")}
+              </Button>
+            ) : (
+              <button
+                type="button"
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-[var(--radius-sm)] bg-fixed px-4 text-[1.0625rem] font-semibold text-primary-foreground shadow-soft transition-[background-color,transform] duration-200 ease-[var(--ease-stashy)] active:scale-[0.96] hover:opacity-90"
+                onClick={handleSave}
+              >
+                {isEdit ? t("saveEdit") : t("save")}
+              </button>
+            )}
           </div>
         </DrawerFooter>
       </DrawerContent>

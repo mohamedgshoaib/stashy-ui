@@ -19,10 +19,12 @@ export type HistoryTransaction = {
   fixedTypeLabel?: string;
   isAutoPay?: boolean;
   typeCategory: HistoryTransactionType;
+  amountValue?: number;
   amount: string;
   date: string;
   dateISO: string;
   direction: HistoryDirection;
+  icon: IconSvgElement;
   methodIcon: IconSvgElement;
   methodTone: "cash" | "card" | "bank";
   isTransfer?: boolean;

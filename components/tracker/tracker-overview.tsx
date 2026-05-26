@@ -1,12 +1,31 @@
 import { useTranslations } from "next-intl"
+import * as React from "react"
 
 import { TrackerProgress } from "@/components/tracker/tracker-progress"
 import { Card, CardContent } from "@/components/ui/card"
+import { getSandboxAnalyticsData } from "@/lib/sandbox-budget"
 import { heroSurfaceClass, statTileClass } from "@/lib/design-system-classes"
 import { cn } from "@/lib/utils"
+import { useSandboxStore } from "@/store/sandbox-store"
 
 export function TrackerOverview() {
   const t = useTranslations("Tracker")
+  const { monthlyBudgetState, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun } = useSandboxStore()
+  const analyticsData = React.useMemo(
+    () =>
+      getSandboxAnalyticsData({
+        monthlyBudgetState,
+        budgetInjection,
+        analyticsHistoryMode,
+        fixedBudgetOverrun,
+      }),
+    [monthlyBudgetState, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun],
+  )
+  const month = analyticsData.current
+  const budgeted = month.fixedTotalBudget
+  const paid = month.fixedTotalSpent
+  const remaining = month.fixedTotalBudget - month.fixedTotalSpent
+  const paidPct = Math.round(budgeted > 0 ? (paid / budgeted) * 100 : 0)
 
   return (
     <Card size="sm" className="py-4 shadow-soft">
@@ -19,15 +38,15 @@ export function TrackerOverview() {
               "bg-brand-subtle",
             )}
           >
-            66%
+            {paidPct}%
           </span>
         </div>
         <div className={cn("grid grid-cols-3 gap-2 p-3", heroSurfaceClass)}>
-          <OverviewStat label={t("overview.budgeted")} value="6,200 EGP" />
-          <OverviewStat label={t("overview.paid")} value="4,100 EGP" />
-          <OverviewStat label={t("overview.remaining")} value="2,100 EGP" />
+          <OverviewStat label={t("overview.budgeted")} value={formatAmount(budgeted)} />
+          <OverviewStat label={t("overview.paid")} value={formatAmount(paid)} />
+          <OverviewStat label={t("overview.remaining")} value={formatAmount(remaining)} />
         </div>
-        <TrackerProgress valueClass="basis-[66%]" />
+        <TrackerProgress value={paidPct} tone="fixed" />
       </CardContent>
     </Card>
   )
@@ -47,4 +66,8 @@ function OverviewStat({ label, value }: { label: string; value: string }) {
       </span>
     </div>
   )
+}
+
+function formatAmount(value: number): string {
+  return `${new Intl.NumberFormat("en").format(Math.round(value))} EGP`
 }

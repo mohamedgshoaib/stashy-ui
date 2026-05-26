@@ -21,8 +21,8 @@ import { semanticSurfaceClass, semanticTextClass } from "@/lib/semantic-styles"
 import { cn } from "@/lib/utils"
 import { getDirectionForLocale } from "@/lib/i18n"
 import type { Locale } from "@/i18n/routing"
-import { fixedItems } from "@/data/fixed-tracker-mock"
-import { mockBudgetStrip } from "@/components/home/home-data"
+import { getHomeBudgetStrip, getSandboxAnalyticsData } from "@/lib/sandbox-budget"
+import { useSandboxStore } from "@/store/sandbox-store"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -31,6 +31,7 @@ type Destination = { id: string; label: string; sublabel?: string }
 type TrackerTransferDrawerProps = {
   open: boolean
   sourceItem: FixedExpenseItem | null
+  items: FixedExpenseItem[]
   onOpenChange: (open: boolean) => void
 }
 
@@ -39,14 +40,27 @@ type TrackerTransferDrawerProps = {
 export function TrackerTransferDrawer({
   open,
   sourceItem,
+  items,
   onOpenChange,
 }: TrackerTransferDrawerProps) {
   const t = useTranslations("Tracker.transfer")
   const locale = useLocale() as Locale
   const direction = getDirectionForLocale(locale)
+  const { monthlyBudgetState, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun } = useSandboxStore()
+  const analyticsData = React.useMemo(
+    () =>
+      getSandboxAnalyticsData({
+        monthlyBudgetState,
+        budgetInjection,
+        analyticsHistoryMode,
+        fixedBudgetOverrun,
+      }),
+    [monthlyBudgetState, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun],
+  )
+  const budgetStrip = React.useMemo(() => getHomeBudgetStrip(analyticsData.current), [analyticsData])
 
   const remaining = sourceItem ? Math.max(0, sourceItem.remaining) : 0
-  const { daysRemaining } = mockBudgetStrip
+  const { daysRemaining } = budgetStrip
 
   const [amount, setAmount] = React.useState("")
   const [destinationId, setDestinationId] = React.useState("variable")
@@ -61,7 +75,7 @@ export function TrackerTransferDrawer({
   if (!sourceItem) return null
 
   // All other manual budgets (excluding source)
-  const otherBudgets = fixedItems.filter(
+  const otherBudgets = items.filter(
     (item) => item.type === "manual" && item.id !== sourceItem.id,
   )
 

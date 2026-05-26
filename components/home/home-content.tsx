@@ -4,15 +4,16 @@ import { useTranslations } from "next-intl";
 
 import { BudgetStripCard } from "@/components/home/budget-strip";
 import { DailyRateCard } from "@/components/home/daily-rate-card";
-import {
-  mockBudgetStrip,
-  mockMajorExpensesRow,
-  navItems,
-  upcomingPayments,
-} from "@/components/home/home-data";
+import { navItems } from "@/components/home/home-data";
 import { MajorExpensesRowCard } from "@/components/home/major-expenses-row";
 import { UpcomingPayments } from "@/components/home/upcoming-payments";
-import type { DailyRate, DrawerKind } from "@/components/home/types";
+import type {
+  BudgetStrip,
+  DailyRate,
+  DrawerKind,
+  MajorExpensesRow,
+} from "@/components/home/types";
+import type { UpcomingPayment } from "@/components/home/home-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { TabsContent } from "@/components/ui/tabs";
@@ -20,6 +21,9 @@ import { PlaceholderPanel } from "@/components/home/placeholder-panel";
 
 type HomeContentProps = {
   dailyRate: DailyRate;
+  budgetStrip: BudgetStrip;
+  majorExpensesRow: MajorExpensesRow;
+  upcomingPayments: UpcomingPayment[];
   introCardVisible: boolean;
   majorScenario: "active" | "none";
   onDismissIntroCard: () => void;
@@ -28,6 +32,9 @@ type HomeContentProps = {
 
 export function HomeContent({
   dailyRate,
+  budgetStrip,
+  majorExpensesRow,
+  upcomingPayments,
   introCardVisible,
   majorScenario,
   onDismissIntroCard,
@@ -45,7 +52,7 @@ export function HomeContent({
       ) : null}
 
       {/* Budget strip — always visible */}
-      <BudgetStripCard data={mockBudgetStrip} />
+      <BudgetStripCard data={budgetStrip} />
 
       {/* Daily rate hero card */}
       <DailyRateCard
@@ -55,7 +62,7 @@ export function HomeContent({
 
       {/* Major expenses row — conditional */}
       {majorScenario === "active" ? (
-        <MajorExpensesRowCard data={mockMajorExpensesRow} />
+        <MajorExpensesRowCard data={majorExpensesRow} />
       ) : null}
 
       {/* Upcoming payments */}

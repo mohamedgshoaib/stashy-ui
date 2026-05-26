@@ -1,10 +1,18 @@
 export type FixedBucketType = "manual" | "recurring" | "installment"
 
+export type FixedBucketIconKey =
+  | "rent"
+  | "spotify"
+  | "phone-installment"
+  | "coffee"
+  | "groceries"
+
 export type FixedBucketPlan = {
   id: string
   name: string
   budget: number
   type: FixedBucketType
+  iconKey: FixedBucketIconKey
 }
 
 export type FixedBucketActual = {
