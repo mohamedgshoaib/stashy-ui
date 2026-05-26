@@ -205,6 +205,15 @@ The `PaymentMethodCard` BudgetBar was correctly using `bg-variable` (Ledger Gray
   - Updated shared history projection in `lib/sandbox-budget.ts` so fixed rows now use bucket-owned icons, variable rows use one shared variable icon, and major rows use one shared major icon.
   - Updated the legacy static `components/history/history-data.ts` mock so it still satisfies the expanded history transaction type.
   - `pnpm typecheck` passed after the icon-model refactor.
+- Tracker fixed-item icon pass
+  - Added `icon` to `FixedExpenseItem` in `components/tracker/types.ts`.
+  - Populated all tracker mock fixed items in `data/fixed-tracker-mock.ts` with item-specific icons so each recurring, installment, and manual budget now owns its own visual identity.
+  - Updated tracker cards to render the item icon on the left:
+    - `components/tracker/cards/subscription-card.tsx`
+    - `components/tracker/cards/installment-card.tsx`
+    - `components/tracker/cards/budget-card.tsx`
+  - Updated `components/tracker/fixed-detail-sheet.tsx` header to reuse the same item icon for the selected fixed item.
+  - `pnpm typecheck` passed after the tracker icon pass.
 
 ## Decisions Made
 
@@ -217,6 +226,7 @@ The `PaymentMethodCard` BudgetBar was correctly using `bg-variable` (Ledger Gray
 - Fixed icons are now owned by the fixed bucket plan itself via `iconKey`, which is a better long-term bridge for user-configurable fixed-item icons than inferring from bucket type.
 - Variable history rows intentionally use one calm shared icon (`Wallet01Icon`) across all variable entries to reduce visual noise.
 - Major history rows intentionally use one shared burden icon (`Alert01Icon`) across all major entries to make the category read consistently regardless of underlying payment method.
+- Tracker fixed cards and detail sheets should use item-owned icons instead of relying only on section-level type icons so the user can visually distinguish fixed items at a glance.
 
 ---
 
@@ -226,3 +236,4 @@ The `PaymentMethodCard` BudgetBar was correctly using `bg-variable` (Ledger Gray
 2. Tracker fixed-item internals still come from `data/fixed-tracker-mock.ts`, so the tracker detail cards are not yet fully unified with the shared month ledger.
 3. `pnpm lint` continues to fail on the same two pre-existing unrelated issues (no new failures).
 4. Fixed bucket icon metadata currently exists only in the analytics/shared sandbox plan path; if tracker creation/edit flows become the source of truth later, that icon field will need to be propagated there as well.
+5. The tracker add/edit flow still does not expose an icon picker yet; tracker item icons are currently defined at the mock-data layer only.

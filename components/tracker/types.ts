@@ -1,3 +1,5 @@
+import type { IconSvgElement } from "@hugeicons/react";
+
 // ─── Fixed expense types matching the API model ───────────────────────────────
 
 export type FixedExpenseType = "manual" | "recurring" | "installment";
@@ -16,6 +18,7 @@ export type FixedTransaction = {
 export type FixedExpenseItem = {
   id: string;
   name: string;
+  icon: IconSvgElement;
   type: FixedExpenseType;
   budget: number; // monthly amount
   paid: number; // paid so far this month

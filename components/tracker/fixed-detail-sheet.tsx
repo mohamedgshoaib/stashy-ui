@@ -73,9 +73,19 @@ function SheetBody({ item, t, direction: _direction, onEdit, onTransfer }: Sheet
     <>
       <DrawerHeader className="gap-2 px-5 pb-3 pt-5">
         <div className="flex items-start justify-between gap-3">
-          <DrawerTitle className="text-base font-semibold text-foreground">
-            {item.name}
-          </DrawerTitle>
+          <div className="flex min-w-0 items-start gap-3">
+            <span
+              className={cn(
+                "flex size-10 shrink-0 items-center justify-center rounded-full bg-background/80 shadow-ring-sm",
+                semanticTextClass.fixed,
+              )}
+            >
+              <HugeiconsIcon icon={item.icon} size={20} aria-hidden="true" />
+            </span>
+            <DrawerTitle className="truncate text-base font-semibold text-foreground">
+              {item.name}
+            </DrawerTitle>
+          </div>
           <span
             className={cn(
               "shrink-0 rounded-full px-2.5 py-1 text-[0.6875rem] font-semibold",

@@ -1,9 +1,10 @@
+import { HugeiconsIcon } from "@hugeicons/react"
 import { useTranslations } from "next-intl"
 
 import { TrackerProgress } from "@/components/tracker/tracker-progress"
 import type { FixedExpenseItem } from "@/components/tracker/types"
 import { surfacePanelClass } from "@/lib/design-system-classes"
-import { semanticSurfaceClass } from "@/lib/semantic-styles"
+import { semanticSurfaceClass, semanticTextClass } from "@/lib/semantic-styles"
 import { cn } from "@/lib/utils"
 
 type InstallmentCardProps = {
@@ -31,9 +32,19 @@ export function InstallmentCard({ item, onTap }: InstallmentCardProps) {
     >
       {/* Top row: name + amount + paid pill */}
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-foreground">{item.name}</p>
-          <p className="mt-0.5 text-xs text-text-tertiary">{t("types.installment")}</p>
+        <div className="flex min-w-0 flex-1 items-start gap-3">
+          <span
+            className={cn(
+              "flex size-10 shrink-0 items-center justify-center rounded-full bg-background/80 shadow-ring-sm",
+              semanticTextClass.fixed,
+            )}
+          >
+            <HugeiconsIcon icon={item.icon} size={20} aria-hidden="true" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold text-foreground">{item.name}</p>
+            <p className="mt-0.5 text-xs text-text-tertiary">{t("types.installment")}</p>
+          </div>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1.5">
           <p

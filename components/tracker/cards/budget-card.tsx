@@ -1,3 +1,4 @@
+import { HugeiconsIcon } from "@hugeicons/react"
 import { useTranslations } from "next-intl"
 
 import { TrackerProgress } from "@/components/tracker/tracker-progress"
@@ -49,9 +50,19 @@ export function BudgetCard({ item, onTap }: BudgetCardProps) {
     >
       {/* Top row: name + spent/budget */}
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-foreground">{item.name}</p>
-          <p className="mt-0.5 text-xs text-text-tertiary">{t("types.manual")}</p>
+        <div className="flex min-w-0 flex-1 items-start gap-3">
+          <span
+            className={cn(
+              "flex size-10 shrink-0 items-center justify-center rounded-full bg-background/80 shadow-ring-sm",
+              semanticTextClass.fixed,
+            )}
+          >
+            <HugeiconsIcon icon={item.icon} size={20} aria-hidden="true" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold text-foreground">{item.name}</p>
+            <p className="mt-0.5 text-xs text-text-tertiary">{t("types.manual")}</p>
+          </div>
         </div>
         <div className="shrink-0 text-end">
           <p
