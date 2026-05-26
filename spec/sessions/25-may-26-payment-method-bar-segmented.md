@@ -155,3 +155,42 @@ Analytics Section 2 had already been reshaped around the newer Fixed, Variable, 
 2. `pnpm lint` continues to fail on the same pre-existing unrelated issues, unchanged from Session 1:
    - `components/tracker/tracker-transfer-drawer.tsx` — unused `surfacePanelClass` import
    - `components/settings/settings-sections.tsx` — unused `SubSectionHeader` declaration
+
+---
+
+# Session 3 — BudgetStripCard progress bar color fix
+
+**Time:** Follow-up block
+
+---
+
+## Status at Session Start
+
+The `PaymentMethodCard` BudgetBar was correctly using `bg-variable` (Ledger Gray) for the variable spend segment after Session 1. However, the homepage `BudgetStripCard` in `components/home/budget-strip.tsx` was still using `bg-warning` (Amber `#b3883b`) for its variable-spent segment — semantically wrong because variable spending is not a warning state. The track was also using `bg-variable-subtle` instead of the system-standard `bg-surface-offset shadow-ring`.
+
+---
+
+## Completed This Session
+
+- `components/home/budget-strip.tsx`
+  - Changed the variable-spent segment from `bg-warning` → `bg-variable` (Ledger Gray `#7a7266`) to align with the `PaymentMethodCard` segmented bar pattern.
+  - Changed the track from `bg-variable-subtle` → `bg-surface-offset shadow-ring` to match the analysis page reference.
+  - Added sequential-capped `majorPct` computation following the same pattern as `PaymentMethodCard`.
+  - Added conditional `bg-major` segment (Ochre Ledger `#9a7a33`) after the variable segment, only rendered when `majorPct > 0`.
+- `components/home/types.ts`
+  - Added `majorSpent: number` field to the `BudgetStrip` type.
+- `components/home/home-data.ts`
+  - Added `majorSpent: 3000` to `mockBudgetStrip` (aligned with `mockMajorExpensesRow.totalAmount`).
+- `pnpm typecheck` passed clean.
+
+## Decisions Made
+
+- Only the "Remaining this month" card (`BudgetStripCard`) was touched, as explicitly requested.
+- Bar height kept at `h-2` (compact, consistent with the card's `size="sm"` layout) rather than scaling up to `h-3`.
+
+---
+
+## Open Blockers
+
+1. Manual browser visual verification of the corrected bar on the homepage was not performed in this environment.
+2. `pnpm lint` continues to fail on the same two pre-existing unrelated issues (no new failures).

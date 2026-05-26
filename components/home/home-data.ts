@@ -51,6 +51,7 @@ export const mockBudgetStrip: BudgetStrip = {
   variableTotal: 7600,
   variableSpent: 3640,
   variableRemaining: 3960,
+  majorSpent: 3000,
   totalRemaining: 5200,
   daysRemaining: 12,
 };
