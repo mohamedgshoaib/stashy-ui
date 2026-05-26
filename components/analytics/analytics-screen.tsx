@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl"
 import * as React from "react"
 
 import { AnalyticsUpgradeGate } from "@/components/analytics/analytics-cards"
+import { BudgetPathCard } from "@/components/analytics/budget-path-card"
 import { BudgetCompositionCard } from "@/components/analytics/budget-composition-card"
 import { getMonthView, getPreviousSnapshot } from "@/components/analytics/data"
 import { FixedAnalysisCard } from "@/components/analytics/fixed-analysis-card"
@@ -135,6 +136,7 @@ export function AnalyticsScreen() {
               subtitle={t("section.landed.subtitle")}
             />
             <HowMonthLandedCard month={selectedMonth} />
+            <BudgetPathCard month={selectedMonth} />
           </div>
         )}
       </main>

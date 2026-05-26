@@ -266,3 +266,57 @@ Session 1 shipped the card's logic and hierarchy redesign, but a visual audit of
 
 1. Pre-existing `pnpm lint` failures unchanged (same two unrelated files).
 2. Visual review pending in sandbox browser after user reviews this session's changes.
+
+---
+
+# Session 3 — Card split: summary card + budget path card; ledger stepper redesign
+
+**Time:** Continuation of same day
+
+---
+
+## Status at Session Start
+
+Session 2 fixed the five UI/UX layout bugs. The user then identified that the card was still visually noisy, especially the budget path stepper, and requested: (1) split the single card into two separate cards, and (2) redesign the budget path to be cleaner and less visually cluttered.
+
+---
+
+## Completed This Session
+
+- Created `components/analytics/budget-path-card.tsx` — new standalone card for the budget path:
+  - Returns `null` for in-progress months (no closed path to show)
+  - Redesigned stepper: **no dots, no vertical connector line, no nested `bg-card` row backgrounds**
+  - Container uses `divide-y divide-border-subtle overflow-hidden rounded-[var(--radius-md)]` for natural group separation
+  - Three groups: (1) base budget anchor + injection/received deltas + adjusted anchor if changed, (2) variable close bridge + manual fixed returned/overspend deltas, (3) final result row
+  - `StepRow` emphasis types: `anchor` (full-width, `font-medium`), `delta` (indented `ps-3.5`, `text-xs`), `bridge` (full-width, normal weight, with `text-[11px]` hint below), `final` (full-width, `font-medium`, `text-[1.0625rem]` amount)
+  - Manual fixed settlement button and `HowMonthLandedPopup` drawer trigger moved here from `HowMonthLandedCard`
+  - All amount `<p>` elements use `whitespace-nowrap` to prevent EGP currency wrapping
+- Stripped `components/analytics/how-month-landed-card.tsx` to summary surface only:
+  - Removed imports: `ArrowRight01Icon`, `HugeiconsIcon`, `React`, `HowMonthLandedPopup`
+  - Removed types: `StepRow`
+  - Removed functions: `StepperRow`
+  - Removed closed-state variables: `bucketsWithDelta`, `hasAdjustedBudget`, `variableOutcome`, `budgetSupportRows`, `manualSettlementRows`, `stepRows`
+  - Removed JSX: budget path section, manual fixed button, `<HowMonthLandedPopup>`, `<>` fragment wrapper
+  - Now returns just the verdict card: badge → verdict headline → stat rows → progress bar → result amount
+- Updated `components/analytics/analytics-screen.tsx`:
+  - Added `import { BudgetPathCard } from "@/components/analytics/budget-path-card"`
+  - Renders `<BudgetPathCard month={selectedMonth} />` immediately after `<HowMonthLandedCard month={selectedMonth} />`
+- Verified: `get_errors` returned no TypeScript errors on all three touched files
+
+---
+
+## Decisions Made
+
+- Two cards (summary + budget path) rather than three. The summary card answers "what happened?" The budget path card answers "how did we get there?" Two questions, two cards — no further split needed.
+- The budget path stepper drops all decorative chrome (dots, lines, row backgrounds) in favor of typography hierarchy and `divide-y` group separation. Decoration was the noise source; the content was already clear.
+- Delta rows use `ps-3.5` indentation as the only sub-item indicator. No visual markers needed when emphasis type already differentiates anchor vs. delta via text size and weight.
+- `bridge` rows (variable close) use normal text weight but a colored amount. The hint text in `text-[11px] text-text-tertiary` provides the bridge-to-Card-1 context without a separate label row.
+- `BudgetPathCard` returns `null` for in-progress months. There is no teaser for the path — the summary card already has the in-progress teaser.
+- All popup/drawer logic (manual fixed settlement, `HowMonthLandedPopup`) stays with the budget path card because that card owns the detailed explanation layer.
+
+---
+
+## Open Blockers
+
+1. Pre-existing `pnpm lint` failures unchanged (same two unrelated files).
+2. Visual review pending in sandbox browser — user to confirm card split rendering and budget path ledger style.
