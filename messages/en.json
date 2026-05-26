@@ -719,6 +719,23 @@
       "badgeOnTrack": "On track",
       "badgeAtRisk": "At risk",
       "badgeOver": "Over budget",
+      "closed": {
+        "badge": {
+          "withinPlan": "Closed within plan",
+          "adjustedInFlight": "Closed after adjustment",
+          "outranThePlan": "Closed over plan"
+        },
+        "heroLabel": {
+          "withinPlan": "left in the month",
+          "adjustedInFlight": "left after adjustments",
+          "outranThePlan": "over the final cap"
+        },
+        "context": {
+          "withinPlan": "This month closed with {amount} EGP still inside the final variable cap.",
+          "adjustedInFlight": "This month still closed with {amount} EGP left after injections expanded the cap.",
+          "outranThePlan": "This month closed {amount} EGP above the final variable cap."
+        }
+      },
       "heroLabelAhead": "ahead of pace",
       "heroLabelBehind": "behind pace",
       "heroLabelOver": "over your budget",
@@ -843,19 +860,34 @@
       "injectionNote": "+ {amount} EGP injected"
     },
     "howMonthLanded": {
+      "title": "How the month landed",
+      "subtitle": "See how the whole month settled once everything lands.",
+      "subtitleClosed": "A closeout view for {month}, including added budget, fixed leftovers, and what the month spent overall.",
       "teaser": {
-        "eyebrow": "{month} · in progress",
-        "title": "The month is still being written.",
+        "badge": "{month} · in progress",
+        "title": "This month is still unfolding.",
         "body": "When {month} ends, Stashy will show you how the plan held up - what fit, what flexed, what to learn for next month."
       },
       "verdict": {
-        "withinPlan": "Within plan.",
-        "adjustedInFlight": "Adjusted in flight.",
-        "outranThePlan": "Outran the plan.",
-        "eyebrowClosed": "{month} · closed",
-        "supportWithinPlan": "Spent {totalSpent} of {plan}. {remainder} left.",
-        "supportAdjustedInFlight": "Spent {totalSpent}; plan + injection was {planPlusInjection}.",
-        "supportOutran": "Spent {totalSpent} of {plan} plan. {overage} over."
+        "badge": "{month} · closed"
+      },
+      "verdictWhole": {
+        "underBudget": "Finished under budget.",
+        "exactBudget": "Landed right on budget.",
+        "overBudget": "Finished over budget."
+      },
+      "summary": {
+        "deltaLabel": "Plan gap",
+        "withinPlan": "Stayed inside the plan",
+        "adjustedInFlight": "Landed inside the adjusted plan",
+        "outranThePlan": "Finished above the plan"
+      },
+      "summaryWhole": {
+        "underBudget": "Left room in the month budget",
+        "exactBudget": "Used the month budget exactly",
+        "overBudget": "Spent above the month budget",
+        "spentLabel": "Whole month spent",
+        "budgetLabel": "Adjusted month budget"
       },
       "bar": {
         "labelStart": "0",
@@ -867,23 +899,45 @@
         "eyebrow": "Injections",
         "label": "Added mid-month",
         "value": "+{amount} EGP",
-        "sub": "{count, plural, one {1 injection} other {# injections}} · raised the plan from {basePlan} to {adjustedPlan}"
+        "sub": "{count, plural, one {1 injection} other {# injections}} · raised the month budget from {basePlan} to {adjustedPlan}"
       },
-      "variable": {
-        "eyebrow": "Variable",
-        "planLabelDefault": "of {plan} plan",
-        "planLabelAdjusted": "of {plan} adjusted",
-        "subUnder": "{delta} under plan",
-        "subOver": "{delta} over plan",
-        "majorSuffix": " · {amount} flagged as Major"
+      "budgetBreakdown": {
+        "eyebrow": "Budget path",
+        "title": "How the month budget changed",
+        "subtitle": "Started from {base}, then landed at an adjusted month budget of {final}.",
+        "baseLabel": "Monthly budget",
+        "finalLabel": "Adjusted month budget",
+        "rows": {
+          "injection": "Budget injections raised the month budget",
+          "received": "Received variable money raised the month budget",
+          "manualFixedReturned": "Unused manual fixed returned to the month",
+          "manualFixedReturnedDetail": "{amount} stayed unused in manual fixed buckets, so it helped the month result.",
+          "manualFixedOverspend": "Manual fixed overspend added pressure",
+          "manualFixedOverspendDetail": "{amount} went above manual fixed plan and pulled against the month result."
+        }
+      },
+      "spendBreakdown": {
+        "eyebrow": "Where it went",
+        "title": "What the whole month spent",
+        "fixedLabel": "Fixed spent",
+        "variableLabel": "Variable spent",
+        "majorLabel": "Major spent",
+        "rows": {
+          "fixed": "Fixed spent",
+          "variable": "Variable spent",
+          "major": "Major spent"
+        }
       },
       "manualFixed": {
-        "eyebrow": "Manual fixed",
+        "title": "Manual fixed settlement",
+        "subtitle": "Buckets that came in above plan or left money unused for the month.",
         "metaLine": "{actual} of {plan}",
-        "andNMore": "{count, plural, one {And 1 more} other {And # more}}"
+        "andNMore": "{count, plural, one {And 1 more} other {And # more}}",
+        "viewAllTitle": "View all manual fixed shifts"
       },
       "popup": {
-        "header": "{month} · {verdict} · {summary}",
+        "title": "Manual fixed details",
+        "subtitle": "{month} · {verdict} · {summary}",
         "summaryUnder": "{amount} under plan",
         "summaryOver": "{amount} over plan",
         "summaryExact": "exactly on plan"

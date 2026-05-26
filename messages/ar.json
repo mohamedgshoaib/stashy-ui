@@ -719,6 +719,23 @@
       "badgeOnTrack": "في المسار الصحيح",
       "badgeAtRisk": "في خطر",
       "badgeOver": "تجاوز الميزانية",
+      "closed": {
+        "badge": {
+          "withinPlan": "أُغلق داخل الخطة",
+          "adjustedInFlight": "أُغلق بعد تعديل الخطة",
+          "outranThePlan": "أُغلق فوق الخطة"
+        },
+        "heroLabel": {
+          "withinPlan": "متبقٍ في الشهر",
+          "adjustedInFlight": "متبقٍ بعد التعديلات",
+          "outranThePlan": "فوق السقف النهائي"
+        },
+        "context": {
+          "withinPlan": "أُغلق هذا الشهر مع بقاء {amount} جنيه داخل السقف المتغير النهائي.",
+          "adjustedInFlight": "أُغلق هذا الشهر مع بقاء {amount} جنيه بعد أن وسّعت حقن الميزانية السقف النهائي.",
+          "outranThePlan": "أُغلق هذا الشهر فوق السقف المتغير النهائي بمقدار {amount} جنيه."
+        }
+      },
       "heroLabelAhead": "متقدم عن الإيقاع",
       "heroLabelBehind": "متأخر عن الإيقاع",
       "heroLabelOver": "تجاوز ميزانيتك",
@@ -843,19 +860,34 @@
       "injectionNote": "+ {amount} جنيه مُضاف"
     },
     "howMonthLanded": {
+      "title": "كيف انتهى الشهر",
+      "subtitle": "راجع كيف استقر الشهر كله بعد أن تُغلق كل الحركة.",
+      "subtitleClosed": "قراءة ختامية لشهر {month} تشمل أي دعم مضاف، وأي فائض عاد من الثابت اليدوي، وما الذي صُرف على مستوى الشهر كله.",
       "teaser": {
-        "eyebrow": "{month} · قيد التنفيذ",
-        "title": "الشهر ما زال يُكتب.",
+        "badge": "{month} · قيد التنفيذ",
+        "title": "هذا الشهر ما زال يتشكل.",
         "body": "عندما ينتهي {month}، سيُريك ستاشي كيف صمدت الخطة: ما الذي اتسع له الشهر، وما الذي اضطر أن يلين، وما الذي يستحق أن تتعلمه للشهر القادم."
       },
       "verdict": {
-        "withinPlan": "داخل الخطة.",
-        "adjustedInFlight": "تعدّلت الخطة أثناء الشهر.",
-        "outranThePlan": "تجاوز المسار الخطة.",
-        "eyebrowClosed": "{month} · مُغلق",
-        "supportWithinPlan": "تم صرف {totalSpent} من {plan}. وتبقى {remainder}.",
-        "supportAdjustedInFlight": "تم صرف {totalSpent}؛ وكانت الخطة بعد الدعم {planPlusInjection}.",
-        "supportOutran": "تم صرف {totalSpent} من خطة قدرها {plan}. وبزيادة {overage}."
+        "badge": "{month} · مُغلق"
+      },
+      "verdictWhole": {
+        "underBudget": "انتهى تحت الميزانية.",
+        "exactBudget": "انتهى تمامًا على الميزانية.",
+        "overBudget": "انتهى فوق الميزانية."
+      },
+      "summary": {
+        "deltaLabel": "فجوة الخطة",
+        "withinPlan": "انتهى داخل الخطة",
+        "adjustedInFlight": "انتهى داخل الخطة المعدلة",
+        "outranThePlan": "أنهى الشهر فوق الخطة"
+      },
+      "summaryWhole": {
+        "underBudget": "ترك هامشًا داخل ميزانية الشهر",
+        "exactBudget": "استخدم ميزانية الشهر بالكامل",
+        "overBudget": "صرف فوق ميزانية الشهر",
+        "spentLabel": "إجمالي ما صُرف في الشهر",
+        "budgetLabel": "ميزانية الشهر بعد التسوية"
       },
       "bar": {
         "labelStart": "0",
@@ -867,23 +899,45 @@
         "eyebrow": "الدعم",
         "label": "أُضيف أثناء الشهر",
         "value": "+{amount} جنيه",
-        "sub": "{count, plural, =0 {0 مرات دعم} one {مرة دعم واحدة} two {مرتا دعم} few {# مرات دعم} many {# مرة دعم} other {# مرة دعم}} · رفعت الخطة من {basePlan} إلى {adjustedPlan}"
+        "sub": "{count, plural, =0 {0 مرات دعم} one {مرة دعم واحدة} two {مرتا دعم} few {# مرات دعم} many {# مرة دعم} other {# مرة دعم}} · رفعت ميزانية الشهر من {basePlan} إلى {adjustedPlan}"
       },
-      "variable": {
-        "eyebrow": "المتغير",
-        "planLabelDefault": "من خطة {plan}",
-        "planLabelAdjusted": "من المعدل {plan}",
-        "subUnder": "{delta} تحت الخطة",
-        "subOver": "{delta} فوق الخطة",
-        "majorSuffix": " · {amount} صُنّف كمصروف كبير"
+      "budgetBreakdown": {
+        "eyebrow": "مسار الميزانية",
+        "title": "كيف تغيّرت ميزانية الشهر",
+        "subtitle": "بدأت من {base} ثم انتهت إلى ميزانية شهر بعد التسوية قدرها {final}.",
+        "baseLabel": "ميزانية الشهر",
+        "finalLabel": "ميزانية الشهر بعد التسوية",
+        "rows": {
+          "injection": "دعم الميزانية رفع ميزانية الشهر",
+          "received": "المبلغ الوارد للمتغير رفع ميزانية الشهر",
+          "manualFixedReturned": "الفائض غير المستخدم من الثابت اليدوي عاد للشهر",
+          "manualFixedReturnedDetail": "بقي {amount} غير مستخدم داخل المظاريف اليدوية، لذلك حسّن نتيجة الشهر.",
+          "manualFixedOverspend": "تجاوز الثابت اليدوي زاد الضغط على النتيجة",
+          "manualFixedOverspendDetail": "تجاوز {amount} الخطة اليدوية للثابت، فخصم من نتيجة الشهر."
+        }
+      },
+      "spendBreakdown": {
+        "eyebrow": "أين ذهب الصرف",
+        "title": "ما الذي صُرف على مستوى الشهر كله",
+        "fixedLabel": "الثابت المصروف",
+        "variableLabel": "المتغير المصروف",
+        "majorLabel": "الكبير المصروف",
+        "rows": {
+          "fixed": "الثابت المصروف",
+          "variable": "المتغير المصروف",
+          "major": "الكبير المصروف"
+        }
       },
       "manualFixed": {
-        "eyebrow": "الثابت اليدوي",
+        "title": "تسوية الثابت اليدوي",
+        "subtitle": "المظاريف التي انتهت فوق خطتها أو تركت فائضًا رجع إلى نتيجة الشهر.",
         "metaLine": "{actual} من {plan}",
-        "andNMore": "{count, plural, one {وواحد إضافي} two {واثنان إضافيان} few {و# إضافية} many {و# إضافية} other {و# إضافية}}"
+        "andNMore": "{count, plural, one {وواحد إضافي} two {واثنان إضافيان} few {و# إضافية} many {و# إضافية} other {و# إضافية}}",
+        "viewAllTitle": "عرض كل تحركات الثابت اليدوي"
       },
       "popup": {
-        "header": "{month} · {verdict} · {summary}",
+        "title": "تفاصيل الثابت اليدوي",
+        "subtitle": "{month} · {verdict} · {summary}",
         "summaryUnder": "{amount} تحت الخطة",
         "summaryOver": "{amount} فوق الخطة",
         "summaryExact": "تماماً على الخطة"

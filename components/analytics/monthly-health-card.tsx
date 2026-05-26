@@ -1,73 +1,133 @@
 "use client"
 
-import { Add01Icon, Alert01Icon, AlertCircleIcon, CheckmarkCircle02Icon } from "@hugeicons/core-free-icons"
+import {
+  Add01Icon,
+  Alert01Icon,
+  AlertCircleIcon,
+  CheckmarkCircle02Icon,
+} from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useTranslations } from "next-intl"
 
-import type { LiveMonthAnalysis } from "@/components/analytics/types"
+import type { ClosedMonthVerdict, LiveMonthAnalysis } from "@/components/analytics/types"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { semanticProgressClass, semanticSurfaceClass, semanticTextClass } from "@/lib/semantic-styles"
+import {
+  semanticProgressClass,
+  semanticSurfaceClass,
+  semanticTextClass,
+} from "@/lib/semantic-styles"
 import { cn } from "@/lib/utils"
 
 export function MonthlyHealthCard({ month }: { month: LiveMonthAnalysis }) {
   const t = useTranslations("Analytics")
   const state = month.monthlyState
+  const isClosed = month.status === "closed"
+  const closedVerdict = month.closedMonthVerdict
+
+  const closedBadgeTone: Record<ClosedMonthVerdict, keyof typeof semanticSurfaceClass> = {
+    withinPlan: "income",
+    adjustedInFlight: "injection",
+    outranThePlan: "expense",
+  }
+
+  const closedHeroTone: Record<ClosedMonthVerdict, string> = {
+    withinPlan: semanticTextClass.income,
+    adjustedInFlight: semanticTextClass.injection,
+    outranThePlan: semanticTextClass.expense,
+  }
 
   // ─── Badge config ─────────────────────────────────────────────────────────────
-  const badgeConfig = {
-    onTrack: {
-      surfaceClass: semanticSurfaceClass.income,
-      icon: CheckmarkCircle02Icon,
-      label: t("monthlyHealth.badgeOnTrack"),
-    },
-    atRisk: {
-      surfaceClass: semanticSurfaceClass.warning,
-      icon: Alert01Icon,
-      label: t("monthlyHealth.badgeAtRisk"),
-    },
-    over: {
-      surfaceClass: semanticSurfaceClass.expense,
-      icon: AlertCircleIcon,
-      label: t("monthlyHealth.badgeOver"),
-    },
-  }[state]
+  const badgeConfig =
+    isClosed && closedVerdict
+      ? {
+          surfaceClass: semanticSurfaceClass[closedBadgeTone[closedVerdict]],
+          icon:
+            closedVerdict === "withinPlan"
+              ? CheckmarkCircle02Icon
+              : closedVerdict === "adjustedInFlight"
+                ? Add01Icon
+                : AlertCircleIcon,
+          label: t(`monthlyHealth.closed.badge.${closedVerdict}`),
+        }
+      : {
+          onTrack: {
+            surfaceClass: semanticSurfaceClass.income,
+            icon: CheckmarkCircle02Icon,
+            label: t("monthlyHealth.badgeOnTrack"),
+          },
+          atRisk: {
+            surfaceClass: semanticSurfaceClass.warning,
+            icon: Alert01Icon,
+            label: t("monthlyHealth.badgeAtRisk"),
+          },
+          over: {
+            surfaceClass: semanticSurfaceClass.expense,
+            icon: AlertCircleIcon,
+            label: t("monthlyHealth.badgeOver"),
+          },
+        }[state]
 
   // ─── Hero number ──────────────────────────────────────────────────────────────
   const rolloverAbs = Math.abs(month.rolloverEgp)
-  const heroSign = state === "onTrack" ? "+" : "−"
+  const heroSign = isClosed ? (month.rolloverEgp >= 0 ? "+" : "−") : state === "onTrack" ? "+" : "−"
   const heroColorClass =
-    state === "onTrack" ? semanticTextClass.income : semanticTextClass.expense
-  const heroLabel = {
-    onTrack: t("monthlyHealth.heroLabelAhead"),
-    atRisk: t("monthlyHealth.heroLabelBehind"),
-    over: t("monthlyHealth.heroLabelOver"),
-  }[state]
+    isClosed && closedVerdict
+      ? closedHeroTone[closedVerdict]
+      : state === "onTrack"
+        ? semanticTextClass.income
+        : semanticTextClass.expense
+  const heroLabel =
+    isClosed && closedVerdict
+      ? t(`monthlyHealth.closed.heroLabel.${closedVerdict}`)
+      : {
+          onTrack: t("monthlyHealth.heroLabelAhead"),
+          atRisk: t("monthlyHealth.heroLabelBehind"),
+          over: t("monthlyHealth.heroLabelOver"),
+        }[state]
 
   // ─── Projection / context sentence ────────────────────────────────────────────
-  const projectionNode = {
-    onTrack: (
+  const projectionNode =
+    isClosed && closedVerdict ? (
       <p className="text-sm leading-[1.55] text-text-secondary text-pretty">
-        {t("monthlyHealth.projectionOnTrack")}
-      </p>
-    ),
-    atRisk: (
-      <p className="text-sm leading-[1.55] text-text-secondary text-pretty">
-        {t("monthlyHealth.projectionAtRisk", {
-          amount: Math.abs(month.projectedSavings).toLocaleString(),
+        {t(`monthlyHealth.closed.context.${closedVerdict}`, {
+          amount: Math.abs(month.rolloverEgp).toLocaleString(),
         })}
       </p>
-    ),
-    over: (
-      <p className="text-sm leading-[1.55] text-text-secondary text-pretty">
-        {t("monthlyHealth.contextOver")}
-      </p>
-    ),
-  }[state]
+    ) : (
+      {
+        onTrack: (
+          <p className="text-sm leading-[1.55] text-text-secondary text-pretty">
+            {t("monthlyHealth.projectionOnTrack")}
+          </p>
+        ),
+        atRisk: (
+          <p className="text-sm leading-[1.55] text-text-secondary text-pretty">
+            {t("monthlyHealth.projectionAtRisk", {
+              amount: Math.abs(month.projectedSavings).toLocaleString(),
+            })}
+          </p>
+        ),
+        over: (
+          <p className="text-sm leading-[1.55] text-text-secondary text-pretty">
+            {t("monthlyHealth.contextOver")}
+          </p>
+        ),
+      }[state]
+    )
 
   // ─── Bar fill color ───────────────────────────────────────────────────────────
-  const barFillClass = state === "onTrack" ? semanticProgressClass.income : semanticProgressClass.warning
+  const barFillClass =
+    isClosed && closedVerdict
+      ? closedVerdict === "withinPlan"
+        ? semanticProgressClass.income
+        : closedVerdict === "adjustedInFlight"
+          ? semanticProgressClass.injection
+          : semanticProgressClass.expense
+      : state === "onTrack"
+        ? semanticProgressClass.income
+        : semanticProgressClass.warning
 
   return (
     <Card size="sm" className="py-4">
@@ -79,11 +139,7 @@ export function MonthlyHealthCard({ month }: { month: LiveMonthAnalysis }) {
             badgeConfig.surfaceClass,
           )}
         >
-          <HugeiconsIcon
-            icon={badgeConfig.icon}
-            size={13}
-            aria-hidden="true"
-          />
+          <HugeiconsIcon icon={badgeConfig.icon} size={13} aria-hidden="true" />
           {badgeConfig.label}
         </span>
 
@@ -127,8 +183,8 @@ export function MonthlyHealthCard({ month }: { month: LiveMonthAnalysis }) {
           </div>
         </div>
 
-        {/* Progress bar — onTrack and atRisk only */}
-        {state !== "over" ? (
+        {/* Progress bar — hidden for closed and hard-over states */}
+        {state !== "over" && !isClosed ? (
           <div className="relative pb-5">
             <div
               className="relative h-1.5 overflow-visible rounded-full bg-surface-offset"
@@ -164,8 +220,8 @@ export function MonthlyHealthCard({ month }: { month: LiveMonthAnalysis }) {
           </div>
         ) : null}
 
-        {/* Inject button — over only */}
-        {state === "over" ? (
+        {/* Inject button — open-month over only */}
+        {state === "over" && !isClosed ? (
           <Button
             type="button"
             className="w-full bg-injection-subtle text-injection hover:bg-injection-subtle/80"
