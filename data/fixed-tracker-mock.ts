@@ -1,19 +1,9 @@
-import {
-  AdobePhotoshopIcon,
-  Building01Icon,
-  CafeIcon,
-  Car01Icon,
-  DiscAlbumIcon,
-  ShoppingBag01Icon,
-  SmartPhone01Icon,
-  SpoonAndForkIcon,
-} from "@hugeicons/core-free-icons";
-
 import type {
   FixedExpenseItem,
   FixedTrackerSummary,
   InstallmentOverview,
 } from "@/components/tracker/types";
+import { getTrackerFixedIcon } from "@/components/tracker/fixed-icons";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -33,7 +23,8 @@ function installmentProgressClass(paid: number, total: number): string {
 const netflix: FixedExpenseItem = {
   id: "sub-netflix",
   name: "Netflix",
-  icon: DiscAlbumIcon,
+  iconKey: "media",
+  icon: getTrackerFixedIcon("media"),
   type: "recurring",
   budget: 250,
   paid: 250,
@@ -63,7 +54,8 @@ const netflix: FixedExpenseItem = {
 const spotify: FixedExpenseItem = {
   id: "sub-spotify",
   name: "Spotify",
-  icon: DiscAlbumIcon,
+  iconKey: "media",
+  icon: getTrackerFixedIcon("media"),
   type: "recurring",
   budget: 100,
   paid: 0,
@@ -84,7 +76,8 @@ const spotify: FixedExpenseItem = {
 const adobeCC: FixedExpenseItem = {
   id: "sub-adobe-cc",
   name: "Adobe Creative Cloud",
-  icon: AdobePhotoshopIcon,
+  iconKey: "design",
+  icon: getTrackerFixedIcon("design"),
   type: "recurring",
   budget: 899,
   paid: 0,
@@ -107,7 +100,8 @@ const adobeCC: FixedExpenseItem = {
 const iphoneInstallment: FixedExpenseItem = {
   id: "inst-iphone",
   name: "iPhone",
-  icon: SmartPhone01Icon,
+  iconKey: "phone",
+  icon: getTrackerFixedIcon("phone"),
   type: "installment",
   budget: 1200,
   paid: 1200,
@@ -137,7 +131,8 @@ const iphoneInstallment: FixedExpenseItem = {
 const laptopInstallment: FixedExpenseItem = {
   id: "inst-laptop",
   name: "Laptop",
-  icon: SmartPhone01Icon,
+  iconKey: "phone",
+  icon: getTrackerFixedIcon("phone"),
   type: "installment",
   budget: 800,
   paid: 0,
@@ -167,7 +162,8 @@ const laptopInstallment: FixedExpenseItem = {
 const carDownpayment: FixedExpenseItem = {
   id: "inst-car",
   name: "Car downpayment plan",
-  icon: Car01Icon,
+  iconKey: "car",
+  icon: getTrackerFixedIcon("car"),
   type: "installment",
   budget: 3500,
   paid: 3500,
@@ -199,7 +195,8 @@ const carDownpayment: FixedExpenseItem = {
 const groceries: FixedExpenseItem = {
   id: "bud-groceries",
   name: "Groceries",
-  icon: ShoppingBag01Icon,
+  iconKey: "shopping",
+  icon: getTrackerFixedIcon("shopping"),
   type: "manual",
   budget: 2000,
   paid: 1650,
@@ -245,7 +242,8 @@ const groceries: FixedExpenseItem = {
 const coffee: FixedExpenseItem = {
   id: "bud-coffee",
   name: "Coffee & Cafes",
-  icon: CafeIcon,
+  iconKey: "cafe",
+  icon: getTrackerFixedIcon("cafe"),
   type: "manual",
   budget: 500,
   paid: 620,
@@ -299,7 +297,8 @@ const coffee: FixedExpenseItem = {
 const gas: FixedExpenseItem = {
   id: "bud-gas",
   name: "Gas & Transport",
-  icon: Car01Icon,
+  iconKey: "car",
+  icon: getTrackerFixedIcon("car"),
   type: "manual",
   budget: 800,
   paid: 320,
@@ -337,7 +336,8 @@ const gas: FixedExpenseItem = {
 const eatingOut: FixedExpenseItem = {
   id: "bud-eating-out",
   name: "Eating Out",
-  icon: SpoonAndForkIcon,
+  iconKey: "dining",
+  icon: getTrackerFixedIcon("dining"),
   type: "manual",
   budget: 1000,
   paid: 0,

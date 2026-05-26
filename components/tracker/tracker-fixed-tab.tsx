@@ -9,28 +9,75 @@ import { InstallmentsSection } from "@/components/tracker/sections/installments-
 import { SubscriptionsSection } from "@/components/tracker/sections/subscriptions-section"
 import { TrackerAddDrawer } from "@/components/tracker/tracker-add-drawer"
 import { TrackerTransferDrawer } from "@/components/tracker/tracker-transfer-drawer"
-import type { FixedExpenseItem } from "@/components/tracker/types"
+import type { FixedExpenseItem, FixedTrackerSummary, InstallmentOverview } from "@/components/tracker/types"
 import {
   fixedItems,
-  mockInstallmentOverview,
-  mockSummary,
 } from "@/data/fixed-tracker-mock"
 
+function buildSummary(items: FixedExpenseItem[]): FixedTrackerSummary {
+  const totalBudgeted = items.reduce((sum, item) => sum + item.budget, 0)
+  const totalPaid = items.reduce((sum, item) => sum + item.paid, 0)
+  const totalRemaining = totalBudgeted - totalPaid
+  const pct = totalBudgeted > 0 ? (totalPaid / totalBudgeted) * 100 : 0
+
+  return {
+    totalBudgeted,
+    totalPaid,
+    totalRemaining,
+    paidProgressClass: `basis-[${Math.min(Math.round(pct), 100)}%]`,
+    overallStatus: pct > 100 ? "over_budget" : pct >= 75 ? "warning" : "on_track",
+    overBudgetItems: items
+      .filter((item) => item.type === "manual" && item.status === "over_budget")
+      .map((item) => ({ name: item.name, overageAmount: Math.abs(item.remaining) })),
+  }
+}
+
+function buildInstallmentOverview(items: FixedExpenseItem[]): InstallmentOverview {
+  const installmentItems = items.filter((item) => item.type === "installment")
+
+  return {
+    monthlyObligation: installmentItems.reduce((sum, item) => sum + item.budget, 0),
+    totalPaidAllTime: installmentItems.reduce(
+      (sum, item) => sum + (item.installmentsPaid ?? 0) * item.budget,
+      0,
+    ),
+    totalRemainingAllTime: installmentItems.reduce(
+      (sum, item) => sum + (item.installmentsRemaining ?? 0) * item.budget,
+      0,
+    ),
+  }
+}
+
 export function TrackerFixedTab() {
+  const [items, setItems] = React.useState<FixedExpenseItem[]>(fixedItems)
   const [selectedItem, setSelectedItem] = React.useState<FixedExpenseItem | null>(null)
   const [editingItem, setEditingItem] = React.useState<FixedExpenseItem | null>(null)
   const [editOpen, setEditOpen] = React.useState(false)
   const [transferItem, setTransferItem] = React.useState<FixedExpenseItem | null>(null)
   const [transferOpen, setTransferOpen] = React.useState(false)
 
-  const recurringItems = fixedItems.filter((item) => item.type === "recurring")
-  const installmentItems = fixedItems.filter((item) => item.type === "installment")
-  const manualItems = fixedItems.filter((item) => item.type === "manual")
+  const recurringItems = items.filter((item) => item.type === "recurring")
+  const installmentItems = items.filter((item) => item.type === "installment")
+  const manualItems = items.filter((item) => item.type === "manual")
+  const summary = React.useMemo(() => buildSummary(items), [items])
+  const installmentOverview = React.useMemo(() => buildInstallmentOverview(items), [items])
 
   function handleEdit(item: FixedExpenseItem) {
     setSelectedItem(null)
     setEditingItem(item)
     setEditOpen(true)
+  }
+
+  function handleSave(item: FixedExpenseItem) {
+    setItems((current) => {
+      const exists = current.some((entry) => entry.id === item.id)
+      return exists
+        ? current.map((entry) => (entry.id === item.id ? item : entry))
+        : [item, ...current]
+    })
+
+    setSelectedItem((current) => (current?.id === item.id ? item : current))
+    setEditingItem(null)
   }
 
   function handleTransfer(item: FixedExpenseItem) {
@@ -41,12 +88,12 @@ export function TrackerFixedTab() {
 
   return (
     <div className="flex flex-col gap-8">
-      <FixedSummaryCard summary={mockSummary} />
+      <FixedSummaryCard summary={summary} />
       <BudgetsSection items={manualItems} onCardTap={setSelectedItem} />
       <SubscriptionsSection items={recurringItems} onCardTap={setSelectedItem} />
       <InstallmentsSection
         items={installmentItems}
-        overview={mockInstallmentOverview}
+        overview={installmentOverview}
         onCardTap={setSelectedItem}
       />
       <FixedDetailSheet
@@ -62,10 +109,12 @@ export function TrackerFixedTab() {
           if (!open) setEditingItem(null)
         }}
         editItem={editingItem}
+        onSave={handleSave}
       />
       <TrackerTransferDrawer
         open={transferOpen}
         sourceItem={transferItem}
+        items={items}
         onOpenChange={(open) => {
           setTransferOpen(open)
           if (!open) setTransferItem(null)

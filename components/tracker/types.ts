@@ -5,6 +5,15 @@ import type { IconSvgElement } from "@hugeicons/react";
 export type FixedExpenseType = "manual" | "recurring" | "installment";
 export type FixedExpenseStatus = "on_track" | "warning" | "over_budget";
 export type PaymentStatus = "paid" | "unpaid";
+export type FixedExpenseIconKey =
+  | "building"
+  | "media"
+  | "design"
+  | "phone"
+  | "car"
+  | "shopping"
+  | "cafe"
+  | "dining";
 
 export type FixedTransaction = {
   id: string;
@@ -18,6 +27,7 @@ export type FixedTransaction = {
 export type FixedExpenseItem = {
   id: string;
   name: string;
+  iconKey: FixedExpenseIconKey;
   icon: IconSvgElement;
   type: FixedExpenseType;
   budget: number; // monthly amount

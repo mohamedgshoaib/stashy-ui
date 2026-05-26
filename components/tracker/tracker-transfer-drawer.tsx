@@ -21,7 +21,6 @@ import { semanticSurfaceClass, semanticTextClass } from "@/lib/semantic-styles"
 import { cn } from "@/lib/utils"
 import { getDirectionForLocale } from "@/lib/i18n"
 import type { Locale } from "@/i18n/routing"
-import { fixedItems } from "@/data/fixed-tracker-mock"
 import { getHomeBudgetStrip, getSandboxAnalyticsData } from "@/lib/sandbox-budget"
 import { useSandboxStore } from "@/store/sandbox-store"
 
@@ -32,6 +31,7 @@ type Destination = { id: string; label: string; sublabel?: string }
 type TrackerTransferDrawerProps = {
   open: boolean
   sourceItem: FixedExpenseItem | null
+  items: FixedExpenseItem[]
   onOpenChange: (open: boolean) => void
 }
 
@@ -40,6 +40,7 @@ type TrackerTransferDrawerProps = {
 export function TrackerTransferDrawer({
   open,
   sourceItem,
+  items,
   onOpenChange,
 }: TrackerTransferDrawerProps) {
   const t = useTranslations("Tracker.transfer")
@@ -74,7 +75,7 @@ export function TrackerTransferDrawer({
   if (!sourceItem) return null
 
   // All other manual budgets (excluding source)
-  const otherBudgets = fixedItems.filter(
+  const otherBudgets = items.filter(
     (item) => item.type === "manual" && item.id !== sourceItem.id,
   )
 

@@ -214,6 +214,27 @@ The `PaymentMethodCard` BudgetBar was correctly using `bg-variable` (Ledger Gray
     - `components/tracker/cards/budget-card.tsx`
   - Updated `components/tracker/fixed-detail-sheet.tsx` header to reuse the same item icon for the selected fixed item.
   - `pnpm typecheck` passed after the tracker icon pass.
+- Tracker add-drawer icon picker + local save pass
+  - Added a shared tracker fixed-icon catalog in `components/tracker/fixed-icons.ts` with icon keys, icon resolution, and type-aware defaults.
+  - Extended `FixedExpenseItem` with `iconKey` so tracker items can persist a stable icon selection instead of only a resolved icon object.
+  - Updated `data/fixed-tracker-mock.ts` to use the shared icon catalog and stable `iconKey` values.
+  - Reworked `components/tracker/tracker-add-drawer.tsx` to:
+    - prefill icon choice in edit mode
+    - reset icon choice intelligently when changing add type in create mode
+    - show an icon preview row
+    - offer a type-aware icon picker grid
+    - emit a full fixed-item payload on save instead of only closing the drawer
+  - Updated `components/tracker/tracker-fixed-tab.tsx` to own local `items` state, apply add/edit saves immediately, and recompute summary/installment overview from the live local list.
+  - Updated `components/tracker/tracker-transfer-drawer.tsx` to read destination budgets from the current local items list instead of the static mock import.
+  - Added tracker add-drawer icon-picker copy to `messages/en.json` and `messages/ar.json`.
+  - `pnpm typecheck` passed after the add-drawer/save-flow refactor.
+- Tracker icon-picker UX rework
+  - Replaced the old duplicated icon preview card + inline chooser grid in `components/tracker/tracker-add-drawer.tsx` with a single compact icon field row in the main form.
+  - Added an internal drawer subview for icon picking so icon browsing is separated from the rest of the fixed-item form.
+  - Added search within the icon picker plus `Recommended` / `All icons` filtering so the interaction can scale to larger icon libraries.
+  - Extended `components/tracker/fixed-icons.ts` icon metadata with `keywords` and `recommendedFor` to support searchable, type-aware filtering instead of the old hardcoded small-list logic.
+  - Picker selection now lives in one clear place only: the icon tiles themselves. The main form only shows the final selected icon row with a disclosure affordance.
+  - `pnpm typecheck` passed after the picker UX rework.
 
 ## Decisions Made
 
@@ -227,6 +248,8 @@ The `PaymentMethodCard` BudgetBar was correctly using `bg-variable` (Ledger Gray
 - Variable history rows intentionally use one calm shared icon (`Wallet01Icon`) across all variable entries to reduce visual noise.
 - Major history rows intentionally use one shared burden icon (`Alert01Icon`) across all major entries to make the category read consistently regardless of underlying payment method.
 - Tracker fixed cards and detail sheets should use item-owned icons instead of relying only on section-level type icons so the user can visually distinguish fixed items at a glance.
+- The tracker fixed add drawer should let the user choose an icon during create/edit, and that choice should be reflected immediately in the fixed tab instead of being a UI-only control.
+- The tracker icon picker should scale to a larger icon library, so the main form must stay compact and the browsing surface must be searchable and independently scrollable.
 
 ---
 
@@ -236,4 +259,5 @@ The `PaymentMethodCard` BudgetBar was correctly using `bg-variable` (Ledger Gray
 2. Tracker fixed-item internals still come from `data/fixed-tracker-mock.ts`, so the tracker detail cards are not yet fully unified with the shared month ledger.
 3. `pnpm lint` continues to fail on the same two pre-existing unrelated issues (no new failures).
 4. Fixed bucket icon metadata currently exists only in the analytics/shared sandbox plan path; if tracker creation/edit flows become the source of truth later, that icon field will need to be propagated there as well.
-5. The tracker add/edit flow still does not expose an icon picker yet; tracker item icons are currently defined at the mock-data layer only.
+5. Tracker fixed add/edit persistence is currently local to `TrackerFixedTab` state only; other mock consumers such as `home-drawer.tsx` still read the static exported `fixedItems` snapshot.
+6. The current picker supports search and recommended/all filtering, but it does not yet expose broader grouped taxonomy chips beyond that first scale pass.
