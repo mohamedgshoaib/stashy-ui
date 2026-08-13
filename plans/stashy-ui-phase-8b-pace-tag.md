@@ -78,7 +78,13 @@ thisMonthPace  = (spentAtToday / budget) / pointInMonth
 
 Each prior month's fraction uses **that month's own budget and its own `daysInMonth`**, evaluated at the same `pointInMonth` as today.
 
-When the equivalent point lands at a fractional array index, use **linear interpolation between adjacent days**:
+Convert the equivalent one-based day position to a zero-based array index first:
+
+```
+i = pointInMonth * priorDaysInMonth - 1
+```
+
+When that index is fractional, use **linear interpolation between adjacent days**:
 
 ```
 value = arr[floor(i)] + (arr[ceil(i)] - arr[floor(i)]) * fraction(i)

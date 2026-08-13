@@ -139,6 +139,9 @@ The Analytics restructure was merged into `main`. The locked Phase 8b plan had s
 - Passed typecheck, lint, production build, and targeted formatting checks.
 - Verified EN/AR at 390×844 with no horizontal overflow, no clipping or truncation, one Coffee pace tag in faster mode, silent Transport cold start, and unchanged end-aligned amounts.
 - Verified all 48 analytics sandbox-axis combinations preserve monotonic manual cumulative arrays whose final value equals `spent`.
+- Corrected the review-reported one-day offset by converting the normalized prior-month day position to a zero-based cumulative-array index before interpolation.
+- Reshaped April Coffee history without changing its endpoint so the corrected comparator still proves the locked average-true versus last-month-only-false branch switch.
+- Re-ran typecheck, lint, formatting, the 48-combination invariant matrix, and the production build successfully after review.
 
 ---
 

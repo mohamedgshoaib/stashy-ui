@@ -101,7 +101,7 @@ function withFixedPaceState(
   if (fixedPaceState === "steady") return data
 
   const snapshotExponentByMonth: Record<string, number> = {
-    "2026-04": 0.8,
+    "2026-04": 0.5,
     "2026-03": 1.3,
     "2026-02": 0.93,
   }

@@ -106,7 +106,7 @@ export function deriveBucketPaceFlag(
 
       const spent = interpolateCumulative(
         actual.dailyCumulative,
-        pointInMonth * snapshot.daysInMonth,
+        pointInMonth * snapshot.daysInMonth - 1,
       )
       return spent === null ? [] : [spent / plan.budget / pointInMonth]
     })
