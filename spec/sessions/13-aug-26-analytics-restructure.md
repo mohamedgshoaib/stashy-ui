@@ -84,7 +84,7 @@ The `analysis_audit` branch was clean and the canonical analytics restructure pl
 
 # Session 2 — PR review and merge readiness
 
-**Time:** 10:38-10:45
+**Time:** 10:38-10:47
 
 ---
 
@@ -104,6 +104,7 @@ PR #12 was open from `analysis_audit` with two reviewer-reported Arabic/RTL regr
 - Re-ran typecheck, lint, and the production build successfully.
 - Verified the corrected Arabic current-month, even-pace, and expanded-overrun direction behavior in headless Chrome at 390×844 with 0px horizontal overflow.
 - Reverted the throwaway fixed-overrun default used to render the disclosure; the store remains unchanged.
+- Merged PR #12 into `main`; GitHub created merge commit `c70f2a3aef4c2603bea81ced6c1c5f46d973bb2b`.
 
 ---
 
