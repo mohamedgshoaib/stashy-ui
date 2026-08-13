@@ -108,47 +108,6 @@ export function HowMonthLandedCard({ month }: HowMonthLandedCardProps) {
   const monthShort = formatAnalyticsMonthShort(locale, month.isoDate)
   const monthLong = formatAnalyticsMonthLabel(locale, month.isoDate)
 
-  if (month.status === "inProgress") {
-    return (
-      <Card size="sm" className="py-4">
-        <CardContent className="flex flex-col gap-4 px-4">
-          <div className="space-y-1">
-            <h2 className="text-[1.0625rem] font-medium text-foreground">
-              {t("howMonthLanded.title")}
-            </h2>
-            <p className="text-sm leading-[1.5] text-text-secondary text-pretty">
-              {t("howMonthLanded.subtitle")}
-            </p>
-          </div>
-
-          <div className="rounded-[var(--radius-md)] bg-surface-offset p-4 shadow-ring">
-            <div className="space-y-4">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-card px-2.5 py-1 text-xs font-medium text-text-secondary shadow-ring">
-                <span className="size-1.5 animate-pulse rounded-full bg-variable/70" />
-                {t("howMonthLanded.teaser.badge", { month: monthShort })}
-              </span>
-              <div className="space-y-2">
-                <p className="text-[1.125rem] font-medium leading-[1.25] text-foreground text-balance">
-                  {t("howMonthLanded.teaser.title")}
-                </p>
-                <p className="text-sm leading-[1.6] text-text-secondary text-pretty">
-                  {t("howMonthLanded.teaser.body", { month: monthLong })}
-                </p>
-              </div>
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="h-2.5 w-20 rounded-full bg-card shadow-ring" />
-                  <div className="h-2.5 w-14 rounded-full bg-card shadow-ring" />
-                </div>
-                <div className="h-2.5 w-full rounded-full bg-card shadow-ring" />
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
-
   const wholeBudget = month.wholeBudgetCloseout
   const adjustedBudgetTotal = wholeBudget.adjustedBudgetTotal
   const wholeMonthSpent = wholeBudget.spentTotal

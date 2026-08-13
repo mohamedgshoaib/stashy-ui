@@ -23,3 +23,14 @@
   - `components/tracker/tracker-transfer-drawer.tsx`: unused `surfacePanelClass` import.
   - `components/settings/settings-sections.tsx`: unused `SubSectionHeader` declaration.
 - New Phase 2 errors: none.
+
+## Phase 3 — Retire HowMonthLandedCard teaser
+
+- Status: complete
+- Deleted the in-progress teaser early return, including its pulse badge and placeholder geometry.
+- Left the closed-month verdict surface unchanged for the dedicated Phase 4 color update.
+- Gate: `pnpm typecheck` passed.
+- Gate: `pnpm lint` reported only the two plan-listed pre-existing errors:
+  - `components/tracker/tracker-transfer-drawer.tsx`: unused `surfacePanelClass` import.
+  - `components/settings/settings-sections.tsx`: unused `SubSectionHeader` declaration.
+- New Phase 3 errors: none.
