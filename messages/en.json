@@ -741,6 +741,8 @@
       "overrunDisclosureShow": "Show overrunning budgets",
       "overrunDisclosureHide": "Hide overrunning budgets",
       "overrunRowOver": "{amount} over",
+      "paceTagFaster": "Faster than usual",
+      "bucketTransport": "Transport",
       "thisMonth": "This month",
       "lastMonth": "Last month",
       "change": "Change",

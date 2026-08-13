@@ -741,6 +741,8 @@
       "overrunDisclosureShow": "عرض الميزانيات المتجاوزة",
       "overrunDisclosureHide": "إخفاء الميزانيات المتجاوزة",
       "overrunRowOver": "{amount} فوق الحد",
+      "paceTagFaster": "أسرع من المعتاد",
+      "bucketTransport": "المواصلات",
       "thisMonth": "هذا الشهر",
       "lastMonth": "الشهر الماضي",
       "change": "التغيير",
