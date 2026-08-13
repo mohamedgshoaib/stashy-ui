@@ -182,6 +182,11 @@ Phase 8b was present on `main`, including `deriveBucketPaceFlag`, `dailyCumulati
 - Passed per-phase and full typecheck/lint gates, a network-enabled production build, and targeted formatting checks.
 - Completed the Phase 5 observation pass at 390×844 across EN/AR, steady/one/faster, Fixed detail/edit/transfer drawers, Home-to-Tracker navigation, under-budget pace tags, and the Analytics route with no horizontal overflow.
 - Reverted all throwaway sandbox-state changes used during visual verification.
+- Applied the missing Resolution 7 fixture correction: the calm `none` state now keeps Coffee 145/200, Groceries 160/240, and Transport 200/400 inside plan; `some` changes only Groceries to 280/240, leaving Coffee and Transport under budget.
+- Lowered the shaped Coffee historical reference without changing snapshot endpoints so `some + faster` flags under-budget Coffee plus over-budget Groceries while Transport remains cold-start and silent.
+- Normalized the current analytics month after sandbox mutations and applied the same delta to the Cash payment-method breakdown so fixed totals, overrun count, classifications, whole-budget figures, and payment-method totals cannot remain stale after bucket spends are rescaled.
+- Re-ran the invariant assertion across all 72 sandbox combinations: every available manual cumulative array is monotonic, has the required live/snapshot length, and ends at `spent`; onTrack/atRisk/over remain correctly classified without injection, and all closed-month verdicts remain unchanged.
+- Re-ran VR-F through the rendered settings drawer at 390×844: Faster produced a Home count of 2; Fixed showed tagged Coffee at 145/200 EGP with 55 EGP left and tagged Groceries at 280/240 EGP, with Transport untagged at 200/400 EGP.
 
 ---
 
@@ -191,6 +196,7 @@ Phase 8b was present on `main`, including `deriveBucketPaceFlag`, `dailyCumulati
 - The manual set is replaced rather than mapped or reconciled with legacy `bud-*` identities and histories.
 - The Home strip remains count-only and the Fixed pace tag remains disclosure-only; neither changes budget status semantics.
 - The Tracker FAB add drawer remains a pre-existing no-op because it has no `onSave`; edit continues through the existing `handleSave` path.
+- The `some` fixture represents one bucket over plan rather than all manual envelopes overrunning; Coffee is the required under-budget hot example in the `faster` state.
 
 ---
 

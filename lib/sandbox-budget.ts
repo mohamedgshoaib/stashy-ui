@@ -16,6 +16,7 @@ import {
   buildDailyCumulative,
   deriveBucketPaceFlag,
   getAnalyticsDataForScenario,
+  getMonthView,
   getPreviousSnapshot,
   withManualBucketCalibration,
 } from "@/components/analytics/data"
@@ -111,8 +112,8 @@ function withFixedPaceState(
 
   const snapshotExponentByMonth: Record<string, number> = {
     "2026-04": 0.5,
-    "2026-03": 1.3,
-    "2026-02": 0.93,
+    "2026-03": 2,
+    "2026-02": 2,
   }
   const groceriesSnapshotExponentByMonth: Record<string, number> = {
     "2026-04": 3,
@@ -204,23 +205,43 @@ export function getSandboxAnalyticsData(config: SandboxBudgetConfig): AnalyticsD
   data = withFixedPaceState(data, config.fixedPaceState)
 
   if (config.fixedBudgetOverrun === "some" && data.current.status === "inProgress") {
+    const groceriesSpent =
+      data.current.fixedBucketsActual.find((actual) => actual.id === "fb-groceries")?.spent ?? 0
+    const groceriesTargetSpent = 280
+    const fixedSpendDelta = Math.max(0, groceriesTargetSpent - groceriesSpent)
+
     data = {
       ...data,
       current: {
         ...data.current,
         fixedBucketsActual: data.current.fixedBucketsActual.map((actual) => {
-          if (actual.id === "fb-coffee") return withRescaledSpend(actual, 240)
-          if (actual.id === "fb-groceries") return withRescaledSpend(actual, 320)
-          if (actual.id === "fb-transport") return withRescaledSpend(actual, 470)
+          if (actual.id === "fb-groceries") {
+            return withRescaledSpend(actual, groceriesTargetSpent)
+          }
           return actual
         }),
+        paymentMethods: data.current.paymentMethods.map((method) =>
+          method.id === "pm1"
+            ? {
+                ...method,
+                fixed: method.fixed + fixedSpendDelta,
+                total: method.total + fixedSpendDelta,
+                fixedByType: method.fixedByType
+                  ? {
+                      ...method.fixedByType,
+                      manual: method.fixedByType.manual + fixedSpendDelta,
+                    }
+                  : undefined,
+              }
+            : method,
+        ),
       },
     }
   }
 
   data = {
     ...data,
-    current: withManualBucketCalibration(data.current),
+    current: getMonthView(data, data.current.month),
     snapshots: data.snapshots.map((snapshot) => withManualBucketCalibration(snapshot)),
   }
 

@@ -70,6 +70,7 @@ That is what earns it a place on a surface that is deliberately sparse: it chang
 4. **Migrate every manual-bucket consumer.** `HomeDrawer` must use the same per-month derivation as the Fixed page instead of materializing categories from the old mock at module scope. Report if this requires more than a trivial component reshape.
 5. **Preserve the current add asymmetry.** Edit continues to save through `TrackerFixedTab`; the Tracker FAB add drawer remains a pre-existing no-op. Do not restructure ownership. Record this under “Pre-existing, not fixed” in the PR.
 6. **Expose all three counts explicitly.** Extend `fixedPaceState` to `steady | one | faster`: `steady` → 0 flags, `one` → Coffee only, `faster` → Coffee and Groceries. Transport remains cold-start and silent. Make `steady` the default.
+7. **Keep manual scenarios ordinary and preserve tag independence.** In `fixedBudgetOverrun: "none"`, all manual buckets stay inside their envelopes. In `"some"`, most remain comfortably inside and only one or two overrun. The drawer-reachable `some + faster` combination must include at least one under-budget hot bucket and produce a Home count of 1 or 2, never 3. Re-run cumulative-array invariants across every scenario and snapshot after shaping these fixtures.
 
 ---
 
