@@ -150,7 +150,10 @@ export function HowMonthLandedCard({ month }: HowMonthLandedCardProps) {
                 <p className="text-sm text-text-secondary">
                   {t("howMonthLanded.summaryWhole.budgetLabel")}
                 </p>
-                <p dir="ltr" className="text-sm font-semibold tabular-nums whitespace-nowrap text-foreground">
+                <p
+                  dir="ltr"
+                  className="text-sm font-semibold tabular-nums whitespace-nowrap text-foreground"
+                >
                   {formatAnalyticsCurrency(locale, adjustedBudgetTotal)}
                 </p>
               </div>

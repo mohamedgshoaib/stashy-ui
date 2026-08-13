@@ -2,12 +2,12 @@
 
 import { useLocale, useTranslations } from "next-intl"
 
+import { getPreviousSnapshot } from "@/components/analytics/data"
 import {
   formatAnalyticsCurrency,
   formatAnalyticsSignedCurrency,
 } from "@/components/analytics/formatters"
 import type { AnalyticsData, LiveMonthAnalysis, MonthSnapshot } from "@/components/analytics/types"
-import { getPreviousSnapshot } from "@/components/analytics/data"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
@@ -62,7 +62,12 @@ export function MethodObligationCard({ month, data }: MethodObligationCardProps)
 
   const committedDelta = previousCommitted !== null ? totalCommitted - previousCommitted : null
 
-  const reason = getCommittedChangeReason(month, previousSnapshot, totalCommitted, previousCommitted)
+  const reason = getCommittedChangeReason(
+    month,
+    previousSnapshot,
+    totalCommitted,
+    previousCommitted,
+  )
 
   // Per-method rows — hide methods with zero committed
   const methodRows = month.paymentMethods
@@ -89,9 +94,7 @@ export function MethodObligationCard({ month, data }: MethodObligationCardProps)
       <CardContent className="flex flex-col gap-4 px-4">
         {/* Header */}
         <div className="space-y-1">
-          <h2 className="text-[1.0625rem] font-medium text-foreground">
-            {t("obligation.title")}
-          </h2>
+          <h2 className="text-[1.0625rem] font-medium text-foreground">{t("obligation.title")}</h2>
           <p className="text-sm leading-[1.5] text-text-secondary text-pretty">
             {t("obligation.subtitle")}
           </p>
@@ -121,7 +124,10 @@ export function MethodObligationCard({ month, data }: MethodObligationCardProps)
                   <p className="text-[0.6875rem] uppercase tracking-[0.08em] text-text-tertiary">
                     {t("obligation.lastMonth")}
                   </p>
-                  <p dir="ltr" className="mt-0.5 text-sm font-semibold tabular-nums text-foreground">
+                  <p
+                    dir="ltr"
+                    className="mt-0.5 text-sm font-semibold tabular-nums text-foreground"
+                  >
                     {formatAnalyticsCurrency(locale, previousCommitted)}
                   </p>
                 </div>

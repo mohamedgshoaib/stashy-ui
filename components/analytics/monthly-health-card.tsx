@@ -46,8 +46,7 @@ export function MonthlyHealthCard({ month }: { month: LiveMonthAnalysis }) {
   // ─── Hero number ──────────────────────────────────────────────────────────────
   const rolloverAbs = Math.abs(month.rolloverEgp)
   const heroSign = state === "onTrack" ? "+" : "−"
-  const heroColorClass =
-    state === "onTrack" ? semanticTextClass.income : semanticTextClass.expense
+  const heroColorClass = state === "onTrack" ? semanticTextClass.income : semanticTextClass.expense
   const heroLabel = {
     onTrack: t("monthlyHealth.heroLabelAhead"),
     atRisk: t("monthlyHealth.heroLabelBehind"),

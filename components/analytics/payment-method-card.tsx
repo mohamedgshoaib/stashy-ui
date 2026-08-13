@@ -118,10 +118,7 @@ function BudgetBar({
       ? Math.min((majorSpent / totalCapacity) * 100, 100 - fixedPct - variablePct)
       : 0
   const injectionPct = hasInjection
-    ? Math.min(
-        (injectionTotal / totalCapacity) * 100,
-        100 - fixedPct - variablePct - majorPct,
-      )
+    ? Math.min((injectionTotal / totalCapacity) * 100, 100 - fixedPct - variablePct - majorPct)
     : 0
 
   const displayPct = monthlyBudget > 0 ? Math.round((grandTotal / monthlyBudget) * 100) : 0
@@ -155,7 +152,9 @@ function BudgetBar({
       <div className="flex flex-wrap gap-2">
         {fixedSpent > 0 && (
           <span className="inline-flex items-center rounded-full bg-fixed-subtle px-2.5 py-0.5 text-xs font-medium text-fixed">
-            <span dir="ltr" className="tabular-nums">{formatAnalyticsCurrency(locale, fixedSpent)}</span>
+            <span dir="ltr" className="tabular-nums">
+              {formatAnalyticsCurrency(locale, fixedSpent)}
+            </span>
           </span>
         )}
         {variableSpendExcludingMajor > 0 && (
@@ -167,7 +166,9 @@ function BudgetBar({
         )}
         {majorSpent > 0 && (
           <span className="inline-flex items-center rounded-full bg-major-subtle px-2.5 py-0.5 text-xs font-medium text-major">
-            <span dir="ltr" className="tabular-nums">{formatAnalyticsCurrency(locale, majorSpent)}</span>
+            <span dir="ltr" className="tabular-nums">
+              {formatAnalyticsCurrency(locale, majorSpent)}
+            </span>
           </span>
         )}
       </div>
@@ -227,7 +228,10 @@ function MethodRow({ method, prevMethod, monthStatus, grandTotal, locale, t }: M
             return (
               <span
                 key={key}
-                className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium", chipClass)}
+                className={cn(
+                  "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+                  chipClass,
+                )}
               >
                 <span dir="ltr" className="tabular-nums">
                   {formatAnalyticsCurrency(locale, amount)}
@@ -260,7 +264,8 @@ export function PaymentMethodCard({ month, prevPaymentMethods }: PaymentMethodCa
   const t = useTranslations("Analytics")
 
   const activeMethods = month.paymentMethods.filter((m) => m.total > 0)
-  const grandTotal = activeMethods.reduce((sum, m) => sum + m.total, 0) - month.variableReceivedTotal
+  const grandTotal =
+    activeMethods.reduce((sum, m) => sum + m.total, 0) - month.variableReceivedTotal
   const isInProgress = month.status === "inProgress"
   const formattedHeroNumber = new Intl.NumberFormat(locale).format(grandTotal)
 

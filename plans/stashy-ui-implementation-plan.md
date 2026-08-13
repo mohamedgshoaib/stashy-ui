@@ -15,6 +15,7 @@ This plan is **self-contained**. Everything needed is here — do not go looking
 **Work phase by phase.** Each phase is independently completable and independently verifiable. Do not start a phase before the previous one passes its verification gate. Do not batch phases together to "save time" — the phase boundaries exist so a failure is attributable.
 
 Each phase states:
+
 - **Goal** — what the phase achieves
 - **Why** — the reasoning, so you can resolve ambiguity correctly rather than guessing
 - **Files** — what you will touch
@@ -23,7 +24,8 @@ Each phase states:
 - **Verify** — the gate
 
 **Standing rules for every phase:**
-- Run `pnpm typecheck && pnpm lint` at the end of each phase. Both must be clean *of new errors*.
+
+- Run `pnpm typecheck && pnpm lint` at the end of each phase. Both must be clean _of new errors_.
 - Do not introduce inline hex colours. Design-system tokens only.
 - Do not use physical directional Tailwind utilities (`ml-`, `mr-`, `pl-`, `pr-`). Use logical ones (`ms-`, `me-`, `ps-`, `pe-`).
 - All financial amounts render with `dir="ltr"`.
@@ -57,16 +59,16 @@ Four principles govern every judgement call in this plan:
 
 ### The surfaces
 
-| Surface | Role |
-|---|---|
-| **Home** | The glance. Converts everything into one actionable number (today's rate). |
-| **Tracker → being renamed Fixed** | Per-item current-month detail for the fixed lane. |
-| **History** | The complete transaction record. Read-only, non-interpretive. |
-| **Analytics** | The sit-down. Decomposes the month. The interpretive layer. Pro-gated. |
+| Surface                           | Role                                                                       |
+| --------------------------------- | -------------------------------------------------------------------------- |
+| **Home**                          | The glance. Converts everything into one actionable number (today's rate). |
+| **Tracker → being renamed Fixed** | Per-item current-month detail for the fixed lane.                          |
+| **History**                       | The complete transaction record. Read-only, non-interpretive.              |
+| **Analytics**                     | The sit-down. Decomposes the month. The interpretive layer. Pro-gated.     |
 
 ### What this work does, in one paragraph
 
-Analytics is being restructured from **three peer sections** into a **two-slot skeleton**: a *hook* that swaps its question depending on whether the month is in progress or closed, and a *detail* slot that is identical in both views. Two card branches that only existed to fill the old structure are deleted. The six detail cards are reordered by descending behavioural leverage. Alongside this, section copy, card headers, a chart legend, one badge interaction, and the Tracker page name are all corrected.
+Analytics is being restructured from **three peer sections** into a **two-slot skeleton**: a _hook_ that swaps its question depending on whether the month is in progress or closed, and a _detail_ slot that is identical in both views. Two card branches that only existed to fill the old structure are deleted. The six detail cards are reordered by descending behavioural leverage. Alongside this, section copy, card headers, a chart legend, one badge interaction, and the Tracker page name are all corrected.
 
 ---
 
@@ -75,6 +77,7 @@ Analytics is being restructured from **three peer sections** into a **two-slot s
 **Goal:** Load repo conventions before writing code.
 
 **Changes:**
+
 1. Read `AGENTS.md`, `spec/index.md`, `spec/DESIGN.md`, and `.cursorrules`. These govern component patterns, tokens, and RTL rules and **override any styling guess** you would otherwise make.
 2. Read `spec/controlled-design-system.md` and `spec/brand-color-audit.md` if present — Phase 4 depends on colour-token semantics.
 3. Confirm the worktree is clean and you are on the correct working branch: `analysis_audit`.
@@ -90,9 +93,9 @@ Analytics is being restructured from **three peer sections** into a **two-slot s
 
 ### Why
 
-The old structure was three peer sections, which forced every section to render *something* in every month state — producing a retrofitted closed-month card branch and a mid-month ghost teaser, both deleted in Phases 2–3.
+The old structure was three peer sections, which forced every section to render _something_ in every month state — producing a retrofitted closed-month card branch and a mid-month ghost teaser, both deleted in Phases 2–3.
 
-The new skeleton has one crucial property: **nothing physically reorders under the month picker.** Slot 1 changes its title *and* its contents together, so it reads as a different question being asked. Slot 2 is byte-identical in both views. Six near-identical cards silently resequencing mid-page would read as broken and destroy scroll memory — which is why a per-status card order was **considered and rejected**.
+The new skeleton has one crucial property: **nothing physically reorders under the month picker.** Slot 1 changes its title _and_ its contents together, so it reads as a different question being asked. Slot 2 is byte-identical in both views. Six near-identical cards silently resequencing mid-page would read as broken and destroy scroll memory — which is why a per-status card order was **considered and rejected**.
 
 ### Files
 
@@ -103,6 +106,7 @@ The new skeleton has one crucial property: **nothing physically reorders under t
 Replace the three-section block inside the non-free-plan branch with two slots:
 
 **Slot 1 — the hook.** Branch on `selectedMonth.status`:
+
 - `inProgress` → `SectionHeader` with `section.onPace.*` + `<MonthlyHealthCard month={selectedMonth} />`
 - `closed` → `SectionHeader` with `section.landed.*` + `<HowMonthLandedCard month={selectedMonth} />` then `<BudgetPathCard month={selectedMonth} />`
 
@@ -123,7 +127,7 @@ Preserve every existing prop on every card exactly as it is today (`month`, `dat
 
 ### The order's rationale (so you can defend it, not change it)
 
-Descending behavioural leverage: *frame → what you can act on daily → the flag on that lane → bounded envelopes → reconciliation → what was never a decision.* It continues the in-progress hook's variable-lane thread instead of changing subject; it puts what the user can still change nearest the top; it seats Major beside Variable where it belongs; and it makes the two per-method cards adjacent for the first time.
+Descending behavioural leverage: _frame → what you can act on daily → the flag on that lane → bounded envelopes → reconciliation → what was never a decision._ It continues the in-progress hook's variable-lane thread instead of changing subject; it puts what the user can still change nearest the top; it seats Major beside Variable where it belongs; and it makes the two per-method cards adjacent for the first time.
 
 **Accepted cost, taken knowingly:** at month-end reconciliation, the payment-method answer is five cards down.
 
@@ -131,7 +135,7 @@ Descending behavioural leverage: *frame → what you can act on daily → the fl
 
 - Do NOT add a third `SectionHeader`, a sub-label, or any grouping element between cards 4 and 5. This was considered at length and rejected: it would invent a page-level component that does not exist, and **a weak break is the worst kind — strong enough to interrupt the descent, too weak to organise it.**
 - Do NOT branch Slot 2 on month status in any way.
-- Do NOT move `BudgetPathCard` away from `HowMonthLandedCard`. They must stay adjacent — the ledger's final row *is* the verdict number, and separating them would show the same figure at the top and bottom of a long page.
+- Do NOT move `BudgetPathCard` away from `HowMonthLandedCard`. They must stay adjacent — the ledger's final row _is_ the verdict number, and separating them would show the same figure at the top and bottom of a long page.
 - Do NOT change the header block, month picker, upgrade gate, or bottom navigation.
 
 ### Verify
@@ -148,7 +152,7 @@ Descending behavioural leverage: *frame → what you can act on daily → the fl
 
 The card's question is "Are you on pace?" — which has **no meaning once a month is closed**. Its closed branch also restated the variable-lane number that `BudgetPathCard`'s variable-close bridge row already carries in context.
 
-Two pieces of evidence that it was a retrofit rather than a design: the closed branch **hides the card's own central bar** (it has no closed-month meaning), and it still renders `Month progress %`, which is always 100% on a closed month. *A surface that hides its own primary element in a state is a retrofit.*
+Two pieces of evidence that it was a retrofit rather than a design: the closed branch **hides the card's own central bar** (it has no closed-month meaning), and it still renders `Month progress %`, which is always 100% on a closed month. _A surface that hides its own primary element in a state is a retrofit._
 
 ### Files
 
@@ -166,7 +170,7 @@ Remove the closed-month path entirely:
 
 ### Do NOT
 
-- Do NOT remove `closedMonthVerdict` from `components/analytics/types.ts` or from the derivation in `components/analytics/data.ts`. **It is still consumed elsewhere.** Only this card's *use* of it goes.
+- Do NOT remove `closedMonthVerdict` from `components/analytics/types.ts` or from the derivation in `components/analytics/data.ts`. **It is still consumed elsewhere.** Only this card's _use_ of it goes.
 - Do NOT delete the `monthlyHealth.closed.*` i18n keys in this phase. They are handled under grep discipline in Phase 10.
 
 ### Verify
@@ -181,7 +185,7 @@ Remove the closed-month path entirely:
 
 ### Why
 
-The teaser's justification was *"anticipation is the surface's job."* **That reasoning was circular** — the surface existed mid-month only so the section had something to render, so its job was invented by the problem it was solving. With the section absent from the in-progress page entirely, the job is gone.
+The teaser's justification was _"anticipation is the surface's job."_ **That reasoning was circular** — the surface existed mid-month only so the section had something to render, so its job was invented by the problem it was solving. With the section absent from the in-progress page entirely, the job is gone.
 
 This deletion also removes the **only sanctioned exception** to the empty-state doctrine, which now reads without qualification: a single quiet line, or hide the component entirely — never placeholder shapes.
 
@@ -214,9 +218,9 @@ This deletion also removes the **only sanctioned exception** to the empty-state 
 
 Two independent arguments.
 
-**Philosophy.** Exact and under are both success; over is the one outcome the product prevents. Three colours assert three outcomes where the product recognises two. The obvious objection — that exact and under are genuinely different *facts* — fails, because that difference is already carried twice on this card: verbally by the headline (`verdictWhole.*`) and numerically by the delta at `1.375rem`. **A third encoding adds no information, only valence.**
+**Philosophy.** Exact and under are both success; over is the one outcome the product prevents. Three colours assert three outcomes where the product recognises two. The obvious objection — that exact and under are genuinely different _facts_ — fails, because that difference is already carried twice on this card: verbally by the headline (`verdictWhole.*`) and numerically by the delta at `1.375rem`. **A third encoding adds no information, only valence.**
 
-**A colour collision, and the stronger argument.** `exactBudget` was painted with the **`fixed` token (Teal Ledger)** — a *structural category* colour borrowed for a *verdict*. Teal means "the Fixed lane" everywhere else on the page. Two-tone dissolves this for free.
+**A colour collision, and the stronger argument.** `exactBudget` was painted with the **`fixed` token (Teal Ledger)** — a _structural category_ colour borrowed for a _verdict_. Teal means "the Fixed lane" everywhere else on the page. Two-tone dissolves this for free.
 
 ### Files
 
@@ -233,8 +237,8 @@ The `fixed` token drops out of verdict use entirely in this file.
 
 ### Do NOT
 
-- Do NOT touch `getManualRowTone` in `how-month-landed-popup.tsx`. It applies expense tone to over-plan manual buckets and looks like a doctrine violation. **It is not.** The governing rule is: *expense tone is allowed when something exceeds its own plan (a genuine overrun); it is not allowed when comparing one period to another (calibration).* An over-plan bucket is an overrun. **Change no code there.**
-- Do NOT remove the `exactBudget` verdict from `WholeBudgetVerdict` or from the data layer. Only its *colour* changes; its headline and delta stay distinct.
+- Do NOT touch `getManualRowTone` in `how-month-landed-popup.tsx`. It applies expense tone to over-plan manual buckets and looks like a doctrine violation. **It is not.** The governing rule is: _expense tone is allowed when something exceeds its own plan (a genuine overrun); it is not allowed when comparing one period to another (calibration)._ An over-plan bucket is an overrun. **Change no code there.**
+- Do NOT remove the `exactBudget` verdict from `WholeBudgetVerdict` or from the data layer. Only its _colour_ changes; its headline and delta stay distinct.
 
 ### Verify
 
@@ -248,11 +252,11 @@ The `fixed` token drops out of verdict use entirely in this file.
 
 ### Why
 
-The old copy was written for three peer sections and read as *areas of a report*. The new skeleton is **one question, then one descent**.
+The old copy was written for three peer sections and read as _areas of a report_. The new skeleton is **one question, then one descent**.
 
 Two rules drive the strings:
 
-**The hook asks a question in both views.** Previously the slot changed *voice*, not just tense — "Are you on pace?" is interrogative and addressed to *you*; "How the month landed" was declarative and about *the month*. Grammatically that read as two different surfaces, defeating the point of a single slot. The **subject shift (`you` → `the month`) is kept deliberately**: mid-month the thing in question is your behaviour, still yours to change; once closed it is the month, settled. Keeping *the month* as subject on the closed view also keeps blame off it.
+**The hook asks a question in both views.** Previously the slot changed _voice_, not just tense — "Are you on pace?" is interrogative and addressed to _you_; "How the month landed" was declarative and about _the month_. Grammatically that read as two different surfaces, defeating the point of a single slot. The **subject shift (`you` → `the month`) is kept deliberately**: mid-month the thing in question is your behaviour, still yours to change; once closed it is the month, settled. Keeping _the month_ as subject on the closed view also keeps blame off it.
 
 **The detail slot goes tense-neutral without a status branch.** Branching would violate Phase 1's identical-slot lock, so the fix had to be one title correct in both. Habitual present ("goes") is genuinely tense-neutral in EN, unlike "is going".
 
@@ -263,22 +267,22 @@ Two rules drive the strings:
 
 ### Changes — EN (locked, use verbatim)
 
-| Key | Locked value |
-|---|---|
-| `Analytics.section.onPace.title` | `Are you on pace?` — **unchanged** |
+| Key                                 | Locked value                                                              |
+| ----------------------------------- | ------------------------------------------------------------------------- |
+| `Analytics.section.onPace.title`    | `Are you on pace?` — **unchanged**                                        |
 | `Analytics.section.onPace.subtitle` | `Where you stand right now and where you'll likely land.` — **unchanged** |
-| `Analytics.section.landed.title` | `How did the month land?` |
-| `Analytics.section.landed.subtitle` | `The final result, and how the month got there.` |
-| `Analytics.section.where.title` | `Where the budget goes` |
-| `Analytics.section.where.subtitle` | `How this month's spending splits across plan and reality.` |
+| `Analytics.section.landed.title`    | `How did the month land?`                                                 |
+| `Analytics.section.landed.subtitle` | `The final result, and how the month got there.`                          |
+| `Analytics.section.where.title`     | `Where the budget goes`                                                   |
+| `Analytics.section.where.subtitle`  | `How this month's spending splits across plan and reality.`               |
 
-`landed.subtitle` was not merely stale — the old value ("A look back at how each month ended") **described retired behaviour**, dating from when this was a permanent history-browsing section. It now describes exactly one month, and must name both cards in the slot the way `onPace.subtitle` names both halves of its card: *"the final result"* (`HowMonthLandedCard`) *"and how the month got there"* (`BudgetPathCard`). It also lacked the terminal period its two peers have.
+`landed.subtitle` was not merely stale — the old value ("A look back at how each month ended") **described retired behaviour**, dating from when this was a permanent history-browsing section. It now describes exactly one month, and must name both cards in the slot the way `onPace.subtitle` names both halves of its card: _"the final result"_ (`HowMonthLandedCard`) _"and how the month got there"_ (`BudgetPathCard`). It also lacked the terminal period its two peers have.
 
 ### Changes — AR
 
 - `Analytics.section.landed.title`: currently `كيف انتهى الشهر`. **This is punctuation only** — `كيف` is already an interrogative particle, so it becomes `كيف انتهى الشهر؟`. No rewording.
 - `Analytics.section.landed.subtitle` and `Analytics.section.where.title` / `where.subtitle`: produce accurate Arabic matching the new EN meaning. Follow the existing Arabic register in the file.
-- **Known drift to resolve while you are here:** EN `where.title` says "the budget" while AR says `ميزانيتك` (*your* budget). Drop the second-person possessive and use the definite form in Arabic. Both hook strings stay second person in both locales. **The EN strings above are locked; adjust AR.**
+- **Known drift to resolve while you are here:** EN `where.title` says "the budget" while AR says `ميزانيتك` (_your_ budget). Drop the second-person possessive and use the definite form in Arabic. Both hook strings stay second person in both locales. **The EN strings above are locked; adjust AR.**
 
 ### Do NOT
 
@@ -313,6 +317,7 @@ The payoff is structural, not cosmetic: **the header-end slot ends with exactly 
 ### The canonical header (locked)
 
 A `space-y-1` stack:
+
 - title — `text-[1.0625rem] font-medium text-foreground`
 - subtitle — `text-sm leading-[1.5] text-text-secondary text-pretty`
 
@@ -323,6 +328,7 @@ A `space-y-1` stack:
 **`FixedAnalysisCard` and `MethodObligationCard`** — add `text-pretty` to the subtitle. Nothing else.
 
 **`BudgetCompositionCard`:**
+
 - title `font-semibold` → `font-medium`
 - subtitle: drop `text-xs`, `text-text-tertiary`, `max-w-[24ch]` → canonical classes
 - **end slot unchanged**: the total budget stays at `text-[1.125rem] font-semibold` with its `composition.totalBudgetLabel` caption beneath, in its `shrink-0 text-end` block
@@ -330,6 +336,7 @@ A `space-y-1` stack:
 Both title and subtitle deviations were inherited from an older pass, not from the card's frame role. **The frame role belongs to the number, not the heading.**
 
 **`PaymentMethodCard`:**
+
 - move the subtitle out of the header-end slot into the canonical stacked position under the title
 - header row alignment `items-baseline` → `items-start`
 - **the end slot empties**
@@ -353,7 +360,7 @@ Both title and subtitle deviations were inherited from an older pass, not from t
 
 ### Why
 
-The chart draws an even-pace reference line — the trajectory of a perfect daily-rate spender — but never says what that pace *is* in EGP. The fix must not create a second rate concept competing with Home's Today's Rate.
+The chart draws an even-pace reference line — the trajectory of a perfect daily-rate spender — but never says what that pace _is_ in EGP. The fix must not create a second rate concept competing with Home's Today's Rate.
 
 **The legend, not a caption.** The existing legend entry gains the number because: it invents no component and no layout; it is quiet by construction at `text-[10.5px]`, which is exactly the "must not compete with Home's Today's Rate" constraint; and it labels the line **at the point of reference**. A standalone caption beneath the chart would be a second EGP/day figure with its own visual weight — precisely the problem this resolution exists to avoid.
 
@@ -387,9 +394,9 @@ The chart draws an even-pace reference line — the trajectory of a perfect dail
 
 ### Why — and note this reopens a lock
 
-⚠️ A locked decision said *"No bucket-level lists — aggregate signals only"* and *"this card never lists individual bucket names."*
+⚠️ A locked decision said _"No bucket-level lists — aggregate signals only"_ and _"this card never lists individual bucket names."_
 
-**The reopening is justified, narrowly.** The lock protected the card's **scan path** from becoming a list. Progressive disclosure behind a tap leaves the default state aggregate and unchanged. **The lock's intent survives; only its wording was wrong.** The governing rule is now: *aggregate by default; bucket names only behind explicit disclosure.*
+**The reopening is justified, narrowly.** The lock protected the card's **scan path** from becoming a list. Progressive disclosure behind a tap leaves the default state aggregate and unchanged. **The lock's intent survives; only its wording was wrong.** The governing rule is now: _aggregate by default; bucket names only behind explicit disclosure._
 
 ### Files
 
@@ -428,11 +435,11 @@ The chart draws an even-pace reference line — the trajectory of a perfect dail
 
 ### Why
 
-The positioning argument (Stashy is budget *management*, not tracking) is real but soft. **The decisive argument is accuracy:** `tracker-screen.tsx` has been **fixed-only** since May — one `TrackerFixedTab` (Budgets → Recurring → Installments) plus the add FAB; Major and History tabs were removed. "Tracker" points a user expecting all their transactions at the wrong surface — that is the History page.
+The positioning argument (Stashy is budget _management_, not tracking) is real but soft. **The decisive argument is accuracy:** `tracker-screen.tsx` has been **fixed-only** since May — one `TrackerFixedTab` (Budgets → Recurring → Installments) plus the add FAB; Major and History tabs were removed. "Tracker" points a user expecting all their transactions at the wrong surface — that is the History page.
 
-*Commitments*, *Budgets*, and *Plan* were each considered and rejected. **Plan** in particular reads easier on day one but hides the model forever — and fixed/variable is the one distinction the user must learn for the daily rate to make sense. A nav item called "Fixed" teaches that vocabulary on every glance.
+_Commitments_, _Budgets_, and _Plan_ were each considered and rejected. **Plan** in particular reads easier on day one but hides the model forever — and fixed/variable is the one distinction the user must learn for the daily rate to make sense. A nav item called "Fixed" teaches that vocabulary on every glance.
 
-**On the Arabic:** use `الثابت` (definite), **not** bare `ثابت`. The product's Arabic has already established `الثابت` as a **lane noun** rather than an adjective, in `budgetPath.rows.manualFixedOverspend`, `budgetPath.rows.manualFixedReturned`, `Home.drawer.settings.fixedOverrunLabel`, and `budgetPath.manualFixed.title`. The definite article is load-bearing: bare `ثابت` is what the *segment* labels use (`Home.budget.fixed`, `History.budgetTypes.fixed`) and reads as a dangling adjective in a dock.
+**On the Arabic:** use `الثابت` (definite), **not** bare `ثابت`. The product's Arabic has already established `الثابت` as a **lane noun** rather than an adjective, in `budgetPath.rows.manualFixedOverspend`, `budgetPath.rows.manualFixedReturned`, `Home.drawer.settings.fixedOverrunLabel`, and `budgetPath.manualFixed.title`. The definite article is load-bearing: bare `ثابت` is what the _segment_ labels use (`Home.budget.fixed`, `History.budgetTypes.fixed`) and reads as a dangling adjective in a dock.
 
 ### Files
 
@@ -440,10 +447,10 @@ The positioning argument (Stashy is budget *management*, not tracking) is real b
 
 ### Changes
 
-| Key | EN | AR |
-|---|---|---|
-| `Home.nav.tracker` | `Fixed` | `الثابت` |
-| `Tracker.title` | `Fixed` | `الثابت` |
+| Key                            | EN                                                                                                  | AR                                                                                 |
+| ------------------------------ | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `Home.nav.tracker`             | `Fixed`                                                                                             | `الثابت`                                                                           |
+| `Tracker.title`                | `Fixed`                                                                                             | `الثابت`                                                                           |
 | `Home.navPlaceholders.tracker` | `Fixed budgets, recurring payments, and installments open here without leaving the mobile sandbox.` | Author an accurate equivalent in the existing register and list it in the PR body. |
 
 **Also in this phase — a pre-existing AR inconsistency, now in scope because nav labels are being touched:** `Home.nav.analytics` is `التحليل` (singular) while `Analytics.title` is `التحليلات` (plural). Dock and page header disagree. **Fix: make the nav match the page title.** Verify both current values before editing.
@@ -471,16 +478,16 @@ The positioning argument (Stashy is budget *management*, not tracking) is real b
 
 ### Method — apply to every candidate
 
-For each key, grep the **entire repo** for the key path, the leaf name, and any dynamic-construction pattern (e.g. `` t(`monthlyHealth.closed.badge.${verdict}`) ``). **Template-literal key construction is the main way a key looks dead and is not.** Only delete when all three forms have zero matches **outside `messages/en.json` and `messages/ar.json`**; the candidate's own definitions in those two files do not count as live usage.
+For each key, grep the **entire repo** for the key path, the leaf name, and any dynamic-construction pattern (e.g. ``t(`monthlyHealth.closed.badge.${verdict}`)``). **Template-literal key construction is the main way a key looks dead and is not.** Only delete when all three forms have zero matches **outside `messages/en.json` and `messages/ar.json`**; the candidate's own definitions in those two files do not count as live usage.
 
 ### Candidates — delete from **both** `en.json` and `ar.json` if grep confirms
 
-| Candidate | Note |
-|---|---|
-| `Analytics.pacing.*` (`contextSentence`, `aheadLabel`, `behindLabel`, `barLabel`, `injectionFootnote`) | Safest of the set — `PacingCard` no longer exists at all |
-| `Analytics.monthlyHealth.closed.badge.*`, `.heroLabel.*`, `.context.*` | Orphaned by Phase 2 |
-| `Analytics.howMonthLanded.teaser.*` | Orphaned by Phase 3 |
-| `Home.budget.*` (`title`, `total`, `variable`, `fixed`, `variableCaption`, `fixedCaption`) | Orphaned by the earlier `BudgetOverviewCard` deletion — **verify carefully**, several leaf names are generic and may collide |
+| Candidate                                                                                              | Note                                                                                                                         |
+| ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| `Analytics.pacing.*` (`contextSentence`, `aheadLabel`, `behindLabel`, `barLabel`, `injectionFootnote`) | Safest of the set — `PacingCard` no longer exists at all                                                                     |
+| `Analytics.monthlyHealth.closed.badge.*`, `.heroLabel.*`, `.context.*`                                 | Orphaned by Phase 2                                                                                                          |
+| `Analytics.howMonthLanded.teaser.*`                                                                    | Orphaned by Phase 3                                                                                                          |
+| `Home.budget.*` (`title`, `total`, `variable`, `fixed`, `variableCaption`, `fixedCaption`)             | Orphaned by the earlier `BudgetOverviewCard` deletion — **verify carefully**, several leaf names are generic and may collide |
 
 ### Do **NOT** delete
 
@@ -538,16 +545,16 @@ Mockups were skipped by agreement wherever a change invented no new component or
 
 Do not implement, do not "while I'm here" these.
 
-| Item | Status |
-|---|---|
-| **`FixedAnalysisCard` "spending faster than usual" pace tag** | **Designed, parked.** Needs a per-bucket daily cumulative array on live months *and* snapshots — a mock data-model change. Everything in this plan is resequencing, copy, and styling against existing data; this would be the only structural data addition. **Parked unless Husseini says otherwise.** |
-| **History default-view scope** (excludes fixed spending) | A **`stashy-api` doc change**, not a mock fix. `docs/Stashy_logics/Stashy_Documentation.md` §15 documents the default as "Variable + Major"; that rule has been decided wrong. The doc is edited first; the mock follows. **Not in this repo, not in this plan.** |
-| **`/[locale]/tracker` route rename** | Out of scope. |
-| **`Tracker` i18n namespace rename** | Optional dev-facing cleanup. Out of scope. |
-| **Free vs Pro gating boundary** | Undecided. Do not change what is gated. |
-| **Analytics gate copy** (`upgrade.title` / `upgrade.description`) | Noted as the right home for aspirational framing. **Not actioned here.** |
-| **`getManualRowTone` in `how-month-landed-popup.tsx`** | Looks like a colour-doctrine violation. **It is not.** Change no code. |
-| **Any `stashy-api` or `stashy-mobile` change** | Out of scope. |
+| Item                                                              | Status                                                                                                                                                                                                                                                                                                   |
+| ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`FixedAnalysisCard` "spending faster than usual" pace tag**     | **Designed, parked.** Needs a per-bucket daily cumulative array on live months _and_ snapshots — a mock data-model change. Everything in this plan is resequencing, copy, and styling against existing data; this would be the only structural data addition. **Parked unless Husseini says otherwise.** |
+| **History default-view scope** (excludes fixed spending)          | A **`stashy-api` doc change**, not a mock fix. `docs/Stashy_logics/Stashy_Documentation.md` §15 documents the default as "Variable + Major"; that rule has been decided wrong. The doc is edited first; the mock follows. **Not in this repo, not in this plan.**                                        |
+| **`/[locale]/tracker` route rename**                              | Out of scope.                                                                                                                                                                                                                                                                                            |
+| **`Tracker` i18n namespace rename**                               | Optional dev-facing cleanup. Out of scope.                                                                                                                                                                                                                                                               |
+| **Free vs Pro gating boundary**                                   | Undecided. Do not change what is gated.                                                                                                                                                                                                                                                                  |
+| **Analytics gate copy** (`upgrade.title` / `upgrade.description`) | Noted as the right home for aspirational framing. **Not actioned here.**                                                                                                                                                                                                                                 |
+| **`getManualRowTone` in `how-month-landed-popup.tsx`**            | Looks like a colour-doctrine violation. **It is not.** Change no code.                                                                                                                                                                                                                                   |
+| **Any `stashy-api` or `stashy-mobile` change**                    | Out of scope.                                                                                                                                                                                                                                                                                            |
 
 ---
 

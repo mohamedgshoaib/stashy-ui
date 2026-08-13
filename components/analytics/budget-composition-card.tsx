@@ -57,19 +57,27 @@ export function BudgetCompositionCard({ month }: { month: LiveMonthAnalysis }) {
                 <p dir="ltr" className="text-sm font-semibold tabular-nums text-foreground">
                   {formatAnalyticsCurrency(locale, fixedEgp)}
                 </p>
-                <p dir="ltr" className="rounded-full bg-card px-2 py-0.5 text-xs tabular-nums text-text-tertiary shadow-ring">
+                <p
+                  dir="ltr"
+                  className="rounded-full bg-card px-2 py-0.5 text-xs tabular-nums text-text-tertiary shadow-ring"
+                >
                   {fixedPct}%
                 </p>
               </div>
             </div>
 
             <div className="rounded-[var(--radius-sm)] bg-variable-subtle px-3 py-2.5 shadow-ring">
-              <p className="text-xs font-semibold text-variable">{t("composition.variableLabel")}</p>
+              <p className="text-xs font-semibold text-variable">
+                {t("composition.variableLabel")}
+              </p>
               <div className="mt-1 flex items-center justify-between gap-2">
                 <p dir="ltr" className="text-sm font-semibold tabular-nums text-foreground">
                   {formatAnalyticsCurrency(locale, variableEgp)}
                 </p>
-                <p dir="ltr" className="rounded-full bg-card px-2 py-0.5 text-xs tabular-nums text-text-tertiary shadow-ring">
+                <p
+                  dir="ltr"
+                  className="rounded-full bg-card px-2 py-0.5 text-xs tabular-nums text-text-tertiary shadow-ring"
+                >
                   {variablePct}%
                 </p>
               </div>

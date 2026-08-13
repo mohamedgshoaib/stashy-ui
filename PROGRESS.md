@@ -144,3 +144,41 @@
   - `components/settings/settings-sections.tsx`: unused `SubSectionHeader` declaration.
 - Gate: initial sandboxed `pnpm build` could not fetch configured Google fonts; rerunning with approved network access passed, including all EN/AR static routes.
 - New Phase 10 errors: none.
+
+## Phase 11 — Observation-only render verification
+
+- Status: complete; no VR fallback was applied.
+- Render environment: headless Chrome at a 390×844 mobile viewport against the local Next.js app.
+- VR-1 — closed hook measurements:
+  - 2 adjacent hook cards, 833px total from first-card top to second-card bottom (0.99 viewport heights).
+  - 62 visible descendant elements and 1 button before the detail-section header.
+  - Whole closed page: 8 cards and 4,272px document height in EN.
+- VR-2 — Fixed → Payment transition:
+  - Fixed card: 581px, 48 visible descendants.
+  - Payment Method card: 658px, 93 visible descendants.
+  - Inter-card gap: 12px; no sub-label or fallback added.
+- VR-3 — Budget Composition header:
+  - Title computes to 17px / weight 500.
+  - Total computes to 18px / weight 600.
+  - Both begin at the same measured vertical position; no size fallback added.
+- VR-4 — exact-budget throwaway scenario:
+  - Temporarily changed April variable spend so derived remainder became zero.
+  - Rendered `Landed right on budget.` with `0 EGP`, `text-income`, `bg-income`, and computed fill `rgb(95, 143, 89)`.
+  - Reverted the temporary data edit; `components/analytics/data.ts` has no diff.
+- VR-5 — Arabic and RTL:
+  - EN and AR closed/in-progress pages rendered without missing-key output or visible horizontal clipping at 390px.
+  - The overflow probe found only zero-width internal Recharts containers, not clipped content.
+  - Fixed overrun disclosure measured 48px tall in both locales; `aria-expanded` toggled false→true, accessible labels switched correctly, the chevron computed to `rotate: 180deg`, and financial row amounts remained `dir="ltr"`.
+  - Arabic dock label `الثابت` rendered at 25px wide within its nav item.
+  - Arabic even-pace text rendered as `إيقاع متساوٍ · 112 EGP/يوم`, but the amount-bearing legend element had no `dir` attribute; the Phase 7 `dir="ltr"` landed on the adjacent current-month legend item. Recorded for review; no observation-phase fix applied.
+- Additional final-state observations:
+  - No-major February collapsed to 7 total cards, omitted `FlaggedAsMajorCard`, and kept a 12px Variable → Fixed gap.
+  - At-risk rendered an `At risk` hook and a 95 EGP/day legend.
+  - The sandbox `over` state rendered 6 cards and retained an `At risk` hook from the current mock derivation.
+  - Free rendered the upgrade gate with 0 analytics cards; Pro restored 7 cards.
+  - Injection changed the legend from 112 to 144 EGP/day; disabling it restored 112.
+  - First-month/with-history and fixed-overrun none/some controls each became active and rendered; the fixed-overrun state showed `2 of 2 budgets overrunning`.
+- Final gate: `pnpm typecheck` passed.
+- Final gate: `pnpm lint` reported only the same two plan-listed pre-existing errors; no new lint errors.
+- Final gate: `pnpm build` passed with all EN/AR static routes.
+- Final gate: targeted `pnpm exec oxfmt --check` passed for all files touched across Phases 0–11 after formatting the previously nonconforming touched files.
