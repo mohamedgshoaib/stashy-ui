@@ -11,3 +11,15 @@
   - `components/tracker/tracker-transfer-drawer.tsx`: unused `surfacePanelClass` import.
   - `components/settings/settings-sections.tsx`: unused `SubSectionHeader` declaration.
 - New Phase 1 errors: none.
+
+## Phase 2 — Retire MonthlyHealthCard closed-month branch
+
+- Status: complete
+- Removed the closed-month verdict maps, branches, and type dependency from `MonthlyHealthCard`.
+- Collapsed badge, hero, projection, progress, and injection behavior to the in-progress `monthlyState` paths.
+- Preserved `closedMonthVerdict` in the shared type and data layers.
+- Gate: `pnpm typecheck` passed.
+- Gate: `pnpm lint` reported only the two plan-listed pre-existing errors:
+  - `components/tracker/tracker-transfer-drawer.tsx`: unused `surfacePanelClass` import.
+  - `components/settings/settings-sections.tsx`: unused `SubSectionHeader` declaration.
+- New Phase 2 errors: none.
