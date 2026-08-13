@@ -28,7 +28,6 @@ import {
 } from "@/components/ui/drawer"
 import { SegmentedChoice } from "@/components/ui/segmented-choice"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { fixedItems } from "@/data/fixed-tracker-mock"
 import { useRouter } from "@/i18n/navigation"
 import {
   dateFieldClass,
@@ -36,6 +35,7 @@ import {
   surfacePanelClass,
   textAreaFieldClass,
 } from "@/lib/design-system-classes"
+import { getFixedExpenseItems, getSandboxAnalyticsData } from "@/lib/sandbox-budget"
 import { semanticSurfaceClass, semanticTextClass } from "@/lib/semantic-styles"
 import { cn } from "@/lib/utils"
 import { useSandboxStore } from "@/store/sandbox-store"
@@ -59,22 +59,49 @@ function getTodayString(): string {
   return `${y}-${m}-${day}`
 }
 
-// ─── Budget categories from mock ──────────────────────────────────────────────
-
-const budgetCategories = fixedItems
-  .filter((item) => item.type === "manual")
-  .map((item) => ({
-    id: item.id,
-    name: item.name,
-    remaining: item.remaining,
-    budget: item.budget,
-  }))
+type HomeBudgetCategory = {
+  id: string
+  name: string
+  remaining: number
+  budget: number
+}
 
 // ─── Main drawer ──────────────────────────────────────────────────────────────
 
 export function HomeDrawer({ kind, direction, onPreviewAddAction, onOpenChange }: HomeDrawerProps) {
   const t = useTranslations("Home.drawer")
   const open = kind !== null
+  const {
+    monthlyBudgetState,
+    budgetInjection,
+    analyticsHistoryMode,
+    fixedBudgetOverrun,
+    fixedPaceState,
+  } = useSandboxStore()
+  const analyticsData = React.useMemo(
+    () =>
+      getSandboxAnalyticsData({
+        monthlyBudgetState,
+        budgetInjection,
+        analyticsHistoryMode,
+        fixedBudgetOverrun,
+        fixedPaceState,
+      }),
+    [monthlyBudgetState, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun, fixedPaceState],
+  )
+  const budgetCategories = React.useMemo<HomeBudgetCategory[]>(
+    () =>
+      getFixedExpenseItems(analyticsData.current)
+        .filter((item) => item.type === "manual")
+        .map((item) => ({
+          id: item.id,
+          name: item.name,
+          remaining: item.remaining,
+          budget: item.budget,
+        })),
+    [analyticsData],
+  )
+  const firstBudgetCategoryId = budgetCategories[0]?.id ?? ""
 
   const [selectedAction, setSelectedAction] = React.useState<AddActionKind>("variable")
   const [amount, setAmount] = React.useState("")
@@ -82,9 +109,7 @@ export function HomeDrawer({ kind, direction, onPreviewAddAction, onOpenChange }
   const [method, setMethod] = React.useState<"cash" | "card" | "bank">("cash")
   const [note, setNote] = React.useState("")
   const [noteExpanded, setNoteExpanded] = React.useState(false)
-  const [selectedCategory, setSelectedCategory] = React.useState<string>(
-    budgetCategories[0]?.id ?? "",
-  )
+  const [selectedCategory, setSelectedCategory] = React.useState<string>(firstBudgetCategoryId)
   const [refundTarget, setRefundTarget] = React.useState<string>("variable")
   const [isMajor, setIsMajor] = React.useState(false)
 
@@ -95,10 +120,10 @@ export function HomeDrawer({ kind, direction, onPreviewAddAction, onOpenChange }
     setNote("")
     setNoteExpanded(false)
     setMethod("cash")
-    setSelectedCategory(budgetCategories[0]?.id ?? "")
+    setSelectedCategory(firstBudgetCategoryId)
     setRefundTarget("variable")
     setIsMajor(false)
-  }, [])
+  }, [firstBudgetCategoryId])
 
   React.useEffect(() => {
     if (!open) resetAddFlow()
@@ -122,6 +147,7 @@ export function HomeDrawer({ kind, direction, onPreviewAddAction, onOpenChange }
           ) : kind === "add" ? (
             <AddFlow
               amount={amount}
+              budgetCategories={budgetCategories}
               date={date}
               isMajor={isMajor}
               method={method}
@@ -187,6 +213,7 @@ export function HomeDrawer({ kind, direction, onPreviewAddAction, onOpenChange }
 
 function AddFlow({
   amount,
+  budgetCategories,
   date,
   isMajor,
   method,
@@ -207,6 +234,7 @@ function AddFlow({
   onCloseDrawer,
 }: {
   amount: string
+  budgetCategories: HomeBudgetCategory[]
   date: string
   isMajor: boolean
   method: "cash" | "card" | "bank"
@@ -405,7 +433,15 @@ function AddFlow({
             getImpactColor(selectedAction, parsedAmount, isMajor),
           )}
         >
-          {getImpactLine(t, selectedAction, parsedAmount, selectedCategory, refundTarget, isMajor)}
+          {getImpactLine(
+            t,
+            selectedAction,
+            parsedAmount,
+            selectedCategory,
+            refundTarget,
+            isMajor,
+            budgetCategories,
+          )}
         </p>
       </div>
 
@@ -538,6 +574,7 @@ function getImpactLine(
   categoryId: string,
   refundTarget: string,
   isMajor: boolean,
+  budgetCategories: HomeBudgetCategory[],
 ): string {
   if (amount === 0) return t("impactEmpty")
 

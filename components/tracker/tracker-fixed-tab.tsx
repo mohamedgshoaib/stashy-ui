@@ -9,10 +9,13 @@ import { InstallmentsSection } from "@/components/tracker/sections/installments-
 import { SubscriptionsSection } from "@/components/tracker/sections/subscriptions-section"
 import { TrackerAddDrawer } from "@/components/tracker/tracker-add-drawer"
 import { TrackerTransferDrawer } from "@/components/tracker/tracker-transfer-drawer"
-import type { FixedExpenseItem, FixedTrackerSummary, InstallmentOverview } from "@/components/tracker/types"
-import {
-  fixedItems,
-} from "@/data/fixed-tracker-mock"
+import type {
+  FixedExpenseItem,
+  FixedTrackerSummary,
+  InstallmentOverview,
+} from "@/components/tracker/types"
+import { getFixedExpenseItems, getSandboxAnalyticsData } from "@/lib/sandbox-budget"
+import { useSandboxStore } from "@/store/sandbox-store"
 
 function buildSummary(items: FixedExpenseItem[]): FixedTrackerSummary {
   const totalBudgeted = items.reduce((sum, item) => sum + item.budget, 0)
@@ -49,7 +52,27 @@ function buildInstallmentOverview(items: FixedExpenseItem[]): InstallmentOvervie
 }
 
 export function TrackerFixedTab() {
-  const [items, setItems] = React.useState<FixedExpenseItem[]>(fixedItems)
+  const {
+    monthlyBudgetState,
+    budgetInjection,
+    analyticsHistoryMode,
+    fixedBudgetOverrun,
+    fixedPaceState,
+  } = useSandboxStore()
+  const analyticsData = React.useMemo(
+    () =>
+      getSandboxAnalyticsData({
+        monthlyBudgetState,
+        budgetInjection,
+        analyticsHistoryMode,
+        fixedBudgetOverrun,
+        fixedPaceState,
+      }),
+    [monthlyBudgetState, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun, fixedPaceState],
+  )
+  const [items, setItems] = React.useState<FixedExpenseItem[]>(() =>
+    getFixedExpenseItems(analyticsData.current),
+  )
   const [selectedItem, setSelectedItem] = React.useState<FixedExpenseItem | null>(null)
   const [editingItem, setEditingItem] = React.useState<FixedExpenseItem | null>(null)
   const [editOpen, setEditOpen] = React.useState(false)

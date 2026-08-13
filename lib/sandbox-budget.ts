@@ -22,12 +22,20 @@ import type {
   AnalyticsData,
   FixedBucketActual,
   FixedBucketIconKey,
+  FixedBucketPlan,
   LiveMonthAnalysis,
   MonthSnapshot,
 } from "@/components/analytics/types"
 import type { HistoryTransaction } from "@/components/history/types"
 import type { UpcomingPayment } from "@/components/home/home-data"
 import type { BudgetStrip, DailyRate, MajorExpensesRow } from "@/components/home/types"
+import { getTrackerFixedIcon } from "@/components/tracker/fixed-icons"
+import type {
+  FixedExpenseIconKey,
+  FixedExpenseItem,
+  FixedTransaction,
+} from "@/components/tracker/types"
+import { fixedManualPresentationFixtures, fixedNonManualItems } from "@/data/fixed-tracker-mock"
 
 export type SandboxBudgetConfig = {
   monthlyBudgetState: "onTrack" | "atRisk" | "over"
@@ -211,6 +219,84 @@ export function getHomeBudgetStrip(month: LiveMonthAnalysis): BudgetStrip {
     totalRemaining: metrics.totalRemaining,
     daysRemaining: month.daysRemaining,
   }
+}
+
+function getFixedManualIconKey(bucketId: string): FixedExpenseIconKey {
+  const iconKeyByBucketId: Record<string, FixedExpenseIconKey> = {
+    "fb-coffee": "cafe",
+    "fb-groceries": "shopping",
+    "fb-transport": "car",
+  }
+
+  return iconKeyByBucketId[bucketId] ?? "shopping"
+}
+
+function getFixedExpenseStatus(progressPct: number): FixedExpenseItem["status"] {
+  if (progressPct > 100) return "over_budget"
+  if (progressPct >= 75) return "warning"
+  return "on_track"
+}
+
+function scaleFixedTransactions(
+  transactions: FixedTransaction[],
+  spent: number,
+): FixedTransaction[] {
+  if (spent <= 0 || transactions.length === 0) return []
+
+  const fixtureTotal = transactions.reduce((sum, transaction) => sum + transaction.amount, 0)
+  if (fixtureTotal <= 0) return transactions
+
+  let assigned = 0
+  return transactions.map((transaction, index) => {
+    const amount =
+      index === transactions.length - 1
+        ? Math.max(0, spent - assigned)
+        : Math.round((transaction.amount / fixtureTotal) * spent)
+    assigned += amount
+
+    return { ...transaction, amount }
+  })
+}
+
+function deriveManualFixedExpenseItem(
+  bucket: FixedBucketPlan,
+  actual: FixedBucketActual | undefined,
+): FixedExpenseItem {
+  const paid = actual?.spent ?? 0
+  const progressPct = bucket.budget > 0 ? (paid / bucket.budget) * 100 : 0
+  const iconKey = getFixedManualIconKey(bucket.id)
+  const fixture = fixedManualPresentationFixtures[bucket.id]
+
+  return {
+    id: bucket.id,
+    name: bucket.name,
+    iconKey,
+    icon: getTrackerFixedIcon(iconKey),
+    type: "manual",
+    budget: bucket.budget,
+    paid,
+    remaining: bucket.budget - paid,
+    progressPct,
+    progressClass: `basis-[${Math.min(Math.round(progressPct), 100)}%]`,
+    status: getFixedExpenseStatus(progressPct),
+    paymentStatus: "unpaid",
+    nextPaymentDate: null,
+    installmentsTotal: null,
+    installmentsPaid: null,
+    installmentsRemaining: null,
+    installmentProgressClass: null,
+    endDate: null,
+    transactions: scaleFixedTransactions(fixture?.transactions ?? [], paid),
+  }
+}
+
+export function getFixedExpenseItems(month: LiveMonthAnalysis): FixedExpenseItem[] {
+  const actualById = new Map(month.fixedBucketsActual.map((actual) => [actual.id, actual]))
+  const manualItems = month.fixedBuckets
+    .filter((bucket) => bucket.type === "manual")
+    .map((bucket) => deriveManualFixedExpenseItem(bucket, actualById.get(bucket.id)))
+
+  return [...fixedNonManualItems, ...manualItems]
 }
 
 export function getHomeMajorExpensesRow(
