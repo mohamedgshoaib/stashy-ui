@@ -190,6 +190,8 @@ Phase 8b was present on `main`, including `deriveBucketPaceFlag`, `dailyCumulati
 - Fixed the user-authorized Home budget follow-up where Major spending was subtracted twice from an already Major-reduced effective variable cap. Variable remaining, tomorrow-rate projection, and emergency overage now subtract only net variable spend from that cap; the composition bar still presents Major as its own segment.
 - Verified the three scenario truths directly: onTrack has 1,640 EGP variable left; atRisk has 340 EGP variable and 555 EGP total left while projecting −1,524 EGP; over has −120 EGP variable left and an emergency overage of exactly 120 EGP.
 - Selected At Risk through the rendered Home settings drawer at 390×844 and observed `Remaining this month 555 EGP`, `Variable left 340 EGP`, and `Fixed left 215 EGP`, with no old −865 value, browser exception, or horizontal overflow.
+- Fixed the PR review finding where editing a manual bucket budget left its running-hot tag tied to the original analytics plan. Tracker now overlays the edited manual budgets onto the current comparison month during render while preserving historical snapshots.
+- Re-ran typecheck, lint, formatting, diff checks, and a network-enabled production build. In the rendered 390×844 edit flow, Coffee changed from tagged at 145/200 EGP to untagged at 145/400 EGP, Groceries remained tagged, and there were no browser exceptions or horizontal overflow.
 
 ---
 
@@ -201,6 +203,7 @@ Phase 8b was present on `main`, including `deriveBucketPaceFlag`, `dailyCumulati
 - The Tracker FAB add drawer remains a pre-existing no-op because it has no `onSave`; edit continues through the existing `handleSave` path.
 - The `some` fixture represents one bucket over plan rather than all manual envelopes overrunning; Coffee is the required under-budget hot example in the `faster` state.
 - Major expenses reduce `effectiveVariableBudget` once. Home may include Major in spend composition, but remaining-cap and daily-rate arithmetic must not subtract it again.
+- Manual budget edits affect the current pace denominator immediately; historical comparison budgets remain immutable.
 
 ---
 

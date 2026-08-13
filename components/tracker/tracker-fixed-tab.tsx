@@ -85,19 +85,24 @@ export function TrackerFixedTab() {
   const manualItems = items.filter((item) => item.type === "manual")
   const summary = React.useMemo(() => buildSummary(items), [items])
   const installmentOverview = React.useMemo(() => buildInstallmentOverview(items), [items])
-  const fasterManualBucketIds = React.useMemo(
-    () =>
-      new Set(
-        items
-          .filter(
-            (item) =>
-              item.type === "manual" &&
-              deriveBucketPaceFlag(item.id, analyticsData.current, analyticsData.snapshots),
-          )
-          .map((item) => item.id),
-      ),
-    [analyticsData, items],
-  )
+  const fasterManualBucketIds = React.useMemo(() => {
+    const manualBudgetById = new Map(manualItems.map((item) => [item.id, item.budget]))
+    const paceComparisonMonth = {
+      ...analyticsData.current,
+      fixedBuckets: analyticsData.current.fixedBuckets.map((bucket) => ({
+        ...bucket,
+        budget: manualBudgetById.get(bucket.id) ?? bucket.budget,
+      })),
+    }
+
+    return new Set(
+      manualItems
+        .filter((item) =>
+          deriveBucketPaceFlag(item.id, paceComparisonMonth, analyticsData.snapshots),
+        )
+        .map((item) => item.id),
+    )
+  }, [analyticsData, manualItems])
 
   function handleEdit(item: FixedExpenseItem) {
     setSelectedItem(null)
