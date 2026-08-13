@@ -807,7 +807,7 @@
       "legend": {
         "thisMonth": "هذا الشهر",
         "lastMonth": "الشهر الماضي",
-        "evenPace": "إيقاع متساوٍ",
+        "evenPace": "إيقاع متساوٍ · {amount}/يوم",
         "today": "اليوم"
       },
       "pace": {

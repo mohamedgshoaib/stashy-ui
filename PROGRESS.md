@@ -78,3 +78,18 @@
   - `components/settings/settings-sections.tsx`: unused `SubSectionHeader` declaration.
 - New Phase 6 errors: none.
 - Phase 11 carry: VR-3 remains observation-only; no fallback is authorized.
+
+## Phase 7 — Even-pace legend value
+
+- Status: complete
+- Derived one shared `evenPacePerDay` slope for both the chart series and legend value.
+- Added the rounded whole-EGP daily value to the existing legend entry and kept the legend layout/styling unchanged.
+- Rendered the legend entry with `dir="ltr"` to protect the financial amount in RTL.
+- Authored Arabic string for PR review:
+  - `Analytics.variable.legend.evenPace`: `إيقاع متساوٍ · {amount}/يوم`
+- Gate: `pnpm typecheck` passed.
+- Gate: `pnpm lint` reported only the two plan-listed pre-existing errors:
+  - `components/tracker/tracker-transfer-drawer.tsx`: unused `surfacePanelClass` import.
+  - `components/settings/settings-sections.tsx`: unused `SubSectionHeader` declaration.
+- New Phase 7 errors: none.
+- Phase 11 carry: verify legend bidi and injection-linked slope rendering under VR-5; no fallback is authorized.

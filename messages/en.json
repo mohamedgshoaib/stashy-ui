@@ -807,7 +807,7 @@
       "legend": {
         "thisMonth": "This month",
         "lastMonth": "Last month",
-        "evenPace": "Even pace",
+        "evenPace": "Even pace · {amount}/day",
         "today": "Today"
       },
       "pace": {
