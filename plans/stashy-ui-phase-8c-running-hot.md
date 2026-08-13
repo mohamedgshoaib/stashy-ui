@@ -62,11 +62,22 @@ That is what earns it a place on a surface that is deliberately sparse: it chang
 
 **Verify:** you can state exactly which `FixedExpenseItem` fields analytics cannot supply.
 
+### Locked survey resolutions
+
+1. **Manual-only unification.** Analytics becomes the source of truth only for the manual bucket set. Recurring and installment items remain entirely on the Fixed mock because analytics does not carry their due dates, payment status, or installment lifecycle.
+2. **Replace the manual set outright.** Do not map or migrate the old `bud-*` fixtures. Replace them wholesale with `fb-coffee`, `fb-groceries`, and `fb-transport`; drop `bud-gas` and `bud-eating-out`; author fresh Fixed-only fixtures sized plausibly against budgets of 200 / 240 / 400 EGP.
+3. **Fixed owns icon presentation.** Analytics does not own `iconKey` for this pass. Map analytics IDs at the derivation boundary in one small function: Coffee → `cafe`, Groceries → `shopping`, Transport → `car`.
+4. **Migrate every manual-bucket consumer.** `HomeDrawer` must use the same per-month derivation as the Fixed page instead of materializing categories from the old mock at module scope. Report if this requires more than a trivial component reshape.
+5. **Preserve the current add asymmetry.** Edit continues to save through `TrackerFixedTab`; the Tracker FAB add drawer remains a pre-existing no-op. Do not restructure ownership. Record this under “Pre-existing, not fixed” in the PR.
+6. **Expose all three counts explicitly.** Extend `fixedPaceState` to `steady | one | faster`: `steady` → 0 flags, `one` → Coffee only, `faster` → Coffee and Groceries. Transport remains cold-start and silent. Make `steady` the default.
+
 ---
 
 ## 3. Phase 1 — Unify the manual bucket data
 
 **Goal:** make the analytics month model the single source of truth for *which manual buckets exist and what they cost*, so the Fixed page can call the comparator.
+
+**Files:** `lib/sandbox-budget.ts`, `data/fixed-tracker-mock.ts`, `components/tracker/tracker-fixed-tab.tsx`, `components/home/home-drawer.tsx`, and any directly affected Fixed presentation helpers/types.
 
 ### Why this is necessary
 
@@ -78,25 +89,31 @@ The real API will have one source of truth for buckets. **Two divergent mock dat
 
 **Do not attempt a full replacement.** Analytics does not carry everything Fixed renders — transaction lists, due dates, installment lifecycle fields, per-item status. Forcing those into the analytics model would bloat it to serve one page.
 
-**The split:**
+**The manual-only split:**
 
-- **Analytics owns the shared facts** — bucket existence, `id`, `name`, `budget`, `type`, `iconKey`, and `spent`. Fixed derives these.
-- **Fixed keeps its own presentation-only fields** — transactions, due dates, installment lifecycle, derived status — keyed by the **same IDs**.
+- **Analytics owns the shared manual facts** — manual bucket existence, `id`, `name`, `budget`, `type`, and `spent`. Fixed derives these.
+- **Fixed owns presentation facts** — `iconKey` / rendered icon, transactions, and derived card values and status — keyed by the analytics manual IDs.
+- **Recurring and installment remain entirely Fixed-owned.** Do not replace, merge, rename, or re-budget them from analytics.
 
-Manual buckets are what matter here. Recurring and installment may keep their existing Fixed-side definitions if analytics cannot supply them; report if so.
+The analytics manual set replaces the old Fixed manual set outright. Do not migrate old manual transaction histories or preserve `bud-*` continuity.
 
 ### Changes
 
-- Add a derivation (natural home: `lib/sandbox-budget.ts`, alongside `getHomeBudgetStrip`) that builds `FixedExpenseItem[]` from the analytics month, merging the Fixed-only fields.
+- Add a derivation (natural home: `lib/sandbox-budget.ts`, alongside `getHomeBudgetStrip`) that combines unchanged recurring/installment mock items with manual `FixedExpenseItem[]` derived from the analytics month and fresh Fixed-only fixtures.
+- Keep the manual icon boundary mapping in one small function beside that derivation: `fb-coffee` → `cafe`, `fb-groceries` → `shopping`, `fb-transport` → `car`.
 - `tracker-fixed-tab.tsx` seeds its local `items` state from that derivation instead of importing the mock directly.
-- **Preserve the local add/edit behaviour.** The tab currently owns state so saves apply immediately and the summary recomputes. That must still work.
+- `home-drawer.tsx` derives its manual budget categories from the same analytics month data instead of importing `fixedItems` at module scope.
+- **Preserve the live edit behaviour.** The tab-owned edit drawer continues to save immediately and recompute the summary.
+- **Preserve the pre-existing FAB add no-op.** The Tracker-level add drawer remains outside the tab state and receives no `onSave`; do not restructure it in this pass.
 - `tracker-transfer-drawer.tsx` reads destination budgets from the live items list — confirm it still resolves after the change.
 - Bucket names and budgets on the Fixed page will change to the analytics values. **That is the point.** Do not preserve the old numbers.
 
 ### Do NOT
 
 - Do NOT move transactions, due dates, or installment lifecycle data into the analytics model.
-- Do NOT delete `data/fixed-tracker-mock.ts` if it still supplies the Fixed-only fields. Reduce it to what analytics cannot provide.
+- Do NOT alter the existing recurring or installment fixtures.
+- Do NOT preserve or map the old manual fixtures. Replace them with fresh fixtures for the analytics manual IDs and budgets.
+- Do NOT delete `data/fixed-tracker-mock.ts`; retain the unchanged recurring/installment items and the fresh manual presentation fixtures there.
 - Do NOT change any analytics-side numbers to make the Fixed page look better. Analytics is upstream.
 
 ### Verify
@@ -189,9 +206,9 @@ Below the rate card because the signal is *about* the rate — a leading indicat
 
 ## 6. Phase 4 — Sandbox and state coverage
 
-`fixedPaceState` already exists from Phase 8b. Confirm it drives the Home strip and the Fixed tag as well as the Analytics tag — one axis, three surfaces.
+Extend the Phase 8b `fixedPaceState` axis to `steady | one | faster`, and confirm it drives the Home strip and the Fixed tag as well as the Analytics tag — one axis, three surfaces. Set `steady` as the sandbox default.
 
-If the strip cannot reach a count of 2+ with current data, shape a second manual bucket's `dailyCumulative` so it can. Preserve the Phase 8b invariants: monotonically non-decreasing, correct length, **last value === `spent`**, and rescaled if `lib/sandbox-budget.ts` mutates `spent`.
+Shape the fixtures so `steady` flags none, `one` flags Coffee only, and `faster` flags Coffee plus Groceries. Transport has no usable prior months and must remain cold-start and silent. Preserve the Phase 8b invariants: monotonically non-decreasing, correct length, **last value === `spent`**, and rescaled if `lib/sandbox-budget.ts` mutates `spent`.
 
 **Verify:** counts of 0, 1 and 2+ are all reachable from the Home settings drawer without editing code.
 
@@ -235,4 +252,10 @@ Then record **objective observations only. Apply no fallbacks** — carry all of
 6. Anything you were tempted to fix and did not.
 7. Confirmation that no `stashy-api` or `stashy-mobile` file was touched.
 
-Then push `running-hot-signal` and open a PR into `main` with the above in its body.
+---
+
+## 10. Final phase — Publish the PR
+
+Push `running-hot-signal` and open a PR into `main` with `gh pr create`.
+
+The PR body must contain the §9 report: per-phase summary, the Phase 0 field survey, everything that changed visually on the Fixed page, the Arabic strings authored in this pass, and VR-A … VR-F as an unchecked checklist with objective observations. Include the Tracker FAB add asymmetry under **Pre-existing, not fixed**.
