@@ -3,6 +3,7 @@
 **Repo:** `stashy-ui` only. No `stashy-api`, no `stashy-mobile`.
 **Prerequisite:** the Analytics restructure PR (phases 1–11) is **merged**. This work renders on rows introduced by that pass.
 **Status:** design locked. Do not redesign. Implement.
+**Branch:** create `fixed-pace-tag` from `main`, never from `analysis_audit`.
 
 ---
 
@@ -11,6 +12,8 @@
 Self-contained. Work **phase by phase**, do not batch. Each phase ends with `pnpm typecheck && pnpm lint`, both clean of *new* errors.
 
 Standing rules: design-system tokens only, no inline hex; logical direction utilities (`ms-`/`me-`/`ps-`/`pe-`), never physical; amounts render `dir="ltr"`; dynamic widths via inline `style`.
+
+At execution start, the first repository change is this plan amendment, committed as `phase 0: plan amendment`.
 
 **Known pre-existing failures — not yours, do not chase:** lint errors in `components/settings/settings-screen.tsx`, `components/settings/settings-sections.tsx`, `components/tracker/tracker-transfer-drawer.tsx`; a possible build failure on `/[locale]/tracker` relating to a `useSearchParams()` Suspense boundary.
 
@@ -63,7 +66,7 @@ thisMonthPace  = (spentAtToday / budget) / pointInMonth
 ```
 `spentAtToday` is the bucket's cumulative spend at `daysTracked`.
 
-**Step 2 — usable prior months.** A prior month is usable when the bucket **existed in it as a manual bucket with a budget**. Otherwise exclude it entirely from both the count and the average — do not treat it as zero.
+**Step 2 — usable prior months.** A prior month is usable when the bucket **existed in it as a manual bucket with a budget** and its actual has a `dailyCumulative` array. An absent array is an unusable month: exclude it entirely from both the count and the average, do not treat it as zero, and remain silent when no usable month remains.
 
 **Step 3 — the reference.**
 - **0 usable prior months** → no tag. Silent. Stop.
@@ -72,11 +75,17 @@ thisMonthPace  = (spentAtToday / budget) / pointInMonth
 
 Each prior month's fraction uses **that month's own budget and its own `daysInMonth`**, evaluated at the same `pointInMonth` as today.
 
+When the equivalent point lands at a fractional array index, use **linear interpolation between adjacent days**:
+```
+value = arr[floor(i)] + (arr[ceil(i)] - arr[floor(i)]) * fraction(i)
+```
+Clamp both adjacent indices to the array bounds. Do not round the index.
+
 **Step 4 — flag.**
 ```
 thisMonthPace > reference * (1 + BAND)
 ```
-`BAND` is the existing **±15% "steady" band already used by `deriveRhythmCharacter`**. **Read the constant from source and reuse it — do not hardcode `0.15`, and do not introduce a second threshold number.** If it is currently an inline literal, extract it to a named export and have both call sites use it.
+`BAND` is the existing **±15% "steady" band already used by `deriveRhythmCharacter`**. It is currently inline at `components/analytics/data.ts:28` and in the equivalent `1.15` comparisons at `:31-32`. Extract it to a named export and have both `deriveRhythmCharacter` and the bucket comparator consume it. **Do not change its value, hardcode `0.15` at the new call site, or introduce a second threshold number.**
 
 **Guards.** Any month with `budget <= 0` or `daysInMonth <= 0` is excluded from the calculation. This is a divide-by-zero guard, not a product state — a manual bucket cannot exist without a budget, so this should be unreachable.
 
@@ -107,8 +116,10 @@ thisMonthPace > reference * (1 + BAND)
 
 Add to `FixedBucketActual`:
 ```ts
-dailyCumulative: number[]
+dailyCumulative?: number[]
 ```
+
+Keep the existing shared type. Do not introduce a discriminated union.
 
 Follow the existing `dailyVariableCumulative` precedent on `LiveMonthAnalysis` / `MonthSnapshot` for shape and conventions.
 
@@ -117,7 +128,7 @@ Follow the existing `dailyVariableCumulative` precedent on `LiveMonthAnalysis` /
 - Length = `daysTracked` on live months, `daysInMonth` on snapshots.
 - **Last value === that bucket's `spent`.** The array and the scalar must agree.
 
-Populate across **all** live scenarios and **all** snapshots, for **manual buckets only**. Recurring and installment buckets do not need it — they are committed obligations with no behavioural pace.
+Populate across **all** live scenarios and **all** snapshots, for **manual buckets only**. Leave the optional field absent on recurring and installment buckets — they are committed obligations with no behavioural pace.
 
 ### Shape the data deliberately
 
@@ -129,6 +140,24 @@ The mock exists to make states visible. Author arrays so these are all reachable
 4. If 3+ snapshots exist: a bucket where the **average** branch produces a different answer than last-month-only would. This is what proves the switchover works.
 
 Also give at least one bucket a **budget change across months**, so the per-month normalisation is exercised rather than assumed.
+
+The bucket roles are locked:
+- `fb-coffee`: the only bucket whose profile is switched by `fixedPaceState`.
+- `fb-groceries`: a fixed steady profile, unaffected by the pace toggle.
+- `fb-transport`: cold-start profile with zero usable prior months.
+
+Add `fb-transport` to the live month only with these fixture values:
+
+| Field | Value |
+|---|---|
+| `id` | `fb-transport` |
+| name | `Transport` |
+| `iconKey` | `groceries` — closest available existing key; do not add a new key, and note the substitution in the PR |
+| budget | `400` |
+| normal-state spend | `310` |
+| overrun-state spend | `470` |
+
+Do not add `fb-transport` to April, March, or February. Its absence from all three snapshots is the cold-start proof. Add its 400 to the live month's `fixedTotalBudget` and raise the live month's `monthlyBudget` by the same 400, leaving the variable lane unchanged. Do not reallocate budget from Coffee or Groceries. Re-verify that `onTrack`, `atRisk`, and `over` still produce their intended states and that no closed-month verdict flips. If any does, stop and report rather than tuning data to compensate.
 
 ### ⚠️ The desync trap — handle this explicitly
 
@@ -163,7 +192,13 @@ Implement §2 exactly: pace fractions normalised per month, usable-prior-month f
 - Return a magnitude, percentage, or direction. **Boolean only** — "faster than usual" or nothing. There is no "slower than usual" tag; underspending is not a signal this product surfaces.
 - Apply it to recurring or installment buckets.
 
-**Verify:** `pnpm typecheck && pnpm lint`. Report, per scenario, which buckets the comparator flags and which branch (last-month vs average) each took.
+**Verify:** `pnpm typecheck && pnpm lint`. Report which buckets the comparator flags and which branch (last-month vs average) each took for exactly these four runs:
+1. `monthlyBudgetState: onTrack`, `analyticsHistoryMode: withHistory`
+2. `monthlyBudgetState: atRisk`, `analyticsHistoryMode: withHistory`
+3. `monthlyBudgetState: over`, `analyticsHistoryMode: withHistory`
+4. `analyticsHistoryMode: firstMonth`, confirming the zero-snapshot path is silent
+
+Do not enumerate other axis combinations. `budgetInjection` and `fixedBudgetOverrun` do not feed the comparator; if either changes its output, report that as a finding.
 
 ---
 
@@ -200,6 +235,8 @@ Inside the tap-to-expand overrun list, on each row where the comparator returns 
 - **Neutral tone.** `text-text-tertiary` / `bg-surface-offset`, matching the quietest existing chip treatment on the page. **Not** expense, not warning.
 - **Text only.** No icon, no arrow, no percentage.
 - Must not disturb the row's existing layout: bucket name, overage amount, and the row's own alignment all stay as they are. The tag is additive.
+- Group the tag with the bucket name on its start side, before the end-aligned overage amount: `[name] [tag] … [amount]`. The tag qualifies the bucket, not the amount.
+- Prefer one line. If name plus tag cannot fit at mobile width, wrap the tag to a second line under the name. Never truncate the bucket name and never shrink the amount. Record the rendered result in VR-A.
 - RTL-safe: logical spacing utilities only.
 
 ### Do NOT
@@ -220,7 +257,9 @@ Inside the tap-to-expand overrun list, on each row where the comparator returns 
 ### Files
 `store/sandbox-store.ts`, `components/home/home-drawer.tsx`
 
-Add a toggle driving whether the manual buckets' arrays present as faster-than-usual or steady. Follow the existing axis pattern (`fixedBudgetOverrun` is the closest analogue) — same shape, same drawer treatment.
+Add a `fixedPaceState` axis with values `"steady" | "faster"` and default `"steady"`. Follow the existing axis pattern (`fixedBudgetOverrun` is the closest analogue) — same shape, same drawer treatment.
+
+The toggle targets `fb-coffee` only. In `steady`, Coffee uses its steady profile and the tag is off. In `faster`, Coffee uses its faster-than-history profile. Groceries and Transport retain their fixed profiles in both states.
 
 The toggle must compose with `fixedBudgetOverrun`, since **the tag can only ever be seen on an overrunning bucket** — the disclosure that hosts it only opens when `manualOverCount > 0`.
 
@@ -242,9 +281,27 @@ Then walk the states and record **objective observations only**:
 
 **Apply no fallbacks.** Carry all five into the PR body as unchecked items with your observations. Design decisions arising from them are Husseini's.
 
+`fb-transport` appears in the disclosure only when `fixedBudgetOverrun` is `some`, because its normal spend is under plan. Its invisibility in the normal state is expected, not a failure.
+
 ---
 
-## 10. Out of scope
+## 10. Phase 7 — Publish the pull request
+
+Only after every prior phase passes:
+
+1. Push `fixed-pace-tag`.
+2. Open a PR into `main` with `gh pr create`.
+3. Include in the PR body:
+   - a per-phase summary;
+   - the snapshot count and whether the average branch is renderable;
+   - Phase 2's four per-scenario flag results and the branch each took;
+   - every Arabic string authored in this pass, including the pace tag and Transport name;
+   - the `groceries` icon-key substitution for Transport;
+   - VR-A through VR-E as an unchecked checklist with objective observations.
+
+---
+
+## 11. Out of scope
 
 | Item | Status |
 |---|---|
@@ -258,7 +315,7 @@ Then walk the states and record **objective observations only**:
 
 ---
 
-## 11. Reporting back
+## 12. Reporting back
 
 1. Per phase: what changed, and anything that did not match this plan.
 2. Phase 0's snapshot count, and whether the average branch is renderable.
