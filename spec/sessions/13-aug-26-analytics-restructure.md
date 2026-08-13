@@ -142,6 +142,7 @@ The Analytics restructure was merged into `main`. The locked Phase 8b plan had s
 - Corrected the review-reported one-day offset by converting the normalized prior-month day position to a zero-based cumulative-array index before interpolation.
 - Reshaped April Coffee history without changing its endpoint so the corrected comparator still proves the locked average-true versus last-month-only-false branch switch.
 - Re-ran typecheck, lint, formatting, the 48-combination invariant matrix, and the production build successfully after review.
+- After merge, changed the sandbox defaults to `fixedBudgetOverrun: "some"` and `fixedPaceState: "faster"` so the live in-progress month opens with a visible Coffee pace-tag example; the existing controls still expose the quiet states.
 
 ---
 
