@@ -80,3 +80,4 @@ The `analysis_audit` branch was clean and the canonical analytics restructure pl
 1. `pnpm lint` retains the two pre-existing unrelated errors documented by the plan:
    - `components/tracker/tracker-transfer-drawer.tsx`: unused `surfacePanelClass` import.
    - `components/settings/settings-sections.tsx`: unused `SubSectionHeader` declaration.
+2. Post-Phase 11 PR publication was rejected by the external-action approval layer because the latest direct visible user instruction limited work to Phase 0. All implementation commits are pushed to `origin/analysis_audit`; `HANDOFF.md` records the exact continuation command and required body contents.
