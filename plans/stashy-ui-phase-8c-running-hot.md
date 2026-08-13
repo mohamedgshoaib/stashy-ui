@@ -9,7 +9,7 @@
 
 ## 0. How to use this document
 
-Self-contained. Work **phase by phase**, do not batch. Each phase ends with `pnpm typecheck && pnpm lint`, clean of *new* errors.
+Self-contained. Work **phase by phase**, do not batch. Each phase ends with `pnpm typecheck && pnpm lint`, clean of _new_ errors.
 
 Standing rules: design-system tokens only, no inline hex; logical direction utilities (`ms-`/`me-`/`ps-`/`pe-`), never physical; amounts render `dir="ltr"`; dynamic widths via inline `style`.
 
@@ -23,15 +23,15 @@ Standing rules: design-system tokens only, no inline hex; logical direction util
 
 ## 1. What this builds, and why
 
-Phase 8b built a pace comparator that flags a manual fixed bucket spending ahead of its own history. It is currently **only reachable inside the Analytics overrun disclosure** — which means it can only fire on buckets *already over plan*, at which point the overage on the same row already says so.
+Phase 8b built a pace comparator that flags a manual fixed bucket spending ahead of its own history. It is currently **only reachable inside the Analytics overrun disclosure** — which means it can only fire on buckets _already over plan_, at which point the overage on the same row already says so.
 
 **A behavioural warning gated behind the outcome it warns about is redundant by construction.** This phase moves the signal to where it can do work.
 
 ### Two surfaces, two jobs
 
-**Home — the alert.** A conditional strip: *"2 budgets running hot"*. Aggregate only, no names, no figures. It exists to make the user aware something needs attention on a surface they open daily.
+**Home — the alert.** A conditional strip: _"2 budgets running hot"_. Aggregate only, no names, no figures. It exists to make the user aware something needs attention on a surface they open daily.
 
-**Fixed — the detail.** A "Faster than usual" tag on each hot bucket's card. This is what makes the Home strip's handoff meaningful: you tap through and immediately see *which*.
+**Fixed — the detail.** A "Faster than usual" tag on each hot bucket's card. This is what makes the Home strip's handoff meaningful: you tap through and immediately see _which_.
 
 The strip is aggregate precisely **because** the destination names them. Naming one bucket on Home when three are hot would be a claim the strip cannot back up, and duplicating the naming on both surfaces is redundant.
 
@@ -45,7 +45,7 @@ That is what earns it a place on a surface that is deliberately sparse: it chang
 
 - **Stashy does not moralize spending. Numbers are facts, not verdicts.** This is a neutral factual signal, not a scolding.
 - **Home converts; it does not decompose.** Home gets a count. Names and detail live on Fixed.
-- **Semantic tone is for exceeding your own plan, not for comparing periods.** A cross-period pace comparison is *calibration*. It stays neutral. See §4 and §5 — this is the most likely thing to get wrong.
+- **Semantic tone is for exceeding your own plan, not for comparing periods.** A cross-period pace comparison is _calibration_. It stays neutral. See §4 and §5 — this is the most likely thing to get wrong.
 
 ---
 
@@ -75,13 +75,13 @@ That is what earns it a place on a surface that is deliberately sparse: it chang
 
 ## 3. Phase 1 — Unify the manual bucket data
 
-**Goal:** make the analytics month model the single source of truth for *which manual buckets exist and what they cost*, so the Fixed page can call the comparator.
+**Goal:** make the analytics month model the single source of truth for _which manual buckets exist and what they cost_, so the Fixed page can call the comparator.
 
 **Files:** `lib/sandbox-budget.ts`, `data/fixed-tracker-mock.ts`, `components/tracker/tracker-fixed-tab.tsx`, `components/home/home-drawer.tsx`, and any directly affected Fixed presentation helpers/types.
 
 ### Why this is necessary
 
-The two datasets were built independently and disagree: Fixed has *Coffee & Cafes* at 500, analytics has `fb-coffee` at 200. `deriveBucketPaceFlag` is keyed to analytics bucket IDs, so today the Fixed page has no way to ask the question at all.
+The two datasets were built independently and disagree: Fixed has _Coffee & Cafes_ at 500, analytics has `fb-coffee` at 200. `deriveBucketPaceFlag` is keyed to analytics bucket IDs, so today the Fixed page has no way to ask the question at all.
 
 The real API will have one source of truth for buckets. **Two divergent mock datasets are a fiction the mock is telling that the product will not tell** — unifying makes the sandbox more faithful, not less.
 
@@ -127,6 +127,7 @@ The analytics manual set replaces the old Fixed manual set outright. Do not migr
 **Goal:** show which buckets are hot, on the surface the Home strip sends you to.
 
 ### Files
+
 `components/tracker/cards/budget-card.tsx`, `components/tracker/tracker-fixed-tab.tsx`
 
 ### Changes
@@ -154,6 +155,7 @@ The analytics manual set replaces the old Fixed manual set outright. Do not migr
 **Goal:** a conditional aggregate alert on Home.
 
 ### Files
+
 `components/home/types.ts`, `components/home/home-data.ts` (or `lib/sandbox-budget.ts`), `components/home/running-hot-row.tsx` (new), `components/home/home-content.tsx`, `components/home/home-screen.tsx`, `messages/en.json`, `messages/ar.json`
 
 ### Data
@@ -168,16 +170,17 @@ Content: the count phrase on the start side, a `View →` affordance on the end 
 
 **Locked EN copy:**
 
-| Key | Value |
-|---|---|
-| `Home.runningHot.rowLabel` | `{count, plural, one {1 budget} other {# budgets}} running hot` |
-| `Home.runningHot.viewAction` | `View` |
+| Key                          | Value                                                           |
+| ---------------------------- | --------------------------------------------------------------- |
+| `Home.runningHot.rowLabel`   | `{count, plural, one {1 budget} other {# budgets}} running hot` |
+| `Home.runningHot.viewAction` | `View`                                                          |
 
 Arabic: author it, match the existing register, list it in the PR. Keep it short — it shares a row with the action.
 
 **Tone — locked: quiet/neutral, NOT amber.** Use a neutral surface (`bg-surface-offset` + `border-border` or equivalent), **not** `bg-warning-subtle`.
 
 Two reasons, and this was decided against an amber mockup:
+
 1. `MajorExpensesRowCard` directly below is already amber. Two amber strips stacked under the daily rate card read as compounding alarm.
 2. It is doctrinally correct — cross-period comparison is calibration, and calibration does not get semantic tone. This keeps Home consistent with the neutral tag on Fixed and in Analytics.
 
@@ -185,7 +188,7 @@ Two reasons, and this was decided against an amber mockup:
 
 In `home-content.tsx`: **after `DailyRateCard`, before `MajorExpensesRowCard`.**
 
-Below the rate card because the signal is *about* the rate — a leading indicator it will drop. It cannot sit above the number it qualifies.
+Below the rate card because the signal is _about_ the rate — a leading indicator it will drop. It cannot sit above the number it qualifies.
 
 ### Navigation
 
@@ -231,14 +234,14 @@ Then record **objective observations only. Apply no fallbacks** — carry all of
 
 ## 8. Out of scope
 
-| Item | Status |
-|---|---|
-| `?bucket=<id>` deep link to a specific bucket | Deferred. Revisit if VR-D shows the handoff is weak. |
-| Naming buckets on Home | Rejected — the destination names them. |
-| Moving transactions / due dates / installment lifecycle into the analytics model | Rejected — bloats an upstream model to serve one page. |
-| Any tone other than neutral on either new surface | Rejected — see §4 and §5. |
-| A "slower than usual" or positive signal | Rejected. Underspending is incidental upside, not a signal. |
-| Any `stashy-api` change | Out of scope. The server-side query for per-bucket daily series is real future work but not this pass. |
+| Item                                                                             | Status                                                                                                 |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `?bucket=<id>` deep link to a specific bucket                                    | Deferred. Revisit if VR-D shows the handoff is weak.                                                   |
+| Naming buckets on Home                                                           | Rejected — the destination names them.                                                                 |
+| Moving transactions / due dates / installment lifecycle into the analytics model | Rejected — bloats an upstream model to serve one page.                                                 |
+| Any tone other than neutral on either new surface                                | Rejected — see §4 and §5.                                                                              |
+| A "slower than usual" or positive signal                                         | Rejected. Underspending is incidental upside, not a signal.                                            |
+| Any `stashy-api` change                                                          | Out of scope. The server-side query for per-bucket daily series is real future work but not this pass. |
 
 ---
 

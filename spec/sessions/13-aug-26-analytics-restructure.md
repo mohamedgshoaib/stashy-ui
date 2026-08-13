@@ -157,3 +157,43 @@ The Analytics restructure was merged into `main`. The locked Phase 8b plan had s
 ## Open Blockers
 
 None.
+
+# Session 4 — Running-hot signal integration
+
+**Time:** Continuous implementation block
+
+---
+
+## Status at Session Start
+
+Phase 8b was present on `main`, including `deriveBucketPaceFlag`, `dailyCumulative`, and `RHYTHM_STEADY_BAND`. The locked Phase 8c plan had six survey ambiguities resolved by the user, narrowing source unification to manual buckets and authorizing the final push-and-PR phase.
+
+---
+
+## Completed This Session
+
+- Created `running-hot-signal` from `main` and committed the required Phase 0 plan amendment with all six resolutions and the final PR phase.
+- Replaced the Fixed manual mock set wholesale with analytics-derived Coffee, Groceries, and Transport buckets while retaining Fixed-owned recurring and installment items.
+- Added the Fixed-owned boundary icon map and fresh, budget-sized transaction fixtures for all three analytics manual buckets.
+- Migrated HomeDrawer manual categories from the stale module-level mock to the same per-month derivation used by Tracker Fixed.
+- Added neutral per-card pace tags on Fixed and the count-only running-hot strip on Home, with locale-aware Tracker navigation.
+- Added steady, one-hot, and faster sandbox states; steady remains the default, one flags Coffee, faster flags Coffee and Groceries, and cold-start Transport remains silent.
+- Added English and Arabic strings for the Home row and one-hot sandbox control while reusing the existing localized pace tag.
+- Passed per-phase and full typecheck/lint gates, a network-enabled production build, and targeted formatting checks.
+- Completed the Phase 5 observation pass at 390×844 across EN/AR, steady/one/faster, Fixed detail/edit/transfer drawers, Home-to-Tracker navigation, under-budget pace tags, and the Analytics route with no horizontal overflow.
+- Reverted all throwaway sandbox-state changes used during visual verification.
+
+---
+
+## Decisions Made
+
+- Analytics owns only manual bucket identity, label, budget, and spend at the derivation boundary; Fixed continues to own presentation, transaction, due-date, installment, and payment lifecycle fields.
+- The manual set is replaced rather than mapped or reconciled with legacy `bud-*` identities and histories.
+- The Home strip remains count-only and the Fixed pace tag remains disclosure-only; neither changes budget status semantics.
+- The Tracker FAB add drawer remains a pre-existing no-op because it has no `onSave`; edit continues through the existing `handleSave` path.
+
+---
+
+## Open Blockers
+
+None.
