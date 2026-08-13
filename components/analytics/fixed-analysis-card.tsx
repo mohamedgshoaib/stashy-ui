@@ -5,7 +5,7 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { useLocale, useTranslations } from "next-intl"
 import * as React from "react"
 
-import { getPreviousSnapshot } from "@/components/analytics/data"
+import { deriveBucketPaceFlag, getPreviousSnapshot } from "@/components/analytics/data"
 import {
   formatAnalyticsCurrency,
   formatAnalyticsSignedCurrency,
@@ -61,7 +61,16 @@ export function FixedAnalysisCard({ month, data }: FixedAnalysisCardProps) {
       const actual = month.fixedBucketsActual.find((item) => item.id === bucket.id)
       const overBy = (actual?.spent ?? 0) - bucket.budget
 
-      return overBy > 0 ? [{ id: bucket.id, name: bucket.name, overBy }] : []
+      return overBy > 0
+        ? [
+            {
+              id: bucket.id,
+              name: bucket.id === "fb-transport" ? t("fixed.bucketTransport") : bucket.name,
+              overBy,
+              fasterThanUsual: deriveBucketPaceFlag(bucket.id, month, data.snapshots),
+            },
+          ]
+        : []
     })
     .sort((a, b) => b.overBy - a.overBy)
   const manualOverCount = manualOverruns.length
@@ -207,7 +216,14 @@ export function FixedAnalysisCard({ month, data }: FixedAnalysisCardProps) {
                           key={bucket.id}
                           className="flex min-h-12 items-center justify-between gap-3 py-2"
                         >
-                          <p className="min-w-0 text-sm text-foreground">{bucket.name}</p>
+                          <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                            <p className="min-w-0 text-sm text-foreground">{bucket.name}</p>
+                            {bucket.fasterThanUsual ? (
+                              <span className="shrink-0 rounded-full bg-surface-offset px-2 py-0.5 text-[0.6875rem] font-medium text-text-tertiary whitespace-nowrap">
+                                {t("fixed.paceTagFaster")}
+                              </span>
+                            ) : null}
+                          </div>
                           <p className="shrink-0 text-sm tabular-nums text-foreground whitespace-nowrap">
                             {label.slice(0, amountStart)}
                             <bdi dir="ltr">{amount}</bdi>

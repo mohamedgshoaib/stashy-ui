@@ -215,6 +215,9 @@
         "fixedOverrunLabel": "Fixed overrun",
         "fixedOverrunNone": "None",
         "fixedOverrunSome": "With overruns",
+        "fixedPaceLabel": "Fixed pace",
+        "fixedPaceSteady": "Steady",
+        "fixedPaceFaster": "Faster",
         "show": "Show",
         "hide": "Hide"
       },
@@ -741,6 +744,8 @@
       "overrunDisclosureShow": "Show overrunning budgets",
       "overrunDisclosureHide": "Hide overrunning budgets",
       "overrunRowOver": "{amount} over",
+      "paceTagFaster": "Faster than usual",
+      "bucketTransport": "Transport",
       "thisMonth": "This month",
       "lastMonth": "Last month",
       "change": "Change",

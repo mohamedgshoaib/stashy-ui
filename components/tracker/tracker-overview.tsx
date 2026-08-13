@@ -3,14 +3,20 @@ import * as React from "react"
 
 import { TrackerProgress } from "@/components/tracker/tracker-progress"
 import { Card, CardContent } from "@/components/ui/card"
-import { getSandboxAnalyticsData } from "@/lib/sandbox-budget"
 import { heroSurfaceClass, statTileClass } from "@/lib/design-system-classes"
+import { getSandboxAnalyticsData } from "@/lib/sandbox-budget"
 import { cn } from "@/lib/utils"
 import { useSandboxStore } from "@/store/sandbox-store"
 
 export function TrackerOverview() {
   const t = useTranslations("Tracker")
-  const { monthlyBudgetState, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun } = useSandboxStore()
+  const {
+    monthlyBudgetState,
+    budgetInjection,
+    analyticsHistoryMode,
+    fixedBudgetOverrun,
+    fixedPaceState,
+  } = useSandboxStore()
   const analyticsData = React.useMemo(
     () =>
       getSandboxAnalyticsData({
@@ -18,8 +24,9 @@ export function TrackerOverview() {
         budgetInjection,
         analyticsHistoryMode,
         fixedBudgetOverrun,
+        fixedPaceState,
       }),
-    [monthlyBudgetState, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun],
+    [monthlyBudgetState, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun, fixedPaceState],
   )
   const month = analyticsData.current
   const budgeted = month.fixedTotalBudget

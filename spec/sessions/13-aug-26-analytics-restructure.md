@@ -117,3 +117,42 @@ PR #12 was open from `analysis_audit` with two reviewer-reported Arabic/RTL regr
 ## Open Blockers
 
 None.
+
+# Session 3 — Manual fixed bucket pace tag
+
+**Time:** Continuous implementation block
+
+---
+
+## Status at Session Start
+
+The Analytics restructure was merged into `main`. The locked Phase 8b plan had six execution ambiguities resolved before work began, including the live-only Transport cold-start fixture, interpolation, tag placement, comparator reporting scope, and the `fixedPaceState` sandbox contract.
+
+---
+
+## Completed This Session
+
+- Created `fixed-pace-tag` from `main` and committed the locked plan amendment as Phase 0.
+- Confirmed the pre-existing `over` scenario normalized to `atRisk` on both `main` and the Phase 1 worktree, then fixed its fixture in an isolated commit by reconciling variable totals at 4,480 EGP.
+- Added optional manual-only cumulative histories, the live-only Transport cold-start bucket, bounded linear interpolation, the shared 15% rhythm band, and the pure bucket pace comparator.
+- Added EN/AR pace and Transport copy, rendered the neutral disclosure-only tag, and added the Coffee-only `fixedPaceState` sandbox control.
+- Passed typecheck, lint, production build, and targeted formatting checks.
+- Verified EN/AR at 390×844 with no horizontal overflow, no clipping or truncation, one Coffee pace tag in faster mode, silent Transport cold start, and unchanged end-aligned amounts.
+- Verified all 48 analytics sandbox-axis combinations preserve monotonic manual cumulative arrays whose final value equals `spent`.
+- Corrected the review-reported one-day offset by converting the normalized prior-month day position to a zero-based cumulative-array index before interpolation.
+- Reshaped April Coffee history without changing its endpoint so the corrected comparator still proves the locked average-true versus last-month-only-false branch switch.
+- Re-ran typecheck, lint, formatting, the 48-combination invariant matrix, and the production build successfully after review.
+
+---
+
+## Decisions Made
+
+- `fb-coffee` is the only toggled pace bucket, `fb-groceries` remains fixed-steady, and live-only `fb-transport` remains cold-start and silent.
+- Transport reuses the `groceries` icon key because the pass does not authorize a new asset decision.
+- The pre-existing over-state fixture correction remains isolated from planned phase commits and will be called out separately in the PR.
+
+---
+
+## Open Blockers
+
+None.

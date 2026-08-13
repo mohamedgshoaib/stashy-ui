@@ -1,6 +1,11 @@
 "use client"
 
-import { ArrowUpRight01Icon, ChartIncreaseIcon, Exchange01Icon, Wallet02Icon } from "@hugeicons/core-free-icons"
+import {
+  ArrowUpRight01Icon,
+  ChartIncreaseIcon,
+  Exchange01Icon,
+  Wallet02Icon,
+} from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { useLocale, useTranslations } from "next-intl"
 import * as React from "react"
@@ -16,12 +21,12 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer"
+import type { Locale } from "@/i18n/routing"
 import { inputFieldClass } from "@/lib/design-system-classes"
+import { getDirectionForLocale } from "@/lib/i18n"
+import { getHomeBudgetStrip, getSandboxAnalyticsData } from "@/lib/sandbox-budget"
 import { semanticSurfaceClass, semanticTextClass } from "@/lib/semantic-styles"
 import { cn } from "@/lib/utils"
-import { getDirectionForLocale } from "@/lib/i18n"
-import type { Locale } from "@/i18n/routing"
-import { getHomeBudgetStrip, getSandboxAnalyticsData } from "@/lib/sandbox-budget"
 import { useSandboxStore } from "@/store/sandbox-store"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -46,7 +51,13 @@ export function TrackerTransferDrawer({
   const t = useTranslations("Tracker.transfer")
   const locale = useLocale() as Locale
   const direction = getDirectionForLocale(locale)
-  const { monthlyBudgetState, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun } = useSandboxStore()
+  const {
+    monthlyBudgetState,
+    budgetInjection,
+    analyticsHistoryMode,
+    fixedBudgetOverrun,
+    fixedPaceState,
+  } = useSandboxStore()
   const analyticsData = React.useMemo(
     () =>
       getSandboxAnalyticsData({
@@ -54,10 +65,14 @@ export function TrackerTransferDrawer({
         budgetInjection,
         analyticsHistoryMode,
         fixedBudgetOverrun,
+        fixedPaceState,
       }),
-    [monthlyBudgetState, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun],
+    [monthlyBudgetState, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun, fixedPaceState],
   )
-  const budgetStrip = React.useMemo(() => getHomeBudgetStrip(analyticsData.current), [analyticsData])
+  const budgetStrip = React.useMemo(
+    () => getHomeBudgetStrip(analyticsData.current),
+    [analyticsData],
+  )
 
   const remaining = sourceItem ? Math.max(0, sourceItem.remaining) : 0
   const { daysRemaining } = budgetStrip
@@ -75,9 +90,7 @@ export function TrackerTransferDrawer({
   if (!sourceItem) return null
 
   // All other manual budgets (excluding source)
-  const otherBudgets = items.filter(
-    (item) => item.type === "manual" && item.id !== sourceItem.id,
-  )
+  const otherBudgets = items.filter((item) => item.type === "manual" && item.id !== sourceItem.id)
 
   const destinations: Destination[] = [
     {
@@ -100,9 +113,7 @@ export function TrackerTransferDrawer({
       <DrawerContent dir={direction} className="mx-auto max-w-sm">
         <DrawerHeader className="text-start">
           <DrawerTitle>{t("title")}</DrawerTitle>
-          <DrawerDescription>
-            {t("description", { name: sourceItem.name })}
-          </DrawerDescription>
+          <DrawerDescription>{t("description", { name: sourceItem.name })}</DrawerDescription>
         </DrawerHeader>
 
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 pb-2">
@@ -145,9 +156,7 @@ export function TrackerTransferDrawer({
                     type="button"
                     className={cn(
                       "flex items-center gap-3 rounded-[var(--radius-sm)] px-3 py-2.5 text-start shadow-ring transition-colors",
-                      isSelected
-                        ? semanticSurfaceClass.transfer
-                        : "bg-surface-offset",
+                      isSelected ? semanticSurfaceClass.transfer : "bg-surface-offset",
                     )}
                     onClick={() => setDestinationId(dest.id)}
                   >
@@ -244,10 +253,12 @@ function ImpactPreview({
     const rateIncrease = daysRemaining > 0 ? amount / daysRemaining : 0
 
     return (
-      <div className={cn(
-        "flex items-start gap-2.5 rounded-[var(--radius-sm)] px-3 py-2.5 shadow-ring",
-        semanticSurfaceClass.income,
-      )}>
+      <div
+        className={cn(
+          "flex items-start gap-2.5 rounded-[var(--radius-sm)] px-3 py-2.5 shadow-ring",
+          semanticSurfaceClass.income,
+        )}
+      >
         <HugeiconsIcon
           icon={ChartIncreaseIcon}
           size={15}
@@ -270,10 +281,12 @@ function ImpactPreview({
   }
 
   return (
-    <div className={cn(
-      "flex items-start gap-2.5 rounded-[var(--radius-sm)] px-3 py-2.5 shadow-ring",
-      semanticSurfaceClass.fixed,
-    )}>
+    <div
+      className={cn(
+        "flex items-start gap-2.5 rounded-[var(--radius-sm)] px-3 py-2.5 shadow-ring",
+        semanticSurfaceClass.fixed,
+      )}
+    >
       <HugeiconsIcon
         icon={Wallet02Icon}
         size={15}

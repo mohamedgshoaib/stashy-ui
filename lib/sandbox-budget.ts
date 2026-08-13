@@ -13,12 +13,14 @@ import {
 } from "@hugeicons/core-free-icons"
 
 import {
+  buildDailyCumulative,
   getAnalyticsDataForScenario,
   getPreviousSnapshot,
   withManualBucketCalibration,
 } from "@/components/analytics/data"
 import type {
   AnalyticsData,
+  FixedBucketActual,
   FixedBucketIconKey,
   LiveMonthAnalysis,
   MonthSnapshot,
@@ -32,6 +34,7 @@ export type SandboxBudgetConfig = {
   budgetInjection: "with" | "without"
   analyticsHistoryMode: "withHistory" | "firstMonth"
   fixedBudgetOverrun: "none" | "some"
+  fixedPaceState: "steady" | "faster"
 }
 
 type FixedPaymentMeta = {
@@ -77,6 +80,63 @@ function getMonthMetrics(month: LiveMonthAnalysis) {
   }
 }
 
+function withRescaledSpend(actual: FixedBucketActual, spent: number): FixedBucketActual {
+  const cumulative = actual.dailyCumulative
+  if (!cumulative || cumulative.length === 0 || actual.spent <= 0) return { ...actual, spent }
+
+  const scale = spent / actual.spent
+  return {
+    ...actual,
+    spent,
+    dailyCumulative: cumulative.map((value, index) =>
+      index === cumulative.length - 1 ? spent : Math.round(value * scale),
+    ),
+  }
+}
+
+function withFixedPaceState(
+  data: AnalyticsData,
+  fixedPaceState: SandboxBudgetConfig["fixedPaceState"],
+): AnalyticsData {
+  if (fixedPaceState === "steady") return data
+
+  const snapshotExponentByMonth: Record<string, number> = {
+    "2026-04": 0.5,
+    "2026-03": 1.3,
+    "2026-02": 0.93,
+  }
+
+  return {
+    ...data,
+    current: {
+      ...data.current,
+      fixedBucketsActual: data.current.fixedBucketsActual.map((actual) =>
+        actual.id === "fb-coffee"
+          ? {
+              ...actual,
+              dailyCumulative: buildDailyCumulative(data.current.daysTracked, actual.spent, 0.55),
+            }
+          : actual,
+      ),
+    },
+    snapshots: data.snapshots.map((snapshot) => ({
+      ...snapshot,
+      fixedBucketsActual: snapshot.fixedBucketsActual.map((actual) =>
+        actual.id === "fb-coffee"
+          ? {
+              ...actual,
+              dailyCumulative: buildDailyCumulative(
+                snapshot.daysInMonth,
+                actual.spent,
+                snapshotExponentByMonth[snapshot.month] ?? 1,
+              ),
+            }
+          : actual,
+      ),
+    })),
+  }
+}
+
 export function getSandboxAnalyticsData(config: SandboxBudgetConfig): AnalyticsData {
   let data = getAnalyticsDataForScenario(config.monthlyBudgetState)
 
@@ -111,14 +171,17 @@ export function getSandboxAnalyticsData(config: SandboxBudgetConfig): AnalyticsD
     }
   }
 
+  data = withFixedPaceState(data, config.fixedPaceState)
+
   if (config.fixedBudgetOverrun === "some" && data.current.status === "inProgress") {
     data = {
       ...data,
       current: {
         ...data.current,
         fixedBucketsActual: data.current.fixedBucketsActual.map((actual) => {
-          if (actual.id === "fb-coffee") return { ...actual, spent: 240 }
-          if (actual.id === "fb-groceries") return { ...actual, spent: 320 }
+          if (actual.id === "fb-coffee") return withRescaledSpend(actual, 240)
+          if (actual.id === "fb-groceries") return withRescaledSpend(actual, 320)
+          if (actual.id === "fb-transport") return withRescaledSpend(actual, 470)
           return actual
         }),
       },

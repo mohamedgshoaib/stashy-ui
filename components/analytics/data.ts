@@ -12,6 +12,20 @@ import type {
 } from "@/components/analytics/types"
 
 export const ANALYTICS_PLAN: "free" | "pro" = "pro"
+export const RHYTHM_STEADY_BAND = 0.15
+
+export function buildDailyCumulative(
+  length: number,
+  total: number,
+  progressExponent = 1,
+): number[] {
+  if (length <= 0) return []
+
+  return Array.from({ length }, (_, index) => {
+    if (index === length - 1) return total
+    return Math.round(total * Math.pow((index + 1) / length, progressExponent))
+  })
+}
 
 export function deriveRhythmCharacter(
   cumulative: number[],
@@ -25,12 +39,86 @@ export function deriveRhythmCharacter(
   const firstAvg = firstHalf.reduce((sum, value) => sum + value, 0) / firstHalf.length
   const secondAvg = secondHalf.reduce((sum, value) => sum + value, 0) / secondHalf.length
   const overallAvg = deltas.reduce((sum, value) => sum + value, 0) / deltas.length
-  const withinSteadyBand = (value: number) => Math.abs(value - overallAvg) <= overallAvg * 0.15
+  const withinSteadyBand = (value: number) =>
+    Math.abs(value - overallAvg) <= overallAvg * RHYTHM_STEADY_BAND
 
   if (withinSteadyBand(firstAvg) && withinSteadyBand(secondAvg)) return "steady"
-  if (firstAvg > secondAvg * 1.15) return "frontLoaded"
-  if (secondAvg > firstAvg * 1.15) return "backLoaded"
+  if (firstAvg > secondAvg * (1 + RHYTHM_STEADY_BAND)) return "frontLoaded"
+  if (secondAvg > firstAvg * (1 + RHYTHM_STEADY_BAND)) return "backLoaded"
   return "uneven"
+}
+
+function interpolateCumulative(cumulative: number[], fractionalIndex: number): number | null {
+  if (cumulative.length === 0 || !Number.isFinite(fractionalIndex)) return null
+
+  const lastIndex = cumulative.length - 1
+  const lowerIndex = Math.max(0, Math.min(lastIndex, Math.floor(fractionalIndex)))
+  const upperIndex = Math.max(0, Math.min(lastIndex, Math.ceil(fractionalIndex)))
+  const fraction = fractionalIndex - Math.floor(fractionalIndex)
+  const lowerValue = cumulative[lowerIndex]
+  const upperValue = cumulative[upperIndex]
+
+  return lowerValue + (upperValue - lowerValue) * fraction
+}
+
+export function deriveBucketPaceFlag(
+  bucketId: string,
+  month: LiveMonthAnalysis,
+  snapshots: MonthSnapshot[],
+): boolean {
+  const currentPlan = month.fixedBuckets.find(
+    (bucket) => bucket.id === bucketId && bucket.type === "manual",
+  )
+  const currentActual = month.fixedBucketsActual.find((bucket) => bucket.id === bucketId)
+
+  if (
+    !currentPlan ||
+    currentPlan.budget <= 0 ||
+    month.daysInMonth <= 0 ||
+    !currentActual?.dailyCumulative?.length
+  ) {
+    return false
+  }
+
+  const pointInMonth = month.status === "closed" ? 1 : month.daysTracked / month.daysInMonth
+  if (pointInMonth <= 0) return false
+
+  const spentAtEvaluationPoint = currentActual.dailyCumulative.at(-1)
+  if (spentAtEvaluationPoint === undefined) return false
+
+  const thisMonthPace = spentAtEvaluationPoint / currentPlan.budget / pointInMonth
+  const priorPaces = snapshots
+    .filter((snapshot) => snapshot.isoDate < month.isoDate)
+    .toSorted((a, b) => b.isoDate.localeCompare(a.isoDate))
+    .flatMap((snapshot) => {
+      const plan = snapshot.fixedBuckets.find(
+        (bucket) => bucket.id === bucketId && bucket.type === "manual",
+      )
+      const actual = snapshot.fixedBucketsActual.find((bucket) => bucket.id === bucketId)
+      if (
+        !plan ||
+        plan.budget <= 0 ||
+        snapshot.daysInMonth <= 0 ||
+        !actual?.dailyCumulative?.length
+      ) {
+        return []
+      }
+
+      const spent = interpolateCumulative(
+        actual.dailyCumulative,
+        pointInMonth * snapshot.daysInMonth - 1,
+      )
+      return spent === null ? [] : [spent / plan.budget / pointInMonth]
+    })
+
+  if (priorPaces.length === 0) return false
+
+  const reference =
+    priorPaces.length < 3
+      ? priorPaces[0]
+      : priorPaces.reduce((sum, pace) => sum + pace, 0) / priorPaces.length
+
+  return thisMonthPace > reference * (1 + RHYTHM_STEADY_BAND)
 }
 
 const FIXED_PLAN: FixedBucketPlan[] = [
@@ -48,6 +136,17 @@ const FIXED_PLAN: FixedBucketPlan[] = [
     id: "fb-groceries",
     name: "Groceries",
     budget: 240,
+    type: "manual",
+    iconKey: "groceries",
+  },
+]
+
+const LIVE_FIXED_PLAN: FixedBucketPlan[] = [
+  ...FIXED_PLAN,
+  {
+    id: "fb-transport",
+    name: "Transport",
+    budget: 400,
     type: "manual",
     iconKey: "groceries",
   },
@@ -472,8 +571,18 @@ const snapshot_2026_04: MonthSnapshot = withManualBucketCalibration({
     { id: "fb-rent", spent: 800, transactionCount: 1 },
     { id: "fb-spotify", spent: 100, transactionCount: 1 },
     { id: "fb-phone-installment", spent: 280, transactionCount: 1 },
-    { id: "fb-coffee", spent: 220, transactionCount: 9 },
-    { id: "fb-groceries", spent: 500, transactionCount: 7 },
+    {
+      id: "fb-coffee",
+      spent: 220,
+      transactionCount: 9,
+      dailyCumulative: buildDailyCumulative(30, 220, 0.18),
+    },
+    {
+      id: "fb-groceries",
+      spent: 500,
+      transactionCount: 7,
+      dailyCumulative: buildDailyCumulative(30, 500, 0.08),
+    },
   ],
   majorTotal: 480,
   majorCount: 1,
@@ -588,8 +697,18 @@ const snapshot_2026_03: MonthSnapshot = withManualBucketCalibration({
     { id: "fb-rent", spent: 800, transactionCount: 1 },
     { id: "fb-spotify", spent: 100, transactionCount: 1 },
     { id: "fb-phone-installment", spent: 300, transactionCount: 1 },
-    { id: "fb-coffee", spent: 240, transactionCount: 8 },
-    { id: "fb-groceries", spent: 160, transactionCount: 5 },
+    {
+      id: "fb-coffee",
+      spent: 240,
+      transactionCount: 8,
+      dailyCumulative: buildDailyCumulative(31, 240, 0.18),
+    },
+    {
+      id: "fb-groceries",
+      spent: 160,
+      transactionCount: 5,
+      dailyCumulative: buildDailyCumulative(31, 160, 0.08),
+    },
   ],
   majorTotal: 720,
   majorCount: 3,
@@ -685,8 +804,18 @@ const snapshot_2026_02: MonthSnapshot = withManualBucketCalibration({
     { id: "fb-rent", spent: 800, transactionCount: 1 },
     { id: "fb-spotify", spent: 100, transactionCount: 1 },
     { id: "fb-phone-installment", spent: 300, transactionCount: 1 },
-    { id: "fb-coffee", spent: 200, transactionCount: 11 },
-    { id: "fb-groceries", spent: 240, transactionCount: 6 },
+    {
+      id: "fb-coffee",
+      spent: 200,
+      transactionCount: 11,
+      dailyCumulative: buildDailyCumulative(28, 200, 0.18),
+    },
+    {
+      id: "fb-groceries",
+      spent: 240,
+      transactionCount: 6,
+      dailyCumulative: buildDailyCumulative(28, 240, 0.08),
+    },
   ],
   majorTotal: 0,
   majorCount: 0,
@@ -783,8 +912,24 @@ const liveFixedBucketsActual: FixedBucketActual[] = [
   { id: "fb-rent", spent: 800, transactionCount: 1 },
   { id: "fb-spotify", spent: 100, transactionCount: 1 },
   { id: "fb-phone-installment", spent: 300, transactionCount: 1 },
-  { id: "fb-coffee", spent: 195, transactionCount: 8 },
-  { id: "fb-groceries", spent: 110, transactionCount: 4 },
+  {
+    id: "fb-coffee",
+    spent: 195,
+    transactionCount: 8,
+    dailyCumulative: buildDailyCumulative(18, 195, 0.9),
+  },
+  {
+    id: "fb-groceries",
+    spent: 110,
+    transactionCount: 4,
+    dailyCumulative: buildDailyCumulative(18, 110, 0.75),
+  },
+  {
+    id: "fb-transport",
+    spent: 310,
+    transactionCount: 10,
+    dailyCumulative: buildDailyCumulative(18, 310, 0.85),
+  },
 ]
 
 const liveMonth_2026_05: LiveMonthAnalysis = withManualBucketCalibration({
@@ -797,12 +942,12 @@ const liveMonth_2026_05: LiveMonthAnalysis = withManualBucketCalibration({
   closedBy: null,
   monthlyState: "onTrack",
 
-  monthlyBudget: 6000,
-  fixedTotalBudget: 1640,
-  fixedBuckets: FIXED_PLAN,
+  monthlyBudget: 6400,
+  fixedTotalBudget: 2040,
+  fixedBuckets: LIVE_FIXED_PLAN,
 
   totalVariableSpent: 1820,
-  fixedTotalSpent: 1505,
+  fixedTotalSpent: 1815,
   fixedOverspend: 0,
   fixedBucketsActual: liveFixedBucketsActual,
   majorTotal: 900,
@@ -810,12 +955,12 @@ const liveMonth_2026_05: LiveMonthAnalysis = withManualBucketCalibration({
   majorTransactions: majorTransactions_2026_05,
   closedMonthVerdict: null,
   wholeBudgetCloseout: {
-    adjustedBudgetTotal: 6095,
-    spentTotal: 4340,
-    remainder: 1755,
-    manualFixedUnusedTotal: 95,
+    adjustedBudgetTotal: 6625,
+    spentTotal: 4760,
+    remainder: 1865,
+    manualFixedUnusedTotal: 225,
     manualFixedOverspendTotal: 0,
-    fixedSpentTotal: 1620,
+    fixedSpentTotal: 2040,
     variableSpentTotal: 1820,
     majorSpentTotal: 900,
     verdict: "underBudget",
@@ -857,10 +1002,10 @@ const liveMonth_2026_05: LiveMonthAnalysis = withManualBucketCalibration({
       id: "pm1",
       name: "Cash",
       variable: 160,
-      fixed: 0,
+      fixed: 310,
       major: 0,
-      total: 160,
-      fixedByType: { manual: 0, recurring: 0, installment: 0 },
+      total: 470,
+      fixedByType: { manual: 310, recurring: 0, installment: 0 },
     },
     {
       id: "pm2",
@@ -961,10 +1106,10 @@ const liveMonth_atRisk: LiveMonthAnalysis = {
       id: "pm1",
       name: "Cash",
       variable: 260,
-      fixed: 0,
+      fixed: 310,
       major: 100,
-      total: 360,
-      fixedByType: { manual: 0, recurring: 0, installment: 0 },
+      total: 670,
+      fixedByType: { manual: 310, recurring: 0, installment: 0 },
     },
     {
       id: "pm2",
@@ -1004,7 +1149,7 @@ export const analyticsDataAtRisk: AnalyticsData = {
 const liveMonth_over: LiveMonthAnalysis = {
   ...liveMonth_2026_05,
   monthlyState: "over",
-  totalVariableSpent: 4240,
+  totalVariableSpent: 4480,
   majorTotal: 0,
   majorCount: 0,
   majorTransactions: [],
@@ -1017,11 +1162,11 @@ const liveMonth_over: LiveMonthAnalysis = {
   projectedSavings: -1240,
   projectedSavingsRate: -33,
   dailyVariableCumulative: [
-    180, 390, 610, 840, 1080, 1330, 1590, 1835, 2070, 2300, 2520, 2755, 2995, 3245, 3505, 3760,
-    4000, 4240,
+    190, 412, 645, 888, 1141, 1405, 1680, 1939, 2187, 2430, 2663, 2911, 3165, 3429, 3703, 3973,
+    4226, 4480,
   ],
-  weeklySpend: [980, 1120, 1240, 900],
-  dayOfWeekSpend: [580, 420, 560, 480, 680, 820, 700],
+  weeklySpend: [980, 1120, 1240, 1140],
+  dayOfWeekSpend: [580, 420, 560, 480, 680, 820, 940],
   largestVariableDay: { date: "2026-05-14", amount: 620 },
   largestVariableTxn: { id: "tx-05-14-a", amount: 540, description: "Emergency repair" },
   fixedManualOverBudgetCount: 2,
@@ -1030,10 +1175,10 @@ const liveMonth_over: LiveMonthAnalysis = {
       id: "pm1",
       name: "Cash",
       variable: 420,
-      fixed: 0,
+      fixed: 310,
       major: 0,
-      total: 420,
-      fixedByType: { manual: 0, recurring: 0, installment: 0 },
+      total: 730,
+      fixedByType: { manual: 310, recurring: 0, installment: 0 },
     },
     {
       id: "pm2",
@@ -1056,10 +1201,10 @@ const liveMonth_over: LiveMonthAnalysis = {
     {
       id: "pm4",
       name: "Bank Card",
-      variable: 1240,
+      variable: 1480,
       fixed: 200,
       major: 0,
-      total: 1440,
+      total: 1680,
       fixedByType: { manual: 0, recurring: 200, installment: 0 },
     },
   ],

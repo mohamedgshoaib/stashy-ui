@@ -33,16 +33,29 @@ export function AnalyticsScreen() {
   const locale = useLocale() as Locale
   const t = useTranslations("Analytics")
   const direction = getDirectionForLocale(locale)
-  const { monthlyBudgetState, plan, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun } =
-    useSandboxStore()
+  const {
+    monthlyBudgetState,
+    plan,
+    budgetInjection,
+    analyticsHistoryMode,
+    fixedBudgetOverrun,
+    fixedPaceState,
+  } = useSandboxStore()
   const analyticsData = React.useMemo(() => {
     return getSandboxAnalyticsData({
       monthlyBudgetState,
       budgetInjection,
       analyticsHistoryMode,
       fixedBudgetOverrun,
+      fixedPaceState,
     })
-  }, [monthlyBudgetState, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun])
+  }, [
+    monthlyBudgetState,
+    budgetInjection,
+    analyticsHistoryMode,
+    fixedBudgetOverrun,
+    fixedPaceState,
+  ])
   const [selectedMonthId, setSelectedMonthId] = React.useState<string>(analyticsData.current.month)
   const [monthPickerOpen, setMonthPickerOpen] = React.useState(false)
 
