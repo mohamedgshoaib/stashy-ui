@@ -9,7 +9,7 @@
 
 ## 0. How to use this document
 
-Self-contained. Work **phase by phase**, do not batch. Each phase ends with `pnpm typecheck && pnpm lint`, both clean of *new* errors.
+Self-contained. Work **phase by phase**, do not batch. Each phase ends with `pnpm typecheck && pnpm lint`, both clean of _new_ errors.
 
 Standing rules: design-system tokens only, no inline hex; logical direction utilities (`ms-`/`me-`/`ps-`/`pe-`), never physical; amounts render `dir="ltr"`; dynamic widths via inline `style`.
 
@@ -31,7 +31,7 @@ It appears **only inside the tap-to-expand overrun list** on `FixedAnalysisCard`
 
 A pace chart was proposed for the fixed lane by analogy with `VariableAnalysisCard`'s rhythm chart, and **rejected**. The shapes are not analogous: variable is **one pool** spent against a daily rate; manual fixed is **N independent envelopes**, several legitimately lumpy. A Gas bucket refilled twice a month is not overspending, but a linear day-of-month comparator would flag it as such.
 
-*An analogy between surfaces must hold at the level of the underlying model, not the visual.*
+_An analogy between surfaces must hold at the level of the underlying model, not the visual._
 
 So: each bucket is compared **only against itself**, never against a pool, a peer, or a straight line.
 
@@ -60,15 +60,18 @@ So: last month only until there are **3+ usable prior months**, then the average
 For each **manual** bucket currently rendered in the disclosure list:
 
 **Step 1 — this month's pace fraction.**
+
 ```
 pointInMonth   = daysTracked / daysInMonth
 thisMonthPace  = (spentAtToday / budget) / pointInMonth
 ```
+
 `spentAtToday` is the bucket's cumulative spend at `daysTracked`.
 
 **Step 2 — usable prior months.** A prior month is usable when the bucket **existed in it as a manual bucket with a budget** and its actual has a `dailyCumulative` array. An absent array is an unusable month: exclude it entirely from both the count and the average, do not treat it as zero, and remain silent when no usable month remains.
 
 **Step 3 — the reference.**
+
 - **0 usable prior months** → no tag. Silent. Stop.
 - **1–2 usable prior months** → reference = the **most recent** usable month's pace fraction.
 - **3+ usable prior months** → reference = the **mean of all usable** months' pace fractions.
@@ -76,15 +79,19 @@ thisMonthPace  = (spentAtToday / budget) / pointInMonth
 Each prior month's fraction uses **that month's own budget and its own `daysInMonth`**, evaluated at the same `pointInMonth` as today.
 
 When the equivalent point lands at a fractional array index, use **linear interpolation between adjacent days**:
+
 ```
 value = arr[floor(i)] + (arr[ceil(i)] - arr[floor(i)]) * fraction(i)
 ```
+
 Clamp both adjacent indices to the array bounds. Do not round the index.
 
 **Step 4 — flag.**
+
 ```
 thisMonthPace > reference * (1 + BAND)
 ```
+
 `BAND` is the existing **±15% "steady" band already used by `deriveRhythmCharacter`**. It is currently inline at `components/analytics/data.ts:28` and in the equivalent `1.15` comparisons at `:31-32`. Extract it to a named export and have both `deriveRhythmCharacter` and the bucket comparator consume it. **Do not change its value, hardcode `0.15` at the new call site, or introduce a second threshold number.**
 
 **Guards.** Any month with `budget <= 0` or `daysInMonth <= 0` is excluded from the calculation. This is a divide-by-zero guard, not a product state — a manual bucket cannot exist without a budget, so this should be unreachable.
@@ -110,11 +117,13 @@ thisMonthPace > reference * (1 + BAND)
 **Goal:** give every manual bucket a per-day cumulative series.
 
 ### Files
+
 `components/analytics/types.ts`, `components/analytics/data.ts`
 
 ### Changes
 
 Add to `FixedBucketActual`:
+
 ```ts
 dailyCumulative?: number[]
 ```
@@ -124,6 +133,7 @@ Keep the existing shared type. Do not introduce a discriminated union.
 Follow the existing `dailyVariableCumulative` precedent on `LiveMonthAnalysis` / `MonthSnapshot` for shape and conventions.
 
 **Invariants — these must hold everywhere:**
+
 - Monotonically non-decreasing.
 - Length = `daysTracked` on live months, `daysInMonth` on snapshots.
 - **Last value === that bucket's `spent`.** The array and the scalar must agree.
@@ -142,20 +152,21 @@ The mock exists to make states visible. Author arrays so these are all reachable
 Also give at least one bucket a **budget change across months**, so the per-month normalisation is exercised rather than assumed.
 
 The bucket roles are locked:
+
 - `fb-coffee`: the only bucket whose profile is switched by `fixedPaceState`.
 - `fb-groceries`: a fixed steady profile, unaffected by the pace toggle.
 - `fb-transport`: cold-start profile with zero usable prior months.
 
 Add `fb-transport` to the live month only with these fixture values:
 
-| Field | Value |
-|---|---|
-| `id` | `fb-transport` |
-| name | `Transport` |
-| `iconKey` | `groceries` — closest available existing key; do not add a new key, and note the substitution in the PR |
-| budget | `400` |
-| normal-state spend | `310` |
-| overrun-state spend | `470` |
+| Field               | Value                                                                                                   |
+| ------------------- | ------------------------------------------------------------------------------------------------------- |
+| `id`                | `fb-transport`                                                                                          |
+| name                | `Transport`                                                                                             |
+| `iconKey`           | `groceries` — closest available existing key; do not add a new key, and note the substitution in the PR |
+| budget              | `400`                                                                                                   |
+| normal-state spend  | `310`                                                                                                   |
+| overrun-state spend | `470`                                                                                                   |
 
 Do not add `fb-transport` to April, March, or February. Its absence from all three snapshots is the cold-start proof. Add its 400 to the live month's `fixedTotalBudget` and raise the live month's `monthlyBudget` by the same 400, leaving the variable lane unchanged. Do not reallocate budget from Coffee or Groceries. Re-verify that `onTrack`, `atRisk`, and `over` still produce their intended states and that no closed-month verdict flips. If any does, stop and report rather than tuning data to compensate.
 
@@ -174,11 +185,13 @@ When a scenario mutation changes a bucket's `spent`, **rescale that bucket's `da
 **Goal:** implement §2 as a pure, testable function.
 
 ### Files
+
 `components/analytics/data.ts`
 
 ### Changes
 
 Export something along the lines of:
+
 ```ts
 deriveBucketPaceFlag(bucketId, month, snapshots): boolean
 ```
@@ -188,11 +201,13 @@ Exact naming is yours; match the file's existing conventions. It must be **pure*
 Implement §2 exactly: pace fractions normalised per month, usable-prior-month filtering, the 1–2 vs 3+ window switch, the shared band constant.
 
 **Do NOT:**
+
 - Hardcode `0.15`. Reuse `deriveRhythmCharacter`'s band.
 - Return a magnitude, percentage, or direction. **Boolean only** — "faster than usual" or nothing. There is no "slower than usual" tag; underspending is not a signal this product surfaces.
 - Apply it to recurring or installment buckets.
 
 **Verify:** `pnpm typecheck && pnpm lint`. Report which buckets the comparator flags and which branch (last-month vs average) each took for exactly these four runs:
+
 1. `monthlyBudgetState: onTrack`, `analyticsHistoryMode: withHistory`
 2. `monthlyBudgetState: atRisk`, `analyticsHistoryMode: withHistory`
 3. `monthlyBudgetState: over`, `analyticsHistoryMode: withHistory`
@@ -205,12 +220,13 @@ Do not enumerate other axis combinations. `budgetInjection` and `fixedBudgetOver
 ## 6. Phase 3 — i18n
 
 ### Files
+
 `messages/en.json`, `messages/ar.json`
 
 **Locked EN**, under the existing `Analytics.fixed.*` namespace:
 
-| Key | Value |
-|---|---|
+| Key                   | Value               |
+| --------------------- | ------------------- |
 | `fixed.paceTagFaster` | `Faster than usual` |
 
 Three words, factual, no numbers, no comparison target named. It sits on a row that already shows the bucket name and overage.
@@ -226,6 +242,7 @@ Three words, factual, no numbers, no comparison target named. It sits on a row t
 **Goal:** show the tag on flagged rows inside the disclosure.
 
 ### Files
+
 `components/analytics/fixed-analysis-card.tsx`
 
 ### Changes
@@ -255,6 +272,7 @@ Inside the tap-to-expand overrun list, on each row where the comparator returns 
 **Goal:** make both states reachable without editing code.
 
 ### Files
+
 `store/sandbox-store.ts`, `components/home/home-drawer.tsx`
 
 Add a `fixedPaceState` axis with values `"steady" | "faster"` and default `"steady"`. Follow the existing axis pattern (`fixedBudgetOverrun` is the closest analogue) — same shape, same drawer treatment.
@@ -303,15 +321,15 @@ Only after every prior phase passes:
 
 ## 11. Out of scope
 
-| Item | Status |
-|---|---|
-| A "slower than usual" / positive tag | Rejected. Underspending is incidental upside, not a signal the product surfaces. |
-| Showing the pace figure, percentage, or direction | Rejected. Tag only. |
-| Multi-month **pattern** detection ("over plan three months running") | Separate parked item. Needs history depth the product will not have early. |
-| Applying pace logic to recurring or installment | Rejected. Committed obligations have no behavioural pace. |
-| Any chart on `FixedAnalysisCard` | Rejected — see §1. |
-| Changing `deriveRhythmCharacter`'s band value | Out of scope. Reuse it; do not retune it. |
-| Any `stashy-api` change | Out of scope. `transactions.date` is already day-granularity, so the real side needs a query later, not a migration. |
+| Item                                                                 | Status                                                                                                               |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| A "slower than usual" / positive tag                                 | Rejected. Underspending is incidental upside, not a signal the product surfaces.                                     |
+| Showing the pace figure, percentage, or direction                    | Rejected. Tag only.                                                                                                  |
+| Multi-month **pattern** detection ("over plan three months running") | Separate parked item. Needs history depth the product will not have early.                                           |
+| Applying pace logic to recurring or installment                      | Rejected. Committed obligations have no behavioural pace.                                                            |
+| Any chart on `FixedAnalysisCard`                                     | Rejected — see §1.                                                                                                   |
+| Changing `deriveRhythmCharacter`'s band value                        | Out of scope. Reuse it; do not retune it.                                                                            |
+| Any `stashy-api` change                                              | Out of scope. `transactions.date` is already day-granularity, so the real side needs a query later, not a migration. |
 
 ---
 
