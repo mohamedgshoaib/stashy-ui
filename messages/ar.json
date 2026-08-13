@@ -47,14 +47,6 @@
       "tomorrowDropLabel": "معدل الغد سينخفض إلى",
       "statusEmergency": "تجاوز الميزانية"
     },
-    "budget": {
-      "title": "نظرة عامة على الميزانية",
-      "total": "ميزانية الشهر",
-      "variable": "متغير",
-      "fixed": "ثابت",
-      "variableCaption": "بعد الالتزامات الثابتة",
-      "fixedCaption": "مدفوعات ملتزم بها"
-    },
     "major": {
       "title": "المصاريف الكبيرة",
       "ofVariable": "من ميزانية {amount} المتغيرة",
@@ -719,23 +711,6 @@
       "badgeOnTrack": "في المسار الصحيح",
       "badgeAtRisk": "في خطر",
       "badgeOver": "تجاوز الميزانية",
-      "closed": {
-        "badge": {
-          "withinPlan": "أُغلق داخل الخطة",
-          "adjustedInFlight": "أُغلق بعد تعديل الخطة",
-          "outranThePlan": "أُغلق فوق الخطة"
-        },
-        "heroLabel": {
-          "withinPlan": "متبقٍ في الشهر",
-          "adjustedInFlight": "متبقٍ بعد التعديلات",
-          "outranThePlan": "فوق السقف النهائي"
-        },
-        "context": {
-          "withinPlan": "أُغلق هذا الشهر مع بقاء {amount} جنيه داخل السقف المتغير النهائي.",
-          "adjustedInFlight": "أُغلق هذا الشهر مع بقاء {amount} جنيه بعد أن وسّعت حقن الميزانية السقف النهائي.",
-          "outranThePlan": "أُغلق هذا الشهر فوق السقف المتغير النهائي بمقدار {amount} جنيه."
-        }
-      },
       "heroLabelAhead": "متقدم عن الإيقاع",
       "heroLabelBehind": "متأخر عن الإيقاع",
       "heroLabelOver": "تجاوز ميزانيتك",
@@ -747,13 +722,6 @@
       "barTickLabel": "متوقع",
       "injectButton": "إضافة أموال للميزانية",
       "daysLine": "{tracked} أيام مُتتبعة · {remaining} أيام متبقية"
-    },
-    "pacing": {
-      "aheadLabel": "متقدم",
-      "behindLabel": "متأخر",
-      "contextSentence": "استخدمت {budgetUsed}% من ميزانيتك المتغيرة بينما مضى {monthProgress}% من الشهر.",
-      "barLabel": "مقارنة إيقاع الميزانية المتغيرة بتقدم الشهر",
-      "injectionFootnote": "يشمل ضخ ميزانية بقيمة {amount} هذا الشهر."
     },
     "composition": {
       "title": "توزيع الميزانية",
@@ -866,11 +834,6 @@
       "title": "كيف انتهى الشهر",
       "subtitle": "راجع كيف استقر الشهر كله بعد أن تُغلق كل الحركة.",
       "subtitleClosed": "قراءة ختامية لشهر {month}: ماذا بقي أو تجاوز، وما الذي أوصل الشهر إلى هذه النتيجة.",
-      "teaser": {
-        "badge": "{month} · قيد التنفيذ",
-        "title": "هذا الشهر ما زال يتشكل.",
-        "body": "عندما ينتهي {month}، سيُريك ستاشي كيف صمدت الخطة: ما الذي اتسع له الشهر، وما الذي اضطر أن يلين، وما الذي يستحق أن تتعلمه للشهر القادم."
-      },
       "verdict": {
         "badge": "{month} · مُغلق"
       },

@@ -128,3 +128,19 @@
   - `components/settings/settings-sections.tsx`: unused `SubSectionHeader` declaration.
 - New Phase 9 errors: none.
 - Phase 11 carry: verify Arabic and English dock placement under VR-5; no fallback is authorized.
+
+## Phase 10 — i18n orphan sweep and dead-code removal
+
+- Status: complete
+- Deleted from both locale files after full-path, leaf-name, dynamic-template, and runtime-source searches:
+  - `Analytics.pacing.*`: zero application-code matches. Archived documentation contains historical leaf-name text only; no runtime translation usage.
+  - `Analytics.monthlyHealth.closed.badge.*`, `.heroLabel.*`, `.context.*`: zero application-code matches after Phase 2.
+  - `Analytics.howMonthLanded.teaser.*`: zero application-code matches after Phase 3.
+  - `Home.budget.*`: zero `Home` namespace application-code matches. `components/settings/settings-sections.tsx` contains `t("budget.title")` under the separate `Settings` namespace, so it is a leaf-name collision rather than a live `Home.budget` use.
+- Confirmed no additional Phase 2–3 helper/import cleanup remained after the earlier phase-local removals.
+- Gate: `pnpm typecheck` passed.
+- Gate: `pnpm lint` reported only the two plan-listed pre-existing errors:
+  - `components/tracker/tracker-transfer-drawer.tsx`: unused `surfacePanelClass` import.
+  - `components/settings/settings-sections.tsx`: unused `SubSectionHeader` declaration.
+- Gate: initial sandboxed `pnpm build` could not fetch configured Google fonts; rerunning with approved network access passed, including all EN/AR static routes.
+- New Phase 10 errors: none.

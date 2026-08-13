@@ -47,14 +47,6 @@
       "tomorrowDropLabel": "Tomorrow's rate drops to",
       "statusEmergency": "Over budget"
     },
-    "budget": {
-      "title": "Budget Overview",
-      "total": "Monthly budget",
-      "variable": "Variable",
-      "fixed": "Fixed",
-      "variableCaption": "After fixed expenses",
-      "fixedCaption": "Committed payments"
-    },
     "major": {
       "title": "Major Expenses",
       "ofVariable": "of {amount} variable budget",
@@ -719,23 +711,6 @@
       "badgeOnTrack": "On track",
       "badgeAtRisk": "At risk",
       "badgeOver": "Over budget",
-      "closed": {
-        "badge": {
-          "withinPlan": "Closed within plan",
-          "adjustedInFlight": "Closed after adjustment",
-          "outranThePlan": "Closed over plan"
-        },
-        "heroLabel": {
-          "withinPlan": "left in the month",
-          "adjustedInFlight": "left after adjustments",
-          "outranThePlan": "over the final cap"
-        },
-        "context": {
-          "withinPlan": "This month closed with {amount} EGP still inside the final variable cap.",
-          "adjustedInFlight": "This month still closed with {amount} EGP left after injections expanded the cap.",
-          "outranThePlan": "This month closed {amount} EGP above the final variable cap."
-        }
-      },
       "heroLabelAhead": "ahead of pace",
       "heroLabelBehind": "behind pace",
       "heroLabelOver": "over your budget",
@@ -747,13 +722,6 @@
       "barTickLabel": "expected",
       "injectButton": "Inject budget funds",
       "daysLine": "{tracked} days tracked · {remaining} days remaining"
-    },
-    "pacing": {
-      "aheadLabel": "ahead",
-      "behindLabel": "behind",
-      "contextSentence": "You've used {budgetUsed}% of your variable budget with {monthProgress}% of the month elapsed.",
-      "barLabel": "Variable budget pace compared with month progress",
-      "injectionFootnote": "Includes a {amount} budget injection this month."
     },
     "composition": {
       "title": "Budget breakdown",
@@ -866,11 +834,6 @@
       "title": "How the month landed",
       "subtitle": "See how the whole month settled once everything lands.",
       "subtitleClosed": "A closeout view for {month}: what was left or over, and what moved it there.",
-      "teaser": {
-        "badge": "{month} · in progress",
-        "title": "This month is still unfolding.",
-        "body": "When {month} ends, Stashy will show you how the plan held up - what fit, what flexed, what to learn for next month."
-      },
       "verdict": {
         "badge": "{month} · closed"
       },
