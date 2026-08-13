@@ -707,12 +707,12 @@
         "subtitle": "Where you stand right now and where you'll likely land."
       },
       "where": {
-        "title": "Where the budget went",
-        "subtitle": "How this month's spending split across plan and reality."
+        "title": "Where the budget goes",
+        "subtitle": "How this month's spending splits across plan and reality."
       },
       "landed": {
-        "title": "How the month landed",
-        "subtitle": "A look back at how each month ended"
+        "title": "How did the month land?",
+        "subtitle": "The final result, and how the month got there."
       }
     },
     "monthlyHealth": {

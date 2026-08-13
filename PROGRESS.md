@@ -47,3 +47,18 @@
   - `components/settings/settings-sections.tsx`: unused `SubSectionHeader` declaration.
 - New Phase 4 errors: none.
 - Phase 11 carry: VR-4 remains observation-only; no fallback is authorized.
+
+## Phase 5 — Section titles and subtitles
+
+- Status: complete
+- Applied the locked English hook/detail section strings.
+- Authored Arabic strings for PR review:
+  - `Analytics.section.where.title`: `أين تذهب الميزانية`
+  - `Analytics.section.where.subtitle`: `كيف يتوزع إنفاق هذا الشهر بين الخطة والواقع.`
+  - `Analytics.section.landed.title`: `كيف انتهى الشهر؟`
+  - `Analytics.section.landed.subtitle`: `النتيجة النهائية، وكيف وصل إليها الشهر.`
+- Gate: `pnpm typecheck` passed.
+- Gate: `pnpm lint` reported only the two plan-listed pre-existing errors:
+  - `components/tracker/tracker-transfer-drawer.tsx`: unused `surfacePanelClass` import.
+  - `components/settings/settings-sections.tsx`: unused `SubSectionHeader` declaration.
+- New Phase 5 errors: none.
