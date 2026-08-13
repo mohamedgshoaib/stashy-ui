@@ -43,15 +43,6 @@ function getBarGeometry(actual: number, plan: number): BarGeometry {
 }
 
 function getSummaryTone(verdict: WholeBudgetVerdict) {
-  if (verdict === "underBudget") {
-    return {
-      amountTextClass: semanticTextClass.income,
-      progressClass: semanticProgressClass.income,
-      tickClassName: "bg-income/70",
-      actualValueClass: "text-foreground",
-    }
-  }
-
   if (verdict === "overBudget") {
     return {
       amountTextClass: semanticTextClass.expense,
@@ -62,9 +53,9 @@ function getSummaryTone(verdict: WholeBudgetVerdict) {
   }
 
   return {
-    amountTextClass: semanticTextClass.fixed,
-    progressClass: semanticProgressClass.fixed,
-    tickClassName: "bg-fixed/65",
+    amountTextClass: semanticTextClass.income,
+    progressClass: semanticProgressClass.income,
+    tickClassName: "bg-income/70",
     actualValueClass: "text-foreground",
   }
 }

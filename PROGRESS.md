@@ -34,3 +34,16 @@
   - `components/tracker/tracker-transfer-drawer.tsx`: unused `surfacePanelClass` import.
   - `components/settings/settings-sections.tsx`: unused `SubSectionHeader` declaration.
 - New Phase 3 errors: none.
+
+## Phase 4 — Whole-budget verdict two-tone semantics
+
+- Status: complete
+- Collapsed `getSummaryTone` to expense for `overBudget` and income for both successful verdicts.
+- Removed the Fixed structural token from whole-budget verdict presentation.
+- Left manual-bucket row tone logic untouched.
+- Gate: `pnpm typecheck` passed.
+- Gate: `pnpm lint` reported only the two plan-listed pre-existing errors:
+  - `components/tracker/tracker-transfer-drawer.tsx`: unused `surfacePanelClass` import.
+  - `components/settings/settings-sections.tsx`: unused `SubSectionHeader` declaration.
+- New Phase 4 errors: none.
+- Phase 11 carry: VR-4 remains observation-only; no fallback is authorized.
