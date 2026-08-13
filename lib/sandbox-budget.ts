@@ -43,7 +43,7 @@ export type SandboxBudgetConfig = {
   budgetInjection: "with" | "without"
   analyticsHistoryMode: "withHistory" | "firstMonth"
   fixedBudgetOverrun: "none" | "some"
-  fixedPaceState: "steady" | "faster"
+  fixedPaceState: "steady" | "one" | "faster"
 }
 
 type FixedPaymentMeta = {
@@ -114,19 +114,31 @@ function withFixedPaceState(
     "2026-03": 1.3,
     "2026-02": 0.93,
   }
+  const groceriesSnapshotExponentByMonth: Record<string, number> = {
+    "2026-04": 3,
+    "2026-03": 3,
+    "2026-02": 3,
+  }
 
   return {
     ...data,
     current: {
       ...data.current,
-      fixedBucketsActual: data.current.fixedBucketsActual.map((actual) =>
-        actual.id === "fb-coffee"
-          ? {
-              ...actual,
-              dailyCumulative: buildDailyCumulative(data.current.daysTracked, actual.spent, 0.55),
-            }
-          : actual,
-      ),
+      fixedBucketsActual: data.current.fixedBucketsActual.map((actual) => {
+        if (actual.id === "fb-coffee") {
+          return {
+            ...actual,
+            dailyCumulative: buildDailyCumulative(data.current.daysTracked, actual.spent, 0.55),
+          }
+        }
+        if (fixedPaceState === "faster" && actual.id === "fb-groceries") {
+          return {
+            ...actual,
+            dailyCumulative: buildDailyCumulative(data.current.daysTracked, actual.spent, 0.65),
+          }
+        }
+        return actual
+      }),
     },
     snapshots: data.snapshots.map((snapshot) => ({
       ...snapshot,
@@ -140,7 +152,16 @@ function withFixedPaceState(
                 snapshotExponentByMonth[snapshot.month] ?? 1,
               ),
             }
-          : actual,
+          : fixedPaceState === "faster" && actual.id === "fb-groceries"
+            ? {
+                ...actual,
+                dailyCumulative: buildDailyCumulative(
+                  snapshot.daysInMonth,
+                  actual.spent,
+                  groceriesSnapshotExponentByMonth[snapshot.month] ?? 3,
+                ),
+              }
+            : actual,
       ),
     })),
   }

@@ -870,12 +870,15 @@ function SettingsControls() {
         <p className="mt-1 text-sm font-semibold text-foreground">{t("settings.fixedPaceLabel")}</p>
         <Tabs
           value={fixedPaceState}
-          onValueChange={(v) => setFixedPaceState(v as "steady" | "faster")}
+          onValueChange={(v) => setFixedPaceState(v as "steady" | "one" | "faster")}
           className="gap-3"
         >
-          <TabsList className={cn(segmentedWellClass, "grid-cols-2")}>
+          <TabsList className={cn(segmentedWellClass, "grid-cols-3")}>
             <TabsTrigger value="steady" className="rounded-xs text-xs">
               {t("settings.fixedPaceSteady")}
+            </TabsTrigger>
+            <TabsTrigger value="one" className="rounded-xs text-xs">
+              {t("settings.fixedPaceOne")}
             </TabsTrigger>
             <TabsTrigger value="faster" className="rounded-xs text-xs">
               {t("settings.fixedPaceFaster")}
