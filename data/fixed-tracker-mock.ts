@@ -1,21 +1,17 @@
-import type {
-  FixedExpenseItem,
-  FixedTrackerSummary,
-  InstallmentOverview,
-} from "@/components/tracker/types";
-import { getTrackerFixedIcon } from "@/components/tracker/fixed-icons";
+import { getTrackerFixedIcon } from "@/components/tracker/fixed-icons"
+import type { FixedExpenseItem } from "@/components/tracker/types"
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function progressClass(pct: number): string {
   // Cap display at 100% for the bar width; over_budget shows full bar + red
-  const capped = Math.min(Math.round(pct), 100);
-  return `basis-[${capped}%]`;
+  const capped = Math.min(Math.round(pct), 100)
+  return `basis-[${capped}%]`
 }
 
 function installmentProgressClass(paid: number, total: number): string {
-  const pct = Math.round((paid / total) * 100);
-  return `basis-[${pct}%]`;
+  const pct = Math.round((paid / total) * 100)
+  return `basis-[${pct}%]`
 }
 
 // ─── Subscriptions (recurring) ────────────────────────────────────────────────
@@ -49,7 +45,7 @@ const netflix: FixedExpenseItem = {
       isAutoPayment: true,
     },
   ],
-};
+}
 
 const spotify: FixedExpenseItem = {
   id: "sub-spotify",
@@ -71,7 +67,7 @@ const spotify: FixedExpenseItem = {
   installmentProgressClass: null,
   endDate: null,
   transactions: [],
-};
+}
 
 const adobeCC: FixedExpenseItem = {
   id: "sub-adobe-cc",
@@ -93,7 +89,7 @@ const adobeCC: FixedExpenseItem = {
   installmentProgressClass: null,
   endDate: null,
   transactions: [],
-};
+}
 
 // ─── Installments ─────────────────────────────────────────────────────────────
 
@@ -126,7 +122,7 @@ const iphoneInstallment: FixedExpenseItem = {
       isAutoPayment: true,
     },
   ],
-};
+}
 
 const laptopInstallment: FixedExpenseItem = {
   id: "inst-laptop",
@@ -157,7 +153,7 @@ const laptopInstallment: FixedExpenseItem = {
       isAutoPayment: true,
     },
   ],
-};
+}
 
 const carDownpayment: FixedExpenseItem = {
   id: "inst-car",
@@ -188,234 +184,97 @@ const carDownpayment: FixedExpenseItem = {
       isAutoPayment: true,
     },
   ],
-};
+}
 
-// ─── Manual budgets ───────────────────────────────────────────────────────────
+// ─── Exported Fixed-owned data ────────────────────────────────────────────────
 
-const groceries: FixedExpenseItem = {
-  id: "bud-groceries",
-  name: "Groceries",
-  iconKey: "shopping",
-  icon: getTrackerFixedIcon("shopping"),
-  type: "manual",
-  budget: 2000,
-  paid: 1650,
-  remaining: 350,
-  progressPct: 82.5,
-  progressClass: progressClass(82.5),
-  status: "warning",
-  paymentStatus: "unpaid", // not relevant for manual
-  nextPaymentDate: null,
-  installmentsTotal: null,
-  installmentsPaid: null,
-  installmentsRemaining: null,
-  installmentProgressClass: null,
-  endDate: null,
-  transactions: [
-    {
-      id: "txn-groc-1",
-      amount: 800,
-      direction: "expense",
-      description: "Supermarket",
-      date: "May 1",
-      isAutoPayment: false,
-    },
-    {
-      id: "txn-groc-2",
-      amount: 450,
-      direction: "expense",
-      description: "Hypermarket",
-      date: "May 5",
-      isAutoPayment: false,
-    },
-    {
-      id: "txn-groc-3",
-      amount: 400,
-      direction: "expense",
-      description: "Farmers market",
-      date: "May 8",
-      isAutoPayment: false,
-    },
-  ],
-};
-
-const coffee: FixedExpenseItem = {
-  id: "bud-coffee",
-  name: "Coffee & Cafes",
-  iconKey: "cafe",
-  icon: getTrackerFixedIcon("cafe"),
-  type: "manual",
-  budget: 500,
-  paid: 620,
-  remaining: -120,
-  progressPct: 124,
-  progressClass: progressClass(124), // capped to basis-[100%]
-  status: "over_budget",
-  paymentStatus: "unpaid",
-  nextPaymentDate: null,
-  installmentsTotal: null,
-  installmentsPaid: null,
-  installmentsRemaining: null,
-  installmentProgressClass: null,
-  endDate: null,
-  transactions: [
-    {
-      id: "txn-coffee-1",
-      amount: 180,
-      direction: "expense",
-      description: "Cilantro",
-      date: "May 2",
-      isAutoPayment: false,
-    },
-    {
-      id: "txn-coffee-2",
-      amount: 220,
-      direction: "expense",
-      description: "Costa",
-      date: "May 4",
-      isAutoPayment: false,
-    },
-    {
-      id: "txn-coffee-3",
-      amount: 120,
-      direction: "expense",
-      description: "Espresso bar",
-      date: "May 7",
-      isAutoPayment: false,
-    },
-    {
-      id: "txn-coffee-4",
-      amount: 100,
-      direction: "expense",
-      description: "Café run",
-      date: "May 9",
-      isAutoPayment: false,
-    },
-  ],
-};
-
-const gas: FixedExpenseItem = {
-  id: "bud-gas",
-  name: "Gas & Transport",
-  iconKey: "car",
-  icon: getTrackerFixedIcon("car"),
-  type: "manual",
-  budget: 800,
-  paid: 320,
-  remaining: 480,
-  progressPct: 40,
-  progressClass: progressClass(40),
-  status: "on_track",
-  paymentStatus: "unpaid",
-  nextPaymentDate: null,
-  installmentsTotal: null,
-  installmentsPaid: null,
-  installmentsRemaining: null,
-  installmentProgressClass: null,
-  endDate: null,
-  transactions: [
-    {
-      id: "txn-gas-1",
-      amount: 200,
-      direction: "expense",
-      description: "Fuel refill",
-      date: "May 3",
-      isAutoPayment: false,
-    },
-    {
-      id: "txn-gas-2",
-      amount: 120,
-      direction: "expense",
-      description: "Ride-share",
-      date: "May 6",
-      isAutoPayment: false,
-    },
-  ],
-};
-
-const eatingOut: FixedExpenseItem = {
-  id: "bud-eating-out",
-  name: "Eating Out",
-  iconKey: "dining",
-  icon: getTrackerFixedIcon("dining"),
-  type: "manual",
-  budget: 1000,
-  paid: 0,
-  remaining: 1000,
-  progressPct: 0,
-  progressClass: progressClass(0),
-  status: "on_track",
-  paymentStatus: "unpaid",
-  nextPaymentDate: null,
-  installmentsTotal: null,
-  installmentsPaid: null,
-  installmentsRemaining: null,
-  installmentProgressClass: null,
-  endDate: null,
-  transactions: [],
-};
-
-// ─── Exported item list ───────────────────────────────────────────────────────
-
-export const fixedItems: FixedExpenseItem[] = [
+export const fixedNonManualItems: FixedExpenseItem[] = [
   netflix,
   spotify,
   adobeCC,
   iphoneInstallment,
   laptopInstallment,
   carDownpayment,
-  groceries,
-  coffee,
-  gas,
-  eatingOut,
-];
+]
 
-// ─── Derived summary ──────────────────────────────────────────────────────────
-
-function computeOverallStatus(
-  paid: number,
-  budgeted: number,
-): "on_track" | "warning" | "over_budget" {
-  if (budgeted === 0) return "on_track";
-  const pct = (paid / budgeted) * 100;
-  if (pct > 100) return "over_budget";
-  if (pct >= 75) return "warning";
-  return "on_track";
+export const fixedManualPresentationFixtures: Record<
+  string,
+  Pick<FixedExpenseItem, "transactions">
+> = {
+  "fb-coffee": {
+    transactions: [
+      {
+        id: "txn-fb-coffee-1",
+        amount: 70,
+        direction: "expense",
+        description: "Morning coffee",
+        date: "May 4",
+        isAutoPayment: false,
+      },
+      {
+        id: "txn-fb-coffee-2",
+        amount: 65,
+        direction: "expense",
+        description: "Coffee with friends",
+        date: "May 10",
+        isAutoPayment: false,
+      },
+      {
+        id: "txn-fb-coffee-3",
+        amount: 60,
+        direction: "expense",
+        description: "Afternoon coffee",
+        date: "May 16",
+        isAutoPayment: false,
+      },
+    ],
+  },
+  "fb-groceries": {
+    transactions: [
+      {
+        id: "txn-fb-groceries-1",
+        amount: 65,
+        direction: "expense",
+        description: "Neighborhood market",
+        date: "May 6",
+        isAutoPayment: false,
+      },
+      {
+        id: "txn-fb-groceries-2",
+        amount: 45,
+        direction: "expense",
+        description: "Fresh produce",
+        date: "May 14",
+        isAutoPayment: false,
+      },
+    ],
+  },
+  "fb-transport": {
+    transactions: [
+      {
+        id: "txn-fb-transport-1",
+        amount: 150,
+        direction: "expense",
+        description: "Fuel refill",
+        date: "May 3",
+        isAutoPayment: false,
+      },
+      {
+        id: "txn-fb-transport-2",
+        amount: 90,
+        direction: "expense",
+        description: "Ride-share",
+        date: "May 9",
+        isAutoPayment: false,
+      },
+      {
+        id: "txn-fb-transport-3",
+        amount: 70,
+        direction: "expense",
+        description: "Fuel top-up",
+        date: "May 15",
+        isAutoPayment: false,
+      },
+    ],
+  },
 }
-
-const totalBudgeted = fixedItems.reduce((sum, item) => sum + item.budget, 0);
-const totalPaid = fixedItems.reduce((sum, item) => sum + item.paid, 0);
-const totalRemaining = totalBudgeted - totalPaid;
-const summaryPct = totalBudgeted > 0 ? (totalPaid / totalBudgeted) * 100 : 0;
-
-// Items whose individual envelope is over — shown in the summary card callout
-const overBudgetItems = fixedItems
-  .filter((item) => item.type === "manual" && item.status === "over_budget")
-  .map((item) => ({ name: item.name, overageAmount: Math.abs(item.remaining) }));
-
-// With current data: totalPaid ≈ 7,540 / 11,049 ≈ 68% → on_track overall
-// Coffee is over its envelope (120 EGP) → shown in callout, not escalated to summary
-export const mockSummary: FixedTrackerSummary = {
-  totalBudgeted,
-  totalPaid,
-  totalRemaining,
-  paidProgressClass: progressClass(summaryPct),
-  overallStatus: computeOverallStatus(totalPaid, totalBudgeted),
-  overBudgetItems,
-};
-
-// ─── Installment overview ─────────────────────────────────────────────────────
-
-const installmentItems = fixedItems.filter((item) => item.type === "installment");
-
-export const mockInstallmentOverview: InstallmentOverview = {
-  monthlyObligation: installmentItems.reduce((sum, item) => sum + item.budget, 0),
-  totalPaidAllTime: installmentItems.reduce(
-    (sum, item) => sum + (item.installmentsPaid ?? 0) * item.budget,
-    0,
-  ),
-  totalRemainingAllTime: installmentItems.reduce(
-    (sum, item) => sum + (item.installmentsRemaining ?? 0) * item.budget,
-    0,
-  ),
-};

@@ -9,6 +9,7 @@ import { cn, getCardTint } from "@/lib/utils"
 
 type BudgetCardProps = {
   item: FixedExpenseItem
+  fasterThanUsual: boolean
   onTap: (item: FixedExpenseItem) => void
 }
 
@@ -30,8 +31,9 @@ const statusTintTone = {
   over_budget: "danger",
 } as const satisfies Record<FixedExpenseStatus, "success" | "warning" | "danger">
 
-export function BudgetCard({ item, onTap }: BudgetCardProps) {
+export function BudgetCard({ item, fasterThanUsual, onTap }: BudgetCardProps) {
   const t = useTranslations("Tracker.fixed")
+  const tAnalyticsFixed = useTranslations("Analytics.fixed")
   const tone = statusProgressTone[item.status]
   const overClass = statusTextClass[item.status]
 
@@ -60,16 +62,21 @@ export function BudgetCard({ item, onTap }: BudgetCardProps) {
             <HugeiconsIcon icon={item.icon} size={20} aria-hidden="true" />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-foreground">{item.name}</p>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <p className="min-w-0 truncate text-sm font-semibold text-foreground">{item.name}</p>
+              {fasterThanUsual ? (
+                <span className="shrink-0 rounded-full bg-surface-offset px-2 py-0.5 text-[0.625rem] font-medium text-text-tertiary shadow-ring">
+                  {tAnalyticsFixed("paceTagFaster")}
+                </span>
+              ) : null}
+            </div>
             <p className="mt-0.5 text-xs text-text-tertiary">{t("types.manual")}</p>
           </div>
         </div>
         <div className="shrink-0 text-end">
-          <p
-            dir="ltr"
-            className="text-sm font-semibold tabular-nums text-foreground"
-          >
-            {formatAmount(item.paid)} <span className="font-normal text-text-tertiary">/ {formatAmount(item.budget)}</span>
+          <p dir="ltr" className="text-sm font-semibold tabular-nums text-foreground">
+            {formatAmount(item.paid)}{" "}
+            <span className="font-normal text-text-tertiary">/ {formatAmount(item.budget)}</span>
           </p>
           {item.transactions.length > 0 && (
             <p className="mt-0.5 text-xs text-text-tertiary">

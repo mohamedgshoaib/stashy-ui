@@ -7,7 +7,7 @@ type Plan = "free" | "pro"
 type BudgetInjection = "with" | "without"
 type AnalyticsHistoryMode = "withHistory" | "firstMonth"
 type FixedBudgetOverrun = "none" | "some"
-type FixedPaceState = "steady" | "faster"
+type FixedPaceState = "steady" | "one" | "faster"
 
 interface SandboxStore {
   monthlyBudgetState: MonthlyBudgetState
@@ -39,7 +39,7 @@ export const useSandboxStore = create<SandboxStore>((set) => ({
   budgetInjection: "without",
   analyticsHistoryMode: "withHistory",
   fixedBudgetOverrun: "some",
-  fixedPaceState: "faster",
+  fixedPaceState: "steady",
   setMonthlyBudgetState: (v) => set({ monthlyBudgetState: v }),
   setDailyRateState: (v) => set({ dailyRateState: v }),
   setMajorScenario: (v) => set({ majorScenario: v }),

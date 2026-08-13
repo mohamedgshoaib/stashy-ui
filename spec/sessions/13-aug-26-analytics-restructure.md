@@ -157,3 +157,56 @@ The Analytics restructure was merged into `main`. The locked Phase 8b plan had s
 ## Open Blockers
 
 None.
+
+# Session 4 — Running-hot signal integration
+
+**Time:** Continuous implementation block
+
+---
+
+## Status at Session Start
+
+Phase 8b was present on `main`, including `deriveBucketPaceFlag`, `dailyCumulative`, and `RHYTHM_STEADY_BAND`. The locked Phase 8c plan had six survey ambiguities resolved by the user, narrowing source unification to manual buckets and authorizing the final push-and-PR phase.
+
+---
+
+## Completed This Session
+
+- Created `running-hot-signal` from `main` and committed the required Phase 0 plan amendment with all six resolutions and the final PR phase.
+- Replaced the Fixed manual mock set wholesale with analytics-derived Coffee, Groceries, and Transport buckets while retaining Fixed-owned recurring and installment items.
+- Added the Fixed-owned boundary icon map and fresh, budget-sized transaction fixtures for all three analytics manual buckets.
+- Migrated HomeDrawer manual categories from the stale module-level mock to the same per-month derivation used by Tracker Fixed.
+- Added neutral per-card pace tags on Fixed and the count-only running-hot strip on Home, with locale-aware Tracker navigation.
+- Added steady, one-hot, and faster sandbox states; steady remains the default, one flags Coffee, faster flags Coffee and Groceries, and cold-start Transport remains silent.
+- Added English and Arabic strings for the Home row and one-hot sandbox control while reusing the existing localized pace tag.
+- Passed per-phase and full typecheck/lint gates, a network-enabled production build, and targeted formatting checks.
+- Completed the Phase 5 observation pass at 390×844 across EN/AR, steady/one/faster, Fixed detail/edit/transfer drawers, Home-to-Tracker navigation, under-budget pace tags, and the Analytics route with no horizontal overflow.
+- Reverted all throwaway sandbox-state changes used during visual verification.
+- Applied the missing Resolution 7 fixture correction: the calm `none` state now keeps Coffee 145/200, Groceries 160/240, and Transport 200/400 inside plan; `some` changes only Groceries to 280/240, leaving Coffee and Transport under budget.
+- Lowered the shaped Coffee historical reference without changing snapshot endpoints so `some + faster` flags under-budget Coffee plus over-budget Groceries while Transport remains cold-start and silent.
+- Normalized the current analytics month after sandbox mutations and applied the same delta to the Cash payment-method breakdown so fixed totals, overrun count, classifications, whole-budget figures, and payment-method totals cannot remain stale after bucket spends are rescaled.
+- Re-ran the invariant assertion across all 72 sandbox combinations: every available manual cumulative array is monotonic, has the required live/snapshot length, and ends at `spent`; onTrack/atRisk/over remain correctly classified without injection, and all closed-month verdicts remain unchanged.
+- Re-ran VR-F through the rendered settings drawer at 390×844: Faster produced a Home count of 2; Fixed showed tagged Coffee at 145/200 EGP with 55 EGP left and tagged Groceries at 280/240 EGP, with Transport untagged at 200/400 EGP.
+- Fixed the user-authorized Home budget follow-up where Major spending was subtracted twice from an already Major-reduced effective variable cap. Variable remaining, tomorrow-rate projection, and emergency overage now subtract only net variable spend from that cap; the composition bar still presents Major as its own segment.
+- Verified the three scenario truths directly: onTrack has 1,640 EGP variable left; atRisk has 340 EGP variable and 555 EGP total left while projecting −1,524 EGP; over has −120 EGP variable left and an emergency overage of exactly 120 EGP.
+- Selected At Risk through the rendered Home settings drawer at 390×844 and observed `Remaining this month 555 EGP`, `Variable left 340 EGP`, and `Fixed left 215 EGP`, with no old −865 value, browser exception, or horizontal overflow.
+- Fixed the PR review finding where editing a manual bucket budget left its running-hot tag tied to the original analytics plan. Tracker now overlays the edited manual budgets onto the current comparison month during render while preserving historical snapshots.
+- Re-ran typecheck, lint, formatting, diff checks, and a network-enabled production build. In the rendered 390×844 edit flow, Coffee changed from tagged at 145/200 EGP to untagged at 145/400 EGP, Groceries remained tagged, and there were no browser exceptions or horizontal overflow.
+
+---
+
+## Decisions Made
+
+- Analytics owns only manual bucket identity, label, budget, and spend at the derivation boundary; Fixed continues to own presentation, transaction, due-date, installment, and payment lifecycle fields.
+- The manual set is replaced rather than mapped or reconciled with legacy `bud-*` identities and histories.
+- The Home strip remains count-only and the Fixed pace tag remains disclosure-only; neither changes budget status semantics.
+- The Tracker FAB add drawer remains a pre-existing no-op because it has no `onSave`; edit continues through the existing `handleSave` path.
+- The `some` fixture represents one bucket over plan rather than all manual envelopes overrunning; Coffee is the required under-budget hot example in the `faster` state.
+- Major expenses reduce `effectiveVariableBudget` once. Home may include Major in spend composition, but remaining-cap and daily-rate arithmetic must not subtract it again.
+- Manual budget edits affect the current pace denominator immediately; historical comparison budgets remain immutable.
+
+---
+
+## Open Blockers
+
+None.

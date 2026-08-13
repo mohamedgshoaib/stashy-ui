@@ -14,7 +14,9 @@ import {
 
 import {
   buildDailyCumulative,
+  deriveBucketPaceFlag,
   getAnalyticsDataForScenario,
+  getMonthView,
   getPreviousSnapshot,
   withManualBucketCalibration,
 } from "@/components/analytics/data"
@@ -22,19 +24,27 @@ import type {
   AnalyticsData,
   FixedBucketActual,
   FixedBucketIconKey,
+  FixedBucketPlan,
   LiveMonthAnalysis,
   MonthSnapshot,
 } from "@/components/analytics/types"
 import type { HistoryTransaction } from "@/components/history/types"
 import type { UpcomingPayment } from "@/components/home/home-data"
 import type { BudgetStrip, DailyRate, MajorExpensesRow } from "@/components/home/types"
+import { getTrackerFixedIcon } from "@/components/tracker/fixed-icons"
+import type {
+  FixedExpenseIconKey,
+  FixedExpenseItem,
+  FixedTransaction,
+} from "@/components/tracker/types"
+import { fixedManualPresentationFixtures, fixedNonManualItems } from "@/data/fixed-tracker-mock"
 
 export type SandboxBudgetConfig = {
   monthlyBudgetState: "onTrack" | "atRisk" | "over"
   budgetInjection: "with" | "without"
   analyticsHistoryMode: "withHistory" | "firstMonth"
   fixedBudgetOverrun: "none" | "some"
-  fixedPaceState: "steady" | "faster"
+  fixedPaceState: "steady" | "one" | "faster"
 }
 
 type FixedPaymentMeta = {
@@ -63,11 +73,14 @@ function getMonthDayIso(month: LiveMonthAnalysis, day: number): string {
 
 function getMonthMetrics(month: LiveMonthAnalysis) {
   const variableBudget = Math.max(0, month.monthlyBudget - month.fixedTotalBudget)
-  const variableSpentExcludingMajor = month.totalVariableSpent
+  const variableSpentExcludingMajor = Math.max(
+    0,
+    month.totalVariableSpent - month.variableReceivedTotal,
+  )
   const majorSpent = month.majorTotal
   const variableSpentIncludingMajor = variableSpentExcludingMajor + majorSpent
   const fixedRemaining = Math.max(0, month.fixedTotalBudget - month.fixedTotalSpent)
-  const variableRemaining = month.effectiveVariableBudget - variableSpentIncludingMajor
+  const variableRemaining = month.effectiveVariableBudget - variableSpentExcludingMajor
 
   return {
     variableBudget,
@@ -102,22 +115,34 @@ function withFixedPaceState(
 
   const snapshotExponentByMonth: Record<string, number> = {
     "2026-04": 0.5,
-    "2026-03": 1.3,
-    "2026-02": 0.93,
+    "2026-03": 2,
+    "2026-02": 2,
+  }
+  const groceriesSnapshotExponentByMonth: Record<string, number> = {
+    "2026-04": 3,
+    "2026-03": 3,
+    "2026-02": 3,
   }
 
   return {
     ...data,
     current: {
       ...data.current,
-      fixedBucketsActual: data.current.fixedBucketsActual.map((actual) =>
-        actual.id === "fb-coffee"
-          ? {
-              ...actual,
-              dailyCumulative: buildDailyCumulative(data.current.daysTracked, actual.spent, 0.55),
-            }
-          : actual,
-      ),
+      fixedBucketsActual: data.current.fixedBucketsActual.map((actual) => {
+        if (actual.id === "fb-coffee") {
+          return {
+            ...actual,
+            dailyCumulative: buildDailyCumulative(data.current.daysTracked, actual.spent, 0.55),
+          }
+        }
+        if (fixedPaceState === "faster" && actual.id === "fb-groceries") {
+          return {
+            ...actual,
+            dailyCumulative: buildDailyCumulative(data.current.daysTracked, actual.spent, 0.65),
+          }
+        }
+        return actual
+      }),
     },
     snapshots: data.snapshots.map((snapshot) => ({
       ...snapshot,
@@ -131,7 +156,16 @@ function withFixedPaceState(
                 snapshotExponentByMonth[snapshot.month] ?? 1,
               ),
             }
-          : actual,
+          : fixedPaceState === "faster" && actual.id === "fb-groceries"
+            ? {
+                ...actual,
+                dailyCumulative: buildDailyCumulative(
+                  snapshot.daysInMonth,
+                  actual.spent,
+                  groceriesSnapshotExponentByMonth[snapshot.month] ?? 3,
+                ),
+              }
+            : actual,
       ),
     })),
   }
@@ -174,23 +208,43 @@ export function getSandboxAnalyticsData(config: SandboxBudgetConfig): AnalyticsD
   data = withFixedPaceState(data, config.fixedPaceState)
 
   if (config.fixedBudgetOverrun === "some" && data.current.status === "inProgress") {
+    const groceriesSpent =
+      data.current.fixedBucketsActual.find((actual) => actual.id === "fb-groceries")?.spent ?? 0
+    const groceriesTargetSpent = 280
+    const fixedSpendDelta = Math.max(0, groceriesTargetSpent - groceriesSpent)
+
     data = {
       ...data,
       current: {
         ...data.current,
         fixedBucketsActual: data.current.fixedBucketsActual.map((actual) => {
-          if (actual.id === "fb-coffee") return withRescaledSpend(actual, 240)
-          if (actual.id === "fb-groceries") return withRescaledSpend(actual, 320)
-          if (actual.id === "fb-transport") return withRescaledSpend(actual, 470)
+          if (actual.id === "fb-groceries") {
+            return withRescaledSpend(actual, groceriesTargetSpent)
+          }
           return actual
         }),
+        paymentMethods: data.current.paymentMethods.map((method) =>
+          method.id === "pm1"
+            ? {
+                ...method,
+                fixed: method.fixed + fixedSpendDelta,
+                total: method.total + fixedSpendDelta,
+                fixedByType: method.fixedByType
+                  ? {
+                      ...method.fixedByType,
+                      manual: method.fixedByType.manual + fixedSpendDelta,
+                    }
+                  : undefined,
+              }
+            : method,
+        ),
       },
     }
   }
 
   data = {
     ...data,
-    current: withManualBucketCalibration(data.current),
+    current: getMonthView(data, data.current.month),
     snapshots: data.snapshots.map((snapshot) => withManualBucketCalibration(snapshot)),
   }
 
@@ -213,6 +267,84 @@ export function getHomeBudgetStrip(month: LiveMonthAnalysis): BudgetStrip {
   }
 }
 
+function getFixedManualIconKey(bucketId: string): FixedExpenseIconKey {
+  const iconKeyByBucketId: Record<string, FixedExpenseIconKey> = {
+    "fb-coffee": "cafe",
+    "fb-groceries": "shopping",
+    "fb-transport": "car",
+  }
+
+  return iconKeyByBucketId[bucketId] ?? "shopping"
+}
+
+function getFixedExpenseStatus(progressPct: number): FixedExpenseItem["status"] {
+  if (progressPct > 100) return "over_budget"
+  if (progressPct >= 75) return "warning"
+  return "on_track"
+}
+
+function scaleFixedTransactions(
+  transactions: FixedTransaction[],
+  spent: number,
+): FixedTransaction[] {
+  if (spent <= 0 || transactions.length === 0) return []
+
+  const fixtureTotal = transactions.reduce((sum, transaction) => sum + transaction.amount, 0)
+  if (fixtureTotal <= 0) return transactions
+
+  let assigned = 0
+  return transactions.map((transaction, index) => {
+    const amount =
+      index === transactions.length - 1
+        ? Math.max(0, spent - assigned)
+        : Math.round((transaction.amount / fixtureTotal) * spent)
+    assigned += amount
+
+    return { ...transaction, amount }
+  })
+}
+
+function deriveManualFixedExpenseItem(
+  bucket: FixedBucketPlan,
+  actual: FixedBucketActual | undefined,
+): FixedExpenseItem {
+  const paid = actual?.spent ?? 0
+  const progressPct = bucket.budget > 0 ? (paid / bucket.budget) * 100 : 0
+  const iconKey = getFixedManualIconKey(bucket.id)
+  const fixture = fixedManualPresentationFixtures[bucket.id]
+
+  return {
+    id: bucket.id,
+    name: bucket.name,
+    iconKey,
+    icon: getTrackerFixedIcon(iconKey),
+    type: "manual",
+    budget: bucket.budget,
+    paid,
+    remaining: bucket.budget - paid,
+    progressPct,
+    progressClass: `basis-[${Math.min(Math.round(progressPct), 100)}%]`,
+    status: getFixedExpenseStatus(progressPct),
+    paymentStatus: "unpaid",
+    nextPaymentDate: null,
+    installmentsTotal: null,
+    installmentsPaid: null,
+    installmentsRemaining: null,
+    installmentProgressClass: null,
+    endDate: null,
+    transactions: scaleFixedTransactions(fixture?.transactions ?? [], paid),
+  }
+}
+
+export function getFixedExpenseItems(month: LiveMonthAnalysis): FixedExpenseItem[] {
+  const actualById = new Map(month.fixedBucketsActual.map((actual) => [actual.id, actual]))
+  const manualItems = month.fixedBuckets
+    .filter((bucket) => bucket.type === "manual")
+    .map((bucket) => deriveManualFixedExpenseItem(bucket, actualById.get(bucket.id)))
+
+  return [...fixedNonManualItems, ...manualItems]
+}
+
 export function getHomeMajorExpensesRow(
   month: LiveMonthAnalysis,
   majorScenario: "active" | "none",
@@ -225,6 +357,15 @@ export function getHomeMajorExpensesRow(
     totalAmount: month.majorTotal,
     percentOfVariable: Math.round((month.majorTotal / Math.max(1, variableBudget)) * 100),
   }
+}
+
+export function getHomeRunningHotCount(data: AnalyticsData): number | null {
+  const count = data.current.fixedBuckets.reduce((total, bucket) => {
+    if (bucket.type !== "manual") return total
+    return deriveBucketPaceFlag(bucket.id, data.current, data.snapshots) ? total + 1 : total
+  }, 0)
+
+  return count > 0 ? count : null
 }
 
 export function getHomeUpcomingPayments(month: LiveMonthAnalysis): UpcomingPayment[] {
@@ -259,7 +400,7 @@ export function getHomeDailyRate(
   const allowanceAmount = Math.max(0, month.todaysRate || month.baseDailyRate)
 
   if (month.monthlyState === "over") {
-    const overByAmount = Math.max(0, Math.round(Math.abs(metrics.totalRemaining) * 100) / 100)
+    const overByAmount = Math.max(0, Math.round(Math.abs(metrics.variableRemaining) * 100) / 100)
 
     return {
       remaining: `-${formatCurrency(overByAmount)}`,
@@ -284,7 +425,7 @@ export function getHomeDailyRate(
       ? Math.round((allowanceAmount + overspendExtra) * 100) / 100
       : baselineSpent
   const remainingAmount = Math.round((allowanceAmount - spentAmount) * 100) / 100
-  const variableSpentAfterToday = metrics.variableSpentIncludingMajor + spentAmount
+  const variableSpentAfterToday = metrics.variableSpentExcludingMajor + spentAmount
   const tomorrowAmount =
     month.daysRemaining > 1
       ? Math.round(

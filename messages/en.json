@@ -55,6 +55,10 @@
       "ofVariableRow": "{percent}% of variable",
       "viewAction": "View"
     },
+    "runningHot": {
+      "rowLabel": "{count, plural, one {1 budget} other {# budgets}} running hot",
+      "viewAction": "View"
+    },
     "strip": {
       "remainingMonth": "Remaining this month",
       "fixedLeft": "Fixed left",
@@ -217,6 +221,7 @@
         "fixedOverrunSome": "With overruns",
         "fixedPaceLabel": "Fixed pace",
         "fixedPaceSteady": "Steady",
+        "fixedPaceOne": "One hot",
         "fixedPaceFaster": "Faster",
         "show": "Show",
         "hide": "Hide"

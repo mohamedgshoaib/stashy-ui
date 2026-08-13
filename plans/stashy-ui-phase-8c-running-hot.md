@@ -9,7 +9,7 @@
 
 ## 0. How to use this document
 
-Self-contained. Work **phase by phase**, do not batch. Each phase ends with `pnpm typecheck && pnpm lint`, clean of *new* errors.
+Self-contained. Work **phase by phase**, do not batch. Each phase ends with `pnpm typecheck && pnpm lint`, clean of _new_ errors.
 
 Standing rules: design-system tokens only, no inline hex; logical direction utilities (`ms-`/`me-`/`ps-`/`pe-`), never physical; amounts render `dir="ltr"`; dynamic widths via inline `style`.
 
@@ -23,15 +23,15 @@ Standing rules: design-system tokens only, no inline hex; logical direction util
 
 ## 1. What this builds, and why
 
-Phase 8b built a pace comparator that flags a manual fixed bucket spending ahead of its own history. It is currently **only reachable inside the Analytics overrun disclosure** — which means it can only fire on buckets *already over plan*, at which point the overage on the same row already says so.
+Phase 8b built a pace comparator that flags a manual fixed bucket spending ahead of its own history. It is currently **only reachable inside the Analytics overrun disclosure** — which means it can only fire on buckets _already over plan_, at which point the overage on the same row already says so.
 
 **A behavioural warning gated behind the outcome it warns about is redundant by construction.** This phase moves the signal to where it can do work.
 
 ### Two surfaces, two jobs
 
-**Home — the alert.** A conditional strip: *"2 budgets running hot"*. Aggregate only, no names, no figures. It exists to make the user aware something needs attention on a surface they open daily.
+**Home — the alert.** A conditional strip: _"2 budgets running hot"_. Aggregate only, no names, no figures. It exists to make the user aware something needs attention on a surface they open daily.
 
-**Fixed — the detail.** A "Faster than usual" tag on each hot bucket's card. This is what makes the Home strip's handoff meaningful: you tap through and immediately see *which*.
+**Fixed — the detail.** A "Faster than usual" tag on each hot bucket's card. This is what makes the Home strip's handoff meaningful: you tap through and immediately see _which_.
 
 The strip is aggregate precisely **because** the destination names them. Naming one bucket on Home when three are hot would be a claim the strip cannot back up, and duplicating the naming on both surfaces is redundant.
 
@@ -45,7 +45,7 @@ That is what earns it a place on a surface that is deliberately sparse: it chang
 
 - **Stashy does not moralize spending. Numbers are facts, not verdicts.** This is a neutral factual signal, not a scolding.
 - **Home converts; it does not decompose.** Home gets a count. Names and detail live on Fixed.
-- **Semantic tone is for exceeding your own plan, not for comparing periods.** A cross-period pace comparison is *calibration*. It stays neutral. See §4 and §5 — this is the most likely thing to get wrong.
+- **Semantic tone is for exceeding your own plan, not for comparing periods.** A cross-period pace comparison is _calibration_. It stays neutral. See §4 and §5 — this is the most likely thing to get wrong.
 
 ---
 
@@ -62,15 +62,27 @@ That is what earns it a place on a surface that is deliberately sparse: it chang
 
 **Verify:** you can state exactly which `FixedExpenseItem` fields analytics cannot supply.
 
+### Locked survey resolutions
+
+1. **Manual-only unification.** Analytics becomes the source of truth only for the manual bucket set. Recurring and installment items remain entirely on the Fixed mock because analytics does not carry their due dates, payment status, or installment lifecycle.
+2. **Replace the manual set outright.** Do not map or migrate the old `bud-*` fixtures. Replace them wholesale with `fb-coffee`, `fb-groceries`, and `fb-transport`; drop `bud-gas` and `bud-eating-out`; author fresh Fixed-only fixtures sized plausibly against budgets of 200 / 240 / 400 EGP.
+3. **Fixed owns icon presentation.** Analytics does not own `iconKey` for this pass. Map analytics IDs at the derivation boundary in one small function: Coffee → `cafe`, Groceries → `shopping`, Transport → `car`.
+4. **Migrate every manual-bucket consumer.** `HomeDrawer` must use the same per-month derivation as the Fixed page instead of materializing categories from the old mock at module scope. Report if this requires more than a trivial component reshape.
+5. **Preserve the current add asymmetry.** Edit continues to save through `TrackerFixedTab`; the Tracker FAB add drawer remains a pre-existing no-op. Do not restructure ownership. Record this under “Pre-existing, not fixed” in the PR.
+6. **Expose all three counts explicitly.** Extend `fixedPaceState` to `steady | one | faster`: `steady` → 0 flags, `one` → Coffee only, `faster` → Coffee and Groceries. Transport remains cold-start and silent. Make `steady` the default.
+7. **Keep manual scenarios ordinary and preserve tag independence.** In `fixedBudgetOverrun: "none"`, all manual buckets stay inside their envelopes. In `"some"`, most remain comfortably inside and only one or two overrun. The drawer-reachable `some + faster` combination must include at least one under-budget hot bucket and produce a Home count of 1 or 2, never 3. Re-run cumulative-array invariants across every scenario and snapshot after shaping these fixtures.
+
 ---
 
 ## 3. Phase 1 — Unify the manual bucket data
 
-**Goal:** make the analytics month model the single source of truth for *which manual buckets exist and what they cost*, so the Fixed page can call the comparator.
+**Goal:** make the analytics month model the single source of truth for _which manual buckets exist and what they cost_, so the Fixed page can call the comparator.
+
+**Files:** `lib/sandbox-budget.ts`, `data/fixed-tracker-mock.ts`, `components/tracker/tracker-fixed-tab.tsx`, `components/home/home-drawer.tsx`, and any directly affected Fixed presentation helpers/types.
 
 ### Why this is necessary
 
-The two datasets were built independently and disagree: Fixed has *Coffee & Cafes* at 500, analytics has `fb-coffee` at 200. `deriveBucketPaceFlag` is keyed to analytics bucket IDs, so today the Fixed page has no way to ask the question at all.
+The two datasets were built independently and disagree: Fixed has _Coffee & Cafes_ at 500, analytics has `fb-coffee` at 200. `deriveBucketPaceFlag` is keyed to analytics bucket IDs, so today the Fixed page has no way to ask the question at all.
 
 The real API will have one source of truth for buckets. **Two divergent mock datasets are a fiction the mock is telling that the product will not tell** — unifying makes the sandbox more faithful, not less.
 
@@ -78,25 +90,31 @@ The real API will have one source of truth for buckets. **Two divergent mock dat
 
 **Do not attempt a full replacement.** Analytics does not carry everything Fixed renders — transaction lists, due dates, installment lifecycle fields, per-item status. Forcing those into the analytics model would bloat it to serve one page.
 
-**The split:**
+**The manual-only split:**
 
-- **Analytics owns the shared facts** — bucket existence, `id`, `name`, `budget`, `type`, `iconKey`, and `spent`. Fixed derives these.
-- **Fixed keeps its own presentation-only fields** — transactions, due dates, installment lifecycle, derived status — keyed by the **same IDs**.
+- **Analytics owns the shared manual facts** — manual bucket existence, `id`, `name`, `budget`, `type`, and `spent`. Fixed derives these.
+- **Fixed owns presentation facts** — `iconKey` / rendered icon, transactions, and derived card values and status — keyed by the analytics manual IDs.
+- **Recurring and installment remain entirely Fixed-owned.** Do not replace, merge, rename, or re-budget them from analytics.
 
-Manual buckets are what matter here. Recurring and installment may keep their existing Fixed-side definitions if analytics cannot supply them; report if so.
+The analytics manual set replaces the old Fixed manual set outright. Do not migrate old manual transaction histories or preserve `bud-*` continuity.
 
 ### Changes
 
-- Add a derivation (natural home: `lib/sandbox-budget.ts`, alongside `getHomeBudgetStrip`) that builds `FixedExpenseItem[]` from the analytics month, merging the Fixed-only fields.
+- Add a derivation (natural home: `lib/sandbox-budget.ts`, alongside `getHomeBudgetStrip`) that combines unchanged recurring/installment mock items with manual `FixedExpenseItem[]` derived from the analytics month and fresh Fixed-only fixtures.
+- Keep the manual icon boundary mapping in one small function beside that derivation: `fb-coffee` → `cafe`, `fb-groceries` → `shopping`, `fb-transport` → `car`.
 - `tracker-fixed-tab.tsx` seeds its local `items` state from that derivation instead of importing the mock directly.
-- **Preserve the local add/edit behaviour.** The tab currently owns state so saves apply immediately and the summary recomputes. That must still work.
+- `home-drawer.tsx` derives its manual budget categories from the same analytics month data instead of importing `fixedItems` at module scope.
+- **Preserve the live edit behaviour.** The tab-owned edit drawer continues to save immediately and recompute the summary.
+- **Preserve the pre-existing FAB add no-op.** The Tracker-level add drawer remains outside the tab state and receives no `onSave`; do not restructure it in this pass.
 - `tracker-transfer-drawer.tsx` reads destination budgets from the live items list — confirm it still resolves after the change.
 - Bucket names and budgets on the Fixed page will change to the analytics values. **That is the point.** Do not preserve the old numbers.
 
 ### Do NOT
 
 - Do NOT move transactions, due dates, or installment lifecycle data into the analytics model.
-- Do NOT delete `data/fixed-tracker-mock.ts` if it still supplies the Fixed-only fields. Reduce it to what analytics cannot provide.
+- Do NOT alter the existing recurring or installment fixtures.
+- Do NOT preserve or map the old manual fixtures. Replace them with fresh fixtures for the analytics manual IDs and budgets.
+- Do NOT delete `data/fixed-tracker-mock.ts`; retain the unchanged recurring/installment items and the fresh manual presentation fixtures there.
 - Do NOT change any analytics-side numbers to make the Fixed page look better. Analytics is upstream.
 
 ### Verify
@@ -110,6 +128,7 @@ Manual buckets are what matter here. Recurring and installment may keep their ex
 **Goal:** show which buckets are hot, on the surface the Home strip sends you to.
 
 ### Files
+
 `components/tracker/cards/budget-card.tsx`, `components/tracker/tracker-fixed-tab.tsx`
 
 ### Changes
@@ -137,6 +156,7 @@ Manual buckets are what matter here. Recurring and installment may keep their ex
 **Goal:** a conditional aggregate alert on Home.
 
 ### Files
+
 `components/home/types.ts`, `components/home/home-data.ts` (or `lib/sandbox-budget.ts`), `components/home/running-hot-row.tsx` (new), `components/home/home-content.tsx`, `components/home/home-screen.tsx`, `messages/en.json`, `messages/ar.json`
 
 ### Data
@@ -151,16 +171,17 @@ Content: the count phrase on the start side, a `View →` affordance on the end 
 
 **Locked EN copy:**
 
-| Key | Value |
-|---|---|
-| `Home.runningHot.rowLabel` | `{count, plural, one {1 budget} other {# budgets}} running hot` |
-| `Home.runningHot.viewAction` | `View` |
+| Key                          | Value                                                           |
+| ---------------------------- | --------------------------------------------------------------- |
+| `Home.runningHot.rowLabel`   | `{count, plural, one {1 budget} other {# budgets}} running hot` |
+| `Home.runningHot.viewAction` | `View`                                                          |
 
 Arabic: author it, match the existing register, list it in the PR. Keep it short — it shares a row with the action.
 
 **Tone — locked: quiet/neutral, NOT amber.** Use a neutral surface (`bg-surface-offset` + `border-border` or equivalent), **not** `bg-warning-subtle`.
 
 Two reasons, and this was decided against an amber mockup:
+
 1. `MajorExpensesRowCard` directly below is already amber. Two amber strips stacked under the daily rate card read as compounding alarm.
 2. It is doctrinally correct — cross-period comparison is calibration, and calibration does not get semantic tone. This keeps Home consistent with the neutral tag on Fixed and in Analytics.
 
@@ -168,7 +189,7 @@ Two reasons, and this was decided against an amber mockup:
 
 In `home-content.tsx`: **after `DailyRateCard`, before `MajorExpensesRowCard`.**
 
-Below the rate card because the signal is *about* the rate — a leading indicator it will drop. It cannot sit above the number it qualifies.
+Below the rate card because the signal is _about_ the rate — a leading indicator it will drop. It cannot sit above the number it qualifies.
 
 ### Navigation
 
@@ -189,9 +210,9 @@ Below the rate card because the signal is *about* the rate — a leading indicat
 
 ## 6. Phase 4 — Sandbox and state coverage
 
-`fixedPaceState` already exists from Phase 8b. Confirm it drives the Home strip and the Fixed tag as well as the Analytics tag — one axis, three surfaces.
+Extend the Phase 8b `fixedPaceState` axis to `steady | one | faster`, and confirm it drives the Home strip and the Fixed tag as well as the Analytics tag — one axis, three surfaces. Set `steady` as the sandbox default.
 
-If the strip cannot reach a count of 2+ with current data, shape a second manual bucket's `dailyCumulative` so it can. Preserve the Phase 8b invariants: monotonically non-decreasing, correct length, **last value === `spent`**, and rescaled if `lib/sandbox-budget.ts` mutates `spent`.
+Shape the fixtures so `steady` flags none, `one` flags Coffee only, and `faster` flags Coffee plus Groceries. Transport has no usable prior months and must remain cold-start and silent. Preserve the Phase 8b invariants: monotonically non-decreasing, correct length, **last value === `spent`**, and rescaled if `lib/sandbox-budget.ts` mutates `spent`.
 
 **Verify:** counts of 0, 1 and 2+ are all reachable from the Home settings drawer without editing code.
 
@@ -214,14 +235,14 @@ Then record **objective observations only. Apply no fallbacks** — carry all of
 
 ## 8. Out of scope
 
-| Item | Status |
-|---|---|
-| `?bucket=<id>` deep link to a specific bucket | Deferred. Revisit if VR-D shows the handoff is weak. |
-| Naming buckets on Home | Rejected — the destination names them. |
-| Moving transactions / due dates / installment lifecycle into the analytics model | Rejected — bloats an upstream model to serve one page. |
-| Any tone other than neutral on either new surface | Rejected — see §4 and §5. |
-| A "slower than usual" or positive signal | Rejected. Underspending is incidental upside, not a signal. |
-| Any `stashy-api` change | Out of scope. The server-side query for per-bucket daily series is real future work but not this pass. |
+| Item                                                                             | Status                                                                                                 |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `?bucket=<id>` deep link to a specific bucket                                    | Deferred. Revisit if VR-D shows the handoff is weak.                                                   |
+| Naming buckets on Home                                                           | Rejected — the destination names them.                                                                 |
+| Moving transactions / due dates / installment lifecycle into the analytics model | Rejected — bloats an upstream model to serve one page.                                                 |
+| Any tone other than neutral on either new surface                                | Rejected — see §4 and §5.                                                                              |
+| A "slower than usual" or positive signal                                         | Rejected. Underspending is incidental upside, not a signal.                                            |
+| Any `stashy-api` change                                                          | Out of scope. The server-side query for per-bucket daily series is real future work but not this pass. |
 
 ---
 
@@ -235,4 +256,10 @@ Then record **objective observations only. Apply no fallbacks** — carry all of
 6. Anything you were tempted to fix and did not.
 7. Confirmation that no `stashy-api` or `stashy-mobile` file was touched.
 
-Then push `running-hot-signal` and open a PR into `main` with the above in its body.
+---
+
+## 10. Final phase — Publish the PR
+
+Push `running-hot-signal` and open a PR into `main` with `gh pr create`.
+
+The PR body must contain the §9 report: per-phase summary, the Phase 0 field survey, everything that changed visually on the Fixed page, the Arabic strings authored in this pass, and VR-A … VR-F as an unchecked checklist with objective observations. Include the Tracker FAB add asymmetry under **Pre-existing, not fixed**.

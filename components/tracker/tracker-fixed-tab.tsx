@@ -2,6 +2,7 @@
 
 import * as React from "react"
 
+import { deriveBucketPaceFlag } from "@/components/analytics/data"
 import { FixedDetailSheet } from "@/components/tracker/fixed-detail-sheet"
 import { FixedSummaryCard } from "@/components/tracker/fixed-summary-card"
 import { BudgetsSection } from "@/components/tracker/sections/budgets-section"
@@ -9,10 +10,13 @@ import { InstallmentsSection } from "@/components/tracker/sections/installments-
 import { SubscriptionsSection } from "@/components/tracker/sections/subscriptions-section"
 import { TrackerAddDrawer } from "@/components/tracker/tracker-add-drawer"
 import { TrackerTransferDrawer } from "@/components/tracker/tracker-transfer-drawer"
-import type { FixedExpenseItem, FixedTrackerSummary, InstallmentOverview } from "@/components/tracker/types"
-import {
-  fixedItems,
-} from "@/data/fixed-tracker-mock"
+import type {
+  FixedExpenseItem,
+  FixedTrackerSummary,
+  InstallmentOverview,
+} from "@/components/tracker/types"
+import { getFixedExpenseItems, getSandboxAnalyticsData } from "@/lib/sandbox-budget"
+import { useSandboxStore } from "@/store/sandbox-store"
 
 function buildSummary(items: FixedExpenseItem[]): FixedTrackerSummary {
   const totalBudgeted = items.reduce((sum, item) => sum + item.budget, 0)
@@ -49,7 +53,27 @@ function buildInstallmentOverview(items: FixedExpenseItem[]): InstallmentOvervie
 }
 
 export function TrackerFixedTab() {
-  const [items, setItems] = React.useState<FixedExpenseItem[]>(fixedItems)
+  const {
+    monthlyBudgetState,
+    budgetInjection,
+    analyticsHistoryMode,
+    fixedBudgetOverrun,
+    fixedPaceState,
+  } = useSandboxStore()
+  const analyticsData = React.useMemo(
+    () =>
+      getSandboxAnalyticsData({
+        monthlyBudgetState,
+        budgetInjection,
+        analyticsHistoryMode,
+        fixedBudgetOverrun,
+        fixedPaceState,
+      }),
+    [monthlyBudgetState, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun, fixedPaceState],
+  )
+  const [items, setItems] = React.useState<FixedExpenseItem[]>(() =>
+    getFixedExpenseItems(analyticsData.current),
+  )
   const [selectedItem, setSelectedItem] = React.useState<FixedExpenseItem | null>(null)
   const [editingItem, setEditingItem] = React.useState<FixedExpenseItem | null>(null)
   const [editOpen, setEditOpen] = React.useState(false)
@@ -61,6 +85,24 @@ export function TrackerFixedTab() {
   const manualItems = items.filter((item) => item.type === "manual")
   const summary = React.useMemo(() => buildSummary(items), [items])
   const installmentOverview = React.useMemo(() => buildInstallmentOverview(items), [items])
+  const fasterManualBucketIds = React.useMemo(() => {
+    const manualBudgetById = new Map(manualItems.map((item) => [item.id, item.budget]))
+    const paceComparisonMonth = {
+      ...analyticsData.current,
+      fixedBuckets: analyticsData.current.fixedBuckets.map((bucket) => ({
+        ...bucket,
+        budget: manualBudgetById.get(bucket.id) ?? bucket.budget,
+      })),
+    }
+
+    return new Set(
+      manualItems
+        .filter((item) =>
+          deriveBucketPaceFlag(item.id, paceComparisonMonth, analyticsData.snapshots),
+        )
+        .map((item) => item.id),
+    )
+  }, [analyticsData, manualItems])
 
   function handleEdit(item: FixedExpenseItem) {
     setSelectedItem(null)
@@ -89,7 +131,11 @@ export function TrackerFixedTab() {
   return (
     <div className="flex flex-col gap-8">
       <FixedSummaryCard summary={summary} />
-      <BudgetsSection items={manualItems} onCardTap={setSelectedItem} />
+      <BudgetsSection
+        items={manualItems}
+        fasterBucketIds={fasterManualBucketIds}
+        onCardTap={setSelectedItem}
+      />
       <SubscriptionsSection items={recurringItems} onCardTap={setSelectedItem} />
       <InstallmentsSection
         items={installmentItems}
