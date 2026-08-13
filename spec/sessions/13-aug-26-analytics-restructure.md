@@ -182,6 +182,9 @@ Phase 8b was present on `main`, including `deriveBucketPaceFlag`, `dailyCumulati
 - Passed per-phase and full typecheck/lint gates, a network-enabled production build, and targeted formatting checks.
 - Completed the Phase 5 observation pass at 390×844 across EN/AR, steady/one/faster, Fixed detail/edit/transfer drawers, Home-to-Tracker navigation, under-budget pace tags, and the Analytics route with no horizontal overflow.
 - Reverted all throwaway sandbox-state changes used during visual verification.
+- Diagnosed the post-verification `HomeScreen` React Client Manifest runtime error as a shared-output collision: a live Turbopack dev server and `next build` were both writing `.next`, after which the dev log showed App Router chunk 404s.
+- Isolated Turbopack development output in `.next-dev` while retaining `.next` for production builds, and ignored the new generated directory.
+- Reproduced the original concurrency condition after the fix: the live dev server remained healthy through a full production build; EN, AR, Tracker, and Analytics returned 200, and repeated headless navigation produced no browser exceptions or client-manifest error.
 
 ---
 
@@ -191,6 +194,7 @@ Phase 8b was present on `main`, including `deriveBucketPaceFlag`, `dailyCumulati
 - The manual set is replaced rather than mapped or reconciled with legacy `bud-*` identities and histories.
 - The Home strip remains count-only and the Fixed pace tag remains disclosure-only; neither changes budget status semantics.
 - The Tracker FAB add drawer remains a pre-existing no-op because it has no `onSave`; edit continues through the existing `handleSave` path.
+- Development and production builds use separate output directories so verification builds cannot invalidate a live Turbopack client manifest.
 
 ---
 
