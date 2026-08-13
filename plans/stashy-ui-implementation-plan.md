@@ -1,6 +1,8 @@
 # Stashy-UI — Analytics restructure & page naming: Implementation Plan
 
 **Repo:** `stashy-ui` (Next 16 / React 19 / Tailwind 4 / next-intl mobile sandbox)
+**Canonical path:** `plans/stashy-ui-implementation-plan.md`
+**Working branch:** `analysis_audit` (commit here; the PR opens from this branch)
 **Status:** Planning complete. All decisions below are **locked** — do not redesign, re-litigate, or "improve" them.
 **Scope:** `stashy-ui` only. No `stashy-api` changes. No `stashy-mobile` changes.
 
@@ -26,6 +28,7 @@ Each phase states:
 - Do not use physical directional Tailwind utilities (`ml-`, `mr-`, `pl-`, `pr-`). Use logical ones (`ms-`, `me-`, `ps-`, `pe-`).
 - All financial amounts render with `dir="ltr"`.
 - Dynamic percentage widths use inline `style={{ width: ... }}`, never Tailwind arbitrary values (JIT-safety).
+- Arabic wording that is not layout-affecting is a translation-pass decision at implementation time, not a planning blocker. Author it in the existing `messages/ar.json` register and list every authored Arabic string in the PR body for review. Layout-affecting Arabic explicitly locked in this plan remains locked.
 - If reality contradicts this plan, **stop and report**. Do not improvise a fix. The plan was written against live code but code may have moved.
 
 ### Known pre-existing failures — do not chase these
@@ -74,7 +77,7 @@ Analytics is being restructured from **three peer sections** into a **two-slot s
 **Changes:**
 1. Read `AGENTS.md`, `spec/index.md`, `spec/DESIGN.md`, and `.cursorrules`. These govern component patterns, tokens, and RTL rules and **override any styling guess** you would otherwise make.
 2. Read `spec/controlled-design-system.md` and `spec/brand-color-audit.md` if present — Phase 4 depends on colour-token semantics.
-3. Confirm the worktree is clean and you are on the correct working branch.
+3. Confirm the worktree is clean and you are on the correct working branch: `analysis_audit`.
 4. Read the current `components/analytics/analytics-screen.tsx` in full. It is the spine of Phases 1–5.
 
 **Verify:** You can state, without looking again, the current Section 2 card order and which `SectionHeader` carries `showDivider={false}`.
@@ -275,7 +278,7 @@ Two rules drive the strings:
 
 - `Analytics.section.landed.title`: currently `كيف انتهى الشهر`. **This is punctuation only** — `كيف` is already an interrogative particle, so it becomes `كيف انتهى الشهر؟`. No rewording.
 - `Analytics.section.landed.subtitle` and `Analytics.section.where.title` / `where.subtitle`: produce accurate Arabic matching the new EN meaning. Follow the existing Arabic register in the file.
-- **Known drift to resolve while you are here:** EN `where.title` says "the budget" while AR says `ميزانيتك` (*your* budget), yet both hook strings use second person in both languages. Make the AR person consistent with its EN counterpart. **The EN strings above are locked; adjust AR.**
+- **Known drift to resolve while you are here:** EN `where.title` says "the budget" while AR says `ميزانيتك` (*your* budget). Drop the second-person possessive and use the definite form in Arabic. Both hook strings stay second person in both locales. **The EN strings above are locked; adjust AR.**
 
 ### Do NOT
 
@@ -330,7 +333,7 @@ Both title and subtitle deviations were inherited from an older pass, not from t
 - move the subtitle out of the header-end slot into the canonical stacked position under the title
 - header row alignment `items-baseline` → `items-start`
 - **the end slot empties**
-- rewrite `Analytics.methods.subtitle` in EN and AR. It is currently the fragment **"by method"**, which only read as a subtitle because of where it sat. It must become a **full clause naming the card's job**, matching every other card's subtitle. The card's job: *how much total was spent on each payment method this month, and how that total splits across fixed / variable / major.*
+- rewrite `Analytics.methods.subtitle`. Locked EN: **`Total on each payment method, and what made it up.`** Author the Arabic equivalent in the existing register and list it in the PR body. It is currently the fragment **"by method"**, which only read as a subtitle because of where it sat. The replacement is a full clause naming the card's job: how much total was spent on each payment method this month, and how that total splits across fixed / variable / major.
 
 ### Do NOT
 
@@ -361,7 +364,7 @@ The chart draws an even-pace reference line — the trajectory of a perfect dail
 
 ### Changes
 
-- `Analytics.variable.legend.evenPace`: `"Even pace"` → `"Even pace · {amount}/day"`, with the AR equivalent.
+- `Analytics.variable.legend.evenPace`: `"Even pace"` → `"Even pace · {amount}/day"`. Author the Arabic equivalent in the existing register and list it in the PR body.
 - Value = `month.effectiveVariableBudget / month.daysInMonth` — **the slope of the line the chart already draws.** Deriving it from the same source means the caption and the line cannot desync, including after a mid-month injection changes the effective budget.
 - **Round to whole EGP. No decimals, no tilde.** Home's Today's Rate shows decimals (e.g. `615.38`); keeping this figure whole is a cheap signal that these are different objects — one a live recalculated rate, the other a static month-long reference.
 - Keep the existing legend styling and position. The swatch, the `text-[10.5px]`, the flex row: unchanged.
@@ -397,10 +400,14 @@ The chart draws an even-pace reference line — the trajectory of a perfect dail
 
 - The overrun badge becomes a **button only when `manualOverCount > 0`**. The income-tone "All within budget" state stays a static span — there is nothing to disclose.
 - **Inline expand, not a drawer.** This card already contains an inline collapsible (the "Envelope transfers" block reading `month.fixedTransfers`). **Reuse that pattern.** A drawer would invent an interaction this card does not have.
-- Collapsed by default. Chevron affordance on the badge, rotating on expand. Minimum 44px tap target.
+- Collapsed by default. Chevron affordance on the badge, rotating on expand. Minimum **48×48** Stashy touch target per `spec/DESIGN.md`; match the existing `min-h-12` pattern rather than the generic 44px accessibility floor.
 - Rows: **overrunning buckets only**, sorted by overage descending. Each row shows bucket name + over-by amount.
 - **Amounts neutral-toned.** These are magnitude, not pace, and not a verdict. Do not apply expense tone to the row amounts.
-- Add the i18n keys the expansion needs, EN + AR.
+- Add these locked key paths under `Analytics.fixed.*`, with Arabic equivalents authored in the existing register and listed in the PR body:
+  - `overrunDisclosureShow` = `Show overrunning budgets`
+  - `overrunDisclosureHide` = `Hide overrunning budgets`
+  - `overrunRowOver` = `{amount} over`
+- The show/hide strings are the accessible label on the badge button, paired with `aria-expanded`. The badge's visible text remains `fixed.someOverrunning`, unchanged.
 
 ### Do NOT
 
@@ -437,7 +444,7 @@ The positioning argument (Stashy is budget *management*, not tracking) is real b
 |---|---|---|
 | `Home.nav.tracker` | `Fixed` | `الثابت` |
 | `Tracker.title` | `Fixed` | `الثابت` |
-| `Home.navPlaceholders.tracker` | reword to describe the Fixed page | reword to match |
+| `Home.navPlaceholders.tracker` | `Fixed budgets, recurring payments, and installments open here without leaving the mobile sandbox.` | Author an accurate equivalent in the existing register and list it in the PR body. |
 
 **Also in this phase — a pre-existing AR inconsistency, now in scope because nav labels are being touched:** `Home.nav.analytics` is `التحليل` (singular) while `Analytics.title` is `التحليلات` (plural). Dock and page header disagree. **Fix: make the nav match the page title.** Verify both current values before editing.
 
@@ -464,7 +471,7 @@ The positioning argument (Stashy is budget *management*, not tracking) is real b
 
 ### Method — apply to every candidate
 
-For each key, grep the **entire repo** for the key path, the leaf name, and any dynamic-construction pattern (e.g. `` t(`monthlyHealth.closed.badge.${verdict}`) ``). **Template-literal key construction is the main way a key looks dead and is not.** Only delete on a zero-match result across all three forms.
+For each key, grep the **entire repo** for the key path, the leaf name, and any dynamic-construction pattern (e.g. `` t(`monthlyHealth.closed.badge.${verdict}`) ``). **Template-literal key construction is the main way a key looks dead and is not.** Only delete when all three forms have zero matches **outside `messages/en.json` and `messages/ar.json`**; the candidate's own definitions in those two files do not count as live usage.
 
 ### Candidates — delete from **both** `en.json` and `ar.json` if grep confirms
 
@@ -493,39 +500,31 @@ In the same pass, remove code orphaned by Phases 2–3: unused imports, unused t
 
 ## 13. Phase 11 — Verify-on-render pass
 
-**Goal:** Check the five things that were decided on reasoning rather than seen.
+**Goal:** Observe the five things that were decided on reasoning rather than seen, without changing the locked design.
 
-Mockups were skipped by agreement wherever a change invented no new component or layout. **This phase is the substitute.** Each item has a **defined fallback** — decided in advance so the check has an outcome either way. If a fallback triggers, apply it and report; do not invent a different fix.
+Mockups were skipped by agreement wherever a change invented no new component or layout. **This phase is the substitute. VR-1 through VR-5 are observation-only. Execute no fallback.** Record objective findings such as measurements, element counts, and scroll depth, then carry all five into the PR body as unchecked review items. Any concern found here requires a new design decision; it does not authorize an implementation change in this pass.
 
 ### VR-1 — Closed-month hook weight
 
-**Check:** Render a closed month. The hook is heavy — verdict card + ~8 ledger rows + the manual-fixed settlement button, all before the first breakdown card. Confirm it does not overwhelm the top of the page.
-
-**Fallback if it does:** move `BudgetPathCard` to close out the page **after** Section 2. Report before applying.
+**Check:** Render a closed month. Record the hook's element count, measured height, and scroll depth before the first breakdown card. Do not move `BudgetPathCard`: its adjacency with `HowMonthLandedCard` is locked by Phase 1, and moving it after Section 2 would reproduce the rejected top-and-bottom geometry.
 
 ### VR-2 — The card 4 → card 5 transition
 
-**Check:** `FixedAnalysisCard` → `PaymentMethodCard`. Confirm it reads as a continuation of the descent, not a jump. Note that `FixedAnalysisCard` carries an undocumented third block — a collapsible "Envelope transfers" section reading `month.fixedTransfers` — which adds real height to card 4. Factor that in.
-
-**Fallback if it reads as a jump:** introduce a sub-label between cards 4 and 5 — **but stop and report first.** At that point it earns its own design pass and a mockup, because it is a new layout element.
+**Check:** `FixedAnalysisCard` → `PaymentMethodCard`. Record the gap, surrounding card heights, and visible element counts across the transition. Note that `FixedAnalysisCard` carries an undocumented third block — a collapsible "Envelope transfers" section reading `month.fixedTransfers` — which adds real height to card 4. Do not introduce a sub-label.
 
 ### VR-3 — `BudgetCompositionCard` header dominance
 
-**Check:** with the title at `font-medium`, confirm the end-slot total still reads as the dominant element in that header rather than competing with the title.
-
-**Fallback if it flattens:** raise the total to `text-[1.25rem]`. **Do NOT restore `font-semibold` on the title** — the frame role belongs to the number, not the heading.
+**Check:** with the title at `font-medium`, record the computed title and total font sizes/weights and their positions. Do not change either value in this phase.
 
 ### VR-4 — Exact-budget verdict tone
 
-**Check:** on a closed **exact-budget** month, confirm the income-toned bar does not read as *"you saved something"* when the delta is zero.
-
-**Fallback if it does:** move exact to `quiet` / `text-text-secondary` — visually distinct without reasserting three-value semantics. Do not restore the `fixed` token.
+**Check:** no committed exact-budget scenario exists: available closed-month remainders are 180, 620, and 540, and the sandbox has no exact-budget control. Make a throwaway local edit forcing one closed month's remainder to zero, observe the exact-budget rendering, then revert the edit so nothing from the scenario is committed. If forcing the state is not trivial, record VR-4 as blocked because the mock data has no exact-budget scenario. Do not change the locked two-tone verdict treatment.
 
 ### VR-5 — Arabic and RTL sweep
 
 **Check, across every touched surface:** the new section strings do not wrap awkwardly or clip; the Phase 8 expansion rows and chevron mirror correctly; the Phase 7 legend renders its amount LTR inside RTL text without bidi damage; the renamed dock labels sit correctly.
 
-**Fallback:** report specifics. Do not silently reword Arabic — wording is a translation pass, not an implementation decision.
+**Reporting:** record specifics. Do not silently reword Arabic during verification; wording changes belong to the implementation translation pass and must be listed in the PR body.
 
 ### Final gate
 
@@ -559,7 +558,8 @@ When all phases pass, report:
 1. **Per phase:** what changed, and anything that did not match this plan.
 2. **Phase 10:** grep results per candidate — deleted, or kept and why.
 3. **Phase 11:** the outcome of each of VR-1 … VR-5, and whether any fallback triggered.
-4. **Anything you were tempted to fix and did not** — this is often the most useful line in the report.
-5. Confirmation that no `stashy-api` or `stashy-mobile` file was touched.
+4. **PR body:** list every Arabic string authored during implementation and carry VR-1 … VR-5 as unchecked review items. No VR fallback may be applied.
+5. **Anything you were tempted to fix and did not** — this is often the most useful line in the report.
+6. Confirmation that no `stashy-api` or `stashy-mobile` file was touched.
 
 **If any phase reveals that this plan is wrong about live code, stop at that phase and report before continuing.**
