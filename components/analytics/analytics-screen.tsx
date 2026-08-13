@@ -6,8 +6,8 @@ import { useLocale, useTranslations } from "next-intl"
 import * as React from "react"
 
 import { AnalyticsUpgradeGate } from "@/components/analytics/analytics-cards"
-import { BudgetPathCard } from "@/components/analytics/budget-path-card"
 import { BudgetCompositionCard } from "@/components/analytics/budget-composition-card"
+import { BudgetPathCard } from "@/components/analytics/budget-path-card"
 import { getMonthView, getPreviousSnapshot } from "@/components/analytics/data"
 import { FixedAnalysisCard } from "@/components/analytics/fixed-analysis-card"
 import { FlaggedAsMajorCard } from "@/components/analytics/flagged-as-major-card"
@@ -113,30 +113,37 @@ export function AnalyticsScreen() {
           </div>
         ) : (
           <div className="flex flex-col gap-3 px-screen pt-2">
-            <SectionHeader
-              title={t("section.onPace.title")}
-              subtitle={t("section.onPace.subtitle")}
-              showDivider={false}
-            />
-            <MonthlyHealthCard month={selectedMonth} />
+            {selectedMonth.status === "inProgress" ? (
+              <>
+                <SectionHeader
+                  title={t("section.onPace.title")}
+                  subtitle={t("section.onPace.subtitle")}
+                  showDivider={false}
+                />
+                <MonthlyHealthCard month={selectedMonth} />
+              </>
+            ) : (
+              <>
+                <SectionHeader
+                  title={t("section.landed.title")}
+                  subtitle={t("section.landed.subtitle")}
+                  showDivider={false}
+                />
+                <HowMonthLandedCard month={selectedMonth} />
+                <BudgetPathCard month={selectedMonth} />
+              </>
+            )}
 
             <SectionHeader
               title={t("section.where.title")}
               subtitle={t("section.where.subtitle")}
             />
             <BudgetCompositionCard month={selectedMonth} />
-            <PaymentMethodCard month={selectedMonth} prevPaymentMethods={prevPaymentMethods} />
-            <FixedAnalysisCard month={selectedMonth} data={analyticsData} />
-            <MethodObligationCard month={selectedMonth} data={analyticsData} />
             <VariableAnalysisCard month={selectedMonth} data={analyticsData} />
             <FlaggedAsMajorCard month={selectedMonth} data={analyticsData} />
-
-            <SectionHeader
-              title={t("section.landed.title")}
-              subtitle={t("section.landed.subtitle")}
-            />
-            <HowMonthLandedCard month={selectedMonth} />
-            <BudgetPathCard month={selectedMonth} />
+            <FixedAnalysisCard month={selectedMonth} data={analyticsData} />
+            <PaymentMethodCard month={selectedMonth} prevPaymentMethods={prevPaymentMethods} />
+            <MethodObligationCard month={selectedMonth} data={analyticsData} />
           </div>
         )}
       </main>

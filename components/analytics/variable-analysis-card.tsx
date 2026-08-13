@@ -13,10 +13,7 @@ import {
   YAxis,
 } from "recharts"
 
-import {
-  deriveRhythmCharacter,
-  getPreviousSnapshot,
-} from "@/components/analytics/data"
+import { deriveRhythmCharacter, getPreviousSnapshot } from "@/components/analytics/data"
 import {
   formatAnalyticsCurrency,
   formatAnalyticsSignedCurrency,
@@ -121,6 +118,7 @@ export function VariableAnalysisCard({ month, data }: VariableAnalysisCardProps)
   const t = useTranslations("Analytics")
   const priorSnapshot = month.status === "closed" ? getPreviousSnapshot(data, month.month) : null
   const showOverlay = month.status === "closed" && priorSnapshot !== null
+  const evenPacePerDay = month.effectiveVariableBudget / month.daysInMonth
 
   const chartData = React.useMemo<RhythmPoint[]>(() => {
     const totalDays = Math.max(month.daysInMonth, priorSnapshot?.daysInMonth ?? 0)
@@ -128,9 +126,10 @@ export function VariableAnalysisCard({ month, data }: VariableAnalysisCardProps)
     return Array.from({ length: totalDays }, (_, index) => {
       const day = index + 1
       const thisMonthValue = month.dailyVariableCumulative[index] ?? null
-      const lastMonthValue = showOverlay ? (priorSnapshot?.dailyVariableCumulative[index] ?? null) : null
-      const evenPaceValue =
-        day <= month.daysInMonth ? (month.effectiveVariableBudget * day) / month.daysInMonth : null
+      const lastMonthValue = showOverlay
+        ? (priorSnapshot?.dailyVariableCumulative[index] ?? null)
+        : null
+      const evenPaceValue = day <= month.daysInMonth ? evenPacePerDay * day : null
 
       return {
         day,
@@ -139,7 +138,7 @@ export function VariableAnalysisCard({ month, data }: VariableAnalysisCardProps)
         lastMonth: lastMonthValue,
       }
     })
-  }, [month.dailyVariableCumulative, month.daysInMonth, month.effectiveVariableBudget, priorSnapshot, showOverlay])
+  }, [evenPacePerDay, month.dailyVariableCumulative, month.daysInMonth, priorSnapshot, showOverlay])
 
   const highlightedTickDay = month.status === "closed" ? month.daysInMonth : month.daysTracked
   const xTicks = [1, 8, 15, 22, highlightedTickDay].filter(
@@ -148,7 +147,7 @@ export function VariableAnalysisCard({ month, data }: VariableAnalysisCardProps)
 
   const actualAt = month.dailyVariableCumulative[month.dailyVariableCumulative.length - 1] ?? 0
   const referenceDay = month.status === "closed" ? month.daysInMonth : month.daysTracked
-  const evenPaceAt = month.effectiveVariableBudget * (referenceDay / month.daysInMonth)
+  const evenPaceAt = evenPacePerDay * referenceDay
   const paceDelta = actualAt - evenPaceAt
   const isExactlyOnPace = Math.abs(paceDelta) < evenPaceAt * 0.02
   const paceToneClass = isExactlyOnPace
@@ -172,6 +171,9 @@ export function VariableAnalysisCard({ month, data }: VariableAnalysisCardProps)
   const relativeBudgetDelta = priorSnapshot
     ? Math.abs(budgetDelta) / Math.max(1, priorSnapshot.effectiveVariableBudgetFinal)
     : 0
+  const evenPaceAmount = formatAnalyticsCurrency(locale, Math.round(evenPacePerDay))
+  const evenPaceLabel = t("variable.legend.evenPace", { amount: evenPaceAmount })
+  const evenPaceAmountStart = evenPaceLabel.indexOf(evenPaceAmount)
 
   return (
     <Card size="sm" className="py-4">
@@ -207,9 +209,17 @@ export function VariableAnalysisCard({ month, data }: VariableAnalysisCardProps)
               <span
                 aria-hidden="true"
                 className="block w-3.5 border-t"
-                style={{ borderColor: "var(--color-text-tertiary)", borderStyle: "dashed", borderTopWidth: 1.5 }}
+                style={{
+                  borderColor: "var(--color-text-tertiary)",
+                  borderStyle: "dashed",
+                  borderTopWidth: 1.5,
+                }}
               />
-              {t("variable.legend.evenPace")}
+              <span>
+                {evenPaceLabel.slice(0, evenPaceAmountStart)}
+                <bdi dir="ltr">{evenPaceAmount}</bdi>
+                {evenPaceLabel.slice(evenPaceAmountStart + evenPaceAmount.length)}
+              </span>
             </span>
           </div>
 
@@ -269,7 +279,15 @@ export function VariableAnalysisCard({ month, data }: VariableAnalysisCardProps)
                   strokeWidth={2.5}
                   dot={
                     month.status === "inProgress"
-                      ? ({ cx = 0, cy = 0, payload }: { cx?: number; cy?: number; payload?: RhythmPoint }) =>
+                      ? ({
+                          cx = 0,
+                          cy = 0,
+                          payload,
+                        }: {
+                          cx?: number
+                          cy?: number
+                          payload?: RhythmPoint
+                        }) =>
                           payload?.day === month.daysTracked && payload.thisMonth !== null ? (
                             <circle
                               cx={cx}
@@ -306,7 +324,9 @@ export function VariableAnalysisCard({ month, data }: VariableAnalysisCardProps)
               {t("variable.pace.label")}
             </p>
             {isExactlyOnPace ? (
-              <p className="text-base font-semibold text-foreground">{t("variable.pace.exactly")}</p>
+              <p className="text-base font-semibold text-foreground">
+                {t("variable.pace.exactly")}
+              </p>
             ) : (
               <p dir="ltr" className={cn("text-base font-semibold tabular-nums", paceToneClass)}>
                 <span>{formatSignedAmount(locale, paceDelta)}</span>
@@ -344,7 +364,10 @@ export function VariableAnalysisCard({ month, data }: VariableAnalysisCardProps)
                 <p className="text-[10.5px] font-medium uppercase tracking-[0.06em] text-text-tertiary">
                   {t("variable.compare.thisMonthLabel")}
                 </p>
-                <p dir="ltr" className="mt-1 text-[15px] font-semibold tabular-nums text-foreground">
+                <p
+                  dir="ltr"
+                  className="mt-1 text-[15px] font-semibold tabular-nums text-foreground"
+                >
                   {formatAnalyticsCurrency(locale, month.totalVariableSpent)}
                 </p>
               </div>

@@ -47,14 +47,6 @@
       "tomorrowDropLabel": "Tomorrow's rate drops to",
       "statusEmergency": "Over budget"
     },
-    "budget": {
-      "title": "Budget Overview",
-      "total": "Monthly budget",
-      "variable": "Variable",
-      "fixed": "Fixed",
-      "variableCaption": "After fixed expenses",
-      "fixedCaption": "Committed payments"
-    },
     "major": {
       "title": "Major Expenses",
       "ofVariable": "of {amount} variable budget",
@@ -109,13 +101,13 @@
     },
     "nav": {
       "home": "Home",
-      "tracker": "Tracker",
+      "tracker": "Fixed",
       "history": "History",
       "analytics": "Analytics",
       "settings": "Settings"
     },
     "navPlaceholders": {
-      "tracker": "Tracker flows will open here without leaving the mobile sandbox.",
+      "tracker": "Fixed budgets, recurring payments, and installments open here without leaving the mobile sandbox.",
       "history": "History now lives on its own screen with filters and totals.",
       "analytics": "Analytics will reuse the same budget rhythm with richer charts.",
       "settings": "Settings stay close so locale and theme can be tested quickly."
@@ -325,7 +317,7 @@
     }
   },
   "Tracker": {
-    "title": "Tracker",
+    "title": "Fixed",
     "transfer": {
       "title": "Transfer Budget",
       "description": "Move remaining funds from {name} to another envelope or your variable pool.",
@@ -707,35 +699,18 @@
         "subtitle": "Where you stand right now and where you'll likely land."
       },
       "where": {
-        "title": "Where the budget went",
-        "subtitle": "How this month's spending split across plan and reality."
+        "title": "Where the budget goes",
+        "subtitle": "How this month's spending splits across plan and reality."
       },
       "landed": {
-        "title": "How the month landed",
-        "subtitle": "A look back at how each month ended"
+        "title": "How did the month land?",
+        "subtitle": "The final result, and how the month got there."
       }
     },
     "monthlyHealth": {
       "badgeOnTrack": "On track",
       "badgeAtRisk": "At risk",
       "badgeOver": "Over budget",
-      "closed": {
-        "badge": {
-          "withinPlan": "Closed within plan",
-          "adjustedInFlight": "Closed after adjustment",
-          "outranThePlan": "Closed over plan"
-        },
-        "heroLabel": {
-          "withinPlan": "left in the month",
-          "adjustedInFlight": "left after adjustments",
-          "outranThePlan": "over the final cap"
-        },
-        "context": {
-          "withinPlan": "This month closed with {amount} EGP still inside the final variable cap.",
-          "adjustedInFlight": "This month still closed with {amount} EGP left after injections expanded the cap.",
-          "outranThePlan": "This month closed {amount} EGP above the final variable cap."
-        }
-      },
       "heroLabelAhead": "ahead of pace",
       "heroLabelBehind": "behind pace",
       "heroLabelOver": "over your budget",
@@ -747,13 +722,6 @@
       "barTickLabel": "expected",
       "injectButton": "Inject budget funds",
       "daysLine": "{tracked} days tracked · {remaining} days remaining"
-    },
-    "pacing": {
-      "aheadLabel": "ahead",
-      "behindLabel": "behind",
-      "contextSentence": "You've used {budgetUsed}% of your variable budget with {monthProgress}% of the month elapsed.",
-      "barLabel": "Variable budget pace compared with month progress",
-      "injectionFootnote": "Includes a {amount} budget injection this month."
     },
     "composition": {
       "title": "Budget breakdown",
@@ -770,6 +738,9 @@
       "budgetUsed": "Budget used",
       "allWithinBudget": "All within budget",
       "someOverrunning": "{over} of {total} budgets overrunning",
+      "overrunDisclosureShow": "Show overrunning budgets",
+      "overrunDisclosureHide": "Hide overrunning budgets",
+      "overrunRowOver": "{amount} over",
       "thisMonth": "This month",
       "lastMonth": "Last month",
       "change": "Change",
@@ -807,7 +778,7 @@
       "legend": {
         "thisMonth": "This month",
         "lastMonth": "Last month",
-        "evenPace": "Even pace",
+        "evenPace": "Even pace · {amount}/day",
         "today": "Today"
       },
       "pace": {
@@ -845,7 +816,7 @@
     },
     "methods": {
       "title": "Payment methods",
-      "subtitle": "by method",
+      "subtitle": "Total on each payment method, and what made it up.",
       "totalLabel": "total spent",
       "fixedLabel": "Fixed",
       "variableLabel": "Variable",
@@ -863,11 +834,6 @@
       "title": "How the month landed",
       "subtitle": "See how the whole month settled once everything lands.",
       "subtitleClosed": "A closeout view for {month}: what was left or over, and what moved it there.",
-      "teaser": {
-        "badge": "{month} · in progress",
-        "title": "This month is still unfolding.",
-        "body": "When {month} ends, Stashy will show you how the plan held up - what fit, what flexed, what to learn for next month."
-      },
       "verdict": {
         "badge": "{month} · closed"
       },
