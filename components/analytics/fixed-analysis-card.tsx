@@ -113,7 +113,9 @@ export function FixedAnalysisCard({ month, data }: FixedAnalysisCardProps) {
         {/* Header */}
         <div className="space-y-1">
           <h2 className="text-[1.0625rem] font-medium text-foreground">{t("fixed.title")}</h2>
-          <p className="text-sm leading-[1.5] text-text-secondary">{t("fixed.subtitle")}</p>
+          <p className="text-sm leading-[1.5] text-text-secondary text-pretty">
+            {t("fixed.subtitle")}
+          </p>
         </div>
 
         {/* Section 1 — Two stat tiles + bar + overrun badge */}

@@ -845,7 +845,7 @@
     },
     "methods": {
       "title": "طرق الدفع",
-      "subtitle": "حسب الوسيلة",
+      "subtitle": "إجمالي الإنفاق بكل وسيلة دفع، وممَّ تكوّن.",
       "totalLabel": "إجمالي المصروف",
       "fixedLabel": "ثابت",
       "variableLabel": "متغير",

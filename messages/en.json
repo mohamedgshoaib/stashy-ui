@@ -845,7 +845,7 @@
     },
     "methods": {
       "title": "Payment methods",
-      "subtitle": "by method",
+      "subtitle": "Total on each payment method, and what made it up.",
       "totalLabel": "total spent",
       "fixedLabel": "Fixed",
       "variableLabel": "Variable",

@@ -270,9 +270,11 @@ export function PaymentMethodCard({ month, prevPaymentMethods }: PaymentMethodCa
         {/* Header */}
         <div className="flex flex-col gap-3">
           {/* Row 1: title + subtitle */}
-          <div className="flex items-baseline justify-between gap-3">
+          <div className="space-y-1">
             <h2 className="text-[1.0625rem] font-medium text-foreground">{t("methods.title")}</h2>
-            <span className="shrink-0 text-sm text-text-tertiary">{t("methods.subtitle")}</span>
+            <p className="text-sm leading-[1.5] text-text-secondary text-pretty">
+              {t("methods.subtitle")}
+            </p>
           </div>
 
           {/* Row 2: hero number */}

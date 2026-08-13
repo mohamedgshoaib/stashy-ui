@@ -62,3 +62,19 @@
   - `components/tracker/tracker-transfer-drawer.tsx`: unused `surfacePanelClass` import.
   - `components/settings/settings-sections.tsx`: unused `SubSectionHeader` declaration.
 - New Phase 5 errors: none.
+
+## Phase 6 — Detail-card header canonicalization
+
+- Status: complete
+- Canonicalized the Budget Composition title/subtitle typography while preserving its total-budget end slot.
+- Added `text-pretty` to Fixed Analysis and Method Obligation subtitles.
+- Moved the Payment Method subtitle into the canonical stack and emptied its header-end slot.
+- Applied locked EN `Analytics.methods.subtitle`: `Total on each payment method, and what made it up.`
+- Authored Arabic string for PR review:
+  - `Analytics.methods.subtitle`: `إجمالي الإنفاق بكل وسيلة دفع، وممَّ تكوّن.`
+- Gate: `pnpm typecheck` passed.
+- Gate: `pnpm lint` reported only the two plan-listed pre-existing errors:
+  - `components/tracker/tracker-transfer-drawer.tsx`: unused `surfacePanelClass` import.
+  - `components/settings/settings-sections.tsx`: unused `SubSectionHeader` declaration.
+- New Phase 6 errors: none.
+- Phase 11 carry: VR-3 remains observation-only; no fallback is authorized.

@@ -92,7 +92,9 @@ export function MethodObligationCard({ month, data }: MethodObligationCardProps)
           <h2 className="text-[1.0625rem] font-medium text-foreground">
             {t("obligation.title")}
           </h2>
-          <p className="text-sm leading-[1.5] text-text-secondary">{t("obligation.subtitle")}</p>
+          <p className="text-sm leading-[1.5] text-text-secondary text-pretty">
+            {t("obligation.subtitle")}
+          </p>
         </div>
 
         {/* Total committed block */}

@@ -20,11 +20,11 @@ export function BudgetCompositionCard({ month }: { month: LiveMonthAnalysis }) {
     <Card size="sm" className="py-4">
       <CardContent className="flex flex-col gap-4 px-4">
         <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 space-y-0.5">
-            <h2 className="text-[1.0625rem] font-semibold text-foreground">
+          <div className="min-w-0 space-y-1">
+            <h2 className="text-[1.0625rem] font-medium text-foreground">
               {t("composition.title")}
             </h2>
-            <p className="max-w-[24ch] text-xs leading-[1.45] text-text-tertiary text-pretty">
+            <p className="text-sm leading-[1.5] text-text-secondary text-pretty">
               {t("composition.subtitle")}
             </p>
           </div>
