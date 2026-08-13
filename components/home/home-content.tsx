@@ -1,46 +1,50 @@
-"use client";
+"use client"
 
-import { useTranslations } from "next-intl";
+import { useTranslations } from "next-intl"
 
-import { BudgetStripCard } from "@/components/home/budget-strip";
-import { DailyRateCard } from "@/components/home/daily-rate-card";
-import { navItems } from "@/components/home/home-data";
-import { MajorExpensesRowCard } from "@/components/home/major-expenses-row";
-import { UpcomingPayments } from "@/components/home/upcoming-payments";
+import { BudgetStripCard } from "@/components/home/budget-strip"
+import { DailyRateCard } from "@/components/home/daily-rate-card"
+import { navItems } from "@/components/home/home-data"
+import type { UpcomingPayment } from "@/components/home/home-data"
+import { MajorExpensesRowCard } from "@/components/home/major-expenses-row"
+import { PlaceholderPanel } from "@/components/home/placeholder-panel"
+import { RunningHotRow } from "@/components/home/running-hot-row"
 import type {
   BudgetStrip,
   DailyRate,
   DrawerKind,
   MajorExpensesRow,
-} from "@/components/home/types";
-import type { UpcomingPayment } from "@/components/home/home-data";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { TabsContent } from "@/components/ui/tabs";
-import { PlaceholderPanel } from "@/components/home/placeholder-panel";
+  RunningHotCount,
+} from "@/components/home/types"
+import { UpcomingPayments } from "@/components/home/upcoming-payments"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { TabsContent } from "@/components/ui/tabs"
 
 type HomeContentProps = {
-  dailyRate: DailyRate;
-  budgetStrip: BudgetStrip;
-  majorExpensesRow: MajorExpensesRow;
-  upcomingPayments: UpcomingPayment[];
-  introCardVisible: boolean;
-  majorScenario: "active" | "none";
-  onDismissIntroCard: () => void;
-  onOpenDrawer: (kind: DrawerKind) => void;
-};
+  dailyRate: DailyRate
+  budgetStrip: BudgetStrip
+  majorExpensesRow: MajorExpensesRow
+  runningHotCount: RunningHotCount
+  upcomingPayments: UpcomingPayment[]
+  introCardVisible: boolean
+  majorScenario: "active" | "none"
+  onDismissIntroCard: () => void
+  onOpenDrawer: (kind: DrawerKind) => void
+}
 
 export function HomeContent({
   dailyRate,
   budgetStrip,
   majorExpensesRow,
+  runningHotCount,
   upcomingPayments,
   introCardVisible,
   majorScenario,
   onDismissIntroCard,
   onOpenDrawer,
 }: HomeContentProps) {
-  const t = useTranslations("Home");
+  const t = useTranslations("Home")
 
   return (
     <main className="flex flex-col gap-section px-screen pb-28 pt-5">
@@ -55,36 +59,27 @@ export function HomeContent({
       <BudgetStripCard data={budgetStrip} />
 
       {/* Daily rate hero card */}
-      <DailyRateCard
-        rate={dailyRate}
-        onInject={() => onOpenDrawer("add")}
-      />
+      <DailyRateCard rate={dailyRate} onInject={() => onOpenDrawer("add")} />
+
+      {/* Running-hot row — conditional */}
+      <RunningHotRow count={runningHotCount} />
 
       {/* Major expenses row — conditional */}
-      {majorScenario === "active" ? (
-        <MajorExpensesRowCard data={majorExpensesRow} />
-      ) : null}
+      {majorScenario === "active" ? <MajorExpensesRowCard data={majorExpensesRow} /> : null}
 
       {/* Upcoming payments */}
-      <UpcomingPayments
-        payments={upcomingPayments}
-        onViewAll={() => onOpenDrawer("fixed")}
-      />
+      <UpcomingPayments payments={upcomingPayments} onViewAll={() => onOpenDrawer("fixed")} />
     </main>
-  );
+  )
 }
 
 export function SecondaryTabPanels() {
-  const t = useTranslations("Home");
+  const t = useTranslations("Home")
 
   return (
     <>
       {navItems.slice(1).map((item) => (
-        <TabsContent
-          key={item.value}
-          value={item.value}
-          className="flex-1 px-screen pb-28 pt-5"
-        >
+        <TabsContent key={item.value} value={item.value} className="flex-1 px-screen pb-28 pt-5">
           <PlaceholderPanel
             title={t(item.labelKey)}
             description={t(`navPlaceholders.${item.value}`)}
@@ -93,17 +88,17 @@ export function SecondaryTabPanels() {
         </TabsContent>
       ))}
     </>
-  );
+  )
 }
 
 function IntroCard({
   onDismiss,
   onOpenDrawer,
 }: {
-  onDismiss: () => void;
-  onOpenDrawer: (kind: DrawerKind) => void;
+  onDismiss: () => void
+  onOpenDrawer: (kind: DrawerKind) => void
 }) {
-  const t = useTranslations("Home");
+  const t = useTranslations("Home")
 
   return (
     <Card size="sm" className="border-brand/25 bg-card py-4 shadow-card">
@@ -135,11 +130,7 @@ function IntroCard({
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <Button
-            type="button"
-            className="w-full"
-            onClick={() => onOpenDrawer("add")}
-          >
+          <Button type="button" className="w-full" onClick={() => onOpenDrawer("add")}>
             {t("intro.logAction")}
           </Button>
           <Button
@@ -153,5 +144,5 @@ function IntroCard({
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }

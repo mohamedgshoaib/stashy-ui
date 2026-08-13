@@ -55,6 +55,10 @@
       "ofVariableRow": "{percent}% من المتغير",
       "viewAction": "عرض"
     },
+    "runningHot": {
+      "rowLabel": "{count, plural, one {ميزانية أسرع من المعتاد} two {ميزانيتان أسرع من المعتاد} other {# ميزانيات أسرع من المعتاد}}",
+      "viewAction": "عرض"
+    },
     "strip": {
       "remainingMonth": "المتبقي هذا الشهر",
       "fixedLeft": "متبقي ثابت",

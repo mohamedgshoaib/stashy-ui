@@ -17,6 +17,7 @@ import {
   getHomeBudgetStrip,
   getHomeDailyRate,
   getHomeMajorExpensesRow,
+  getHomeRunningHotCount,
   getHomeUpcomingPayments,
   getSandboxAnalyticsData,
 } from "@/lib/sandbox-budget"
@@ -70,6 +71,10 @@ export function HomeScreen() {
       ),
     [currentMonth, majorScenario, monthlyBudgetState],
   )
+  const runningHotCount = React.useMemo(
+    () => getHomeRunningHotCount(analyticsData),
+    [analyticsData],
+  )
 
   return (
     <Tabs value={activeNav} onValueChange={setActiveNav} className="min-h-svh gap-0 bg-background">
@@ -80,6 +85,7 @@ export function HomeScreen() {
             dailyRate={dailyRate}
             budgetStrip={budgetStrip}
             majorExpensesRow={majorExpensesRow}
+            runningHotCount={runningHotCount}
             upcomingPayments={upcomingPayments}
             introCardVisible={introCardVisible}
             majorScenario={monthlyBudgetState === "over" ? "active" : majorScenario}

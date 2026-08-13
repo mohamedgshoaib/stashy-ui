@@ -14,6 +14,7 @@ import {
 
 import {
   buildDailyCumulative,
+  deriveBucketPaceFlag,
   getAnalyticsDataForScenario,
   getPreviousSnapshot,
   withManualBucketCalibration,
@@ -311,6 +312,15 @@ export function getHomeMajorExpensesRow(
     totalAmount: month.majorTotal,
     percentOfVariable: Math.round((month.majorTotal / Math.max(1, variableBudget)) * 100),
   }
+}
+
+export function getHomeRunningHotCount(data: AnalyticsData): number | null {
+  const count = data.current.fixedBuckets.reduce((total, bucket) => {
+    if (bucket.type !== "manual") return total
+    return deriveBucketPaceFlag(bucket.id, data.current, data.snapshots) ? total + 1 : total
+  }, 0)
+
+  return count > 0 ? count : null
 }
 
 export function getHomeUpcomingPayments(month: LiveMonthAnalysis): UpcomingPayment[] {
