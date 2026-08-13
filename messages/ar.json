@@ -215,6 +215,9 @@
         "fixedOverrunLabel": "تجاوز الثابت",
         "fixedOverrunNone": "لا شيء",
         "fixedOverrunSome": "مع تجاوزات",
+        "fixedPaceLabel": "إيقاع الثابت",
+        "fixedPaceSteady": "منتظم",
+        "fixedPaceFaster": "أسرع",
         "show": "إظهار",
         "hide": "إخفاء"
       },

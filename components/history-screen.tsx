@@ -1,57 +1,59 @@
-"use client";
+"use client"
 
-import { FilterIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { useLocale, useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
-import * as React from "react";
+import { FilterIcon } from "@hugeicons/core-free-icons"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { useLocale, useTranslations } from "next-intl"
+import { useSearchParams } from "next/navigation"
+import * as React from "react"
 
-import { AppBottomNavigation } from "@/components/app-bottom-navigation";
-import { navItems } from "@/components/home/home-data";
+import { AppBottomNavigation } from "@/components/app-bottom-navigation"
 import {
   defaultHistoryFilterState,
   getActiveHistoryFilterCount,
-} from "@/components/history/history-filter-controls";
-import { HistoryFilterDrawer } from "@/components/history/history-filter-drawer";
-import { HistoryOverviewCard } from "@/components/history/history-overview-card";
-import { HistoryRow } from "@/components/history/history-row";
-import type {
-  HistoryFilterState,
-  HistoryTransaction,
-} from "@/components/history/types";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { heroSurfaceClass, statTileClass } from "@/lib/design-system-classes";
-import { semanticSurfaceClass, semanticTextClass } from "@/lib/semantic-styles";
-import { getDirectionForLocale } from "@/lib/i18n";
+} from "@/components/history/history-filter-controls"
+import { HistoryFilterDrawer } from "@/components/history/history-filter-drawer"
+import { HistoryOverviewCard } from "@/components/history/history-overview-card"
+import { HistoryRow } from "@/components/history/history-row"
+import type { HistoryFilterState, HistoryTransaction } from "@/components/history/types"
+import { navItems } from "@/components/home/home-data"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
+import type { Locale } from "@/i18n/routing"
+import { heroSurfaceClass, statTileClass } from "@/lib/design-system-classes"
+import { getDirectionForLocale } from "@/lib/i18n"
 import {
   getHistoryPresetRange,
   getHistoryTransactions,
   getSandboxAnalyticsData,
-} from "@/lib/sandbox-budget";
-import { cn } from "@/lib/utils";
-import type { Locale } from "@/i18n/routing";
-import { useSandboxStore } from "@/store/sandbox-store";
+} from "@/lib/sandbox-budget"
+import { semanticSurfaceClass, semanticTextClass } from "@/lib/semantic-styles"
+import { cn } from "@/lib/utils"
+import { useSandboxStore } from "@/store/sandbox-store"
 
 export function HistoryScreen() {
-  const t = useTranslations("History");
-  const tFilter = useTranslations("History.drawer.filter");
-  const locale = useLocale() as Locale;
-  const direction = getDirectionForLocale(locale);
-  const searchParams = useSearchParams();
-  const { monthlyBudgetState, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun } = useSandboxStore();
+  const t = useTranslations("History")
+  const tFilter = useTranslations("History.drawer.filter")
+  const locale = useLocale() as Locale
+  const direction = getDirectionForLocale(locale)
+  const searchParams = useSearchParams()
+  const {
+    monthlyBudgetState,
+    budgetInjection,
+    analyticsHistoryMode,
+    fixedBudgetOverrun,
+    fixedPaceState,
+  } = useSandboxStore()
   const [filterState, setFilterState] = React.useState<HistoryFilterState>(() => {
-    const filter = searchParams.get("filter");
-    const validTypes = ["all", "variable", "monthly", "budget", "major"] as const;
-    type ValidType = typeof validTypes[number];
-    const isValid = (v: string | null): v is ValidType =>
-      validTypes.includes(v as ValidType);
+    const filter = searchParams.get("filter")
+    const validTypes = ["all", "variable", "monthly", "budget", "major"] as const
+    type ValidType = (typeof validTypes)[number]
+    const isValid = (v: string | null): v is ValidType => validTypes.includes(v as ValidType)
     return isValid(filter)
       ? { ...defaultHistoryFilterState, type: filter }
-      : defaultHistoryFilterState;
-  });
-  const [drawerOpen, setDrawerOpen] = React.useState(false);
+      : defaultHistoryFilterState
+  })
+  const [drawerOpen, setDrawerOpen] = React.useState(false)
   const analyticsData = React.useMemo(
     () =>
       getSandboxAnalyticsData({
@@ -59,27 +61,22 @@ export function HistoryScreen() {
         budgetInjection,
         analyticsHistoryMode,
         fixedBudgetOverrun,
+        fixedPaceState,
       }),
-    [monthlyBudgetState, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun],
-  );
-  const items = React.useMemo(() => getHistoryTransactions(analyticsData.current), [analyticsData]);
+    [monthlyBudgetState, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun, fixedPaceState],
+  )
+  const items = React.useMemo(() => getHistoryTransactions(analyticsData.current), [analyticsData])
 
   const filteredItems = React.useMemo(
     () => filterHistoryTransactions(items, filterState, analyticsData.current),
     [analyticsData, filterState, items],
-  );
-  const filterCount = React.useMemo(
-    () => getActiveHistoryFilterCount(filterState),
-    [filterState],
-  );
+  )
+  const filterCount = React.useMemo(() => getActiveHistoryFilterCount(filterState), [filterState])
   const appliedFilters = React.useMemo(
     () => getAppliedFilters(t, tFilter, filterState),
     [filterState, t, tFilter],
-  );
-  const overview = React.useMemo(
-    () => getHistoryOverview(filteredItems),
-    [filteredItems],
-  );
+  )
+  const overview = React.useMemo(() => getHistoryOverview(filteredItems), [filteredItems])
 
   return (
     <div className="min-h-svh bg-background">
@@ -104,7 +101,7 @@ export function HistoryScreen() {
               size="xs"
               className={cn(
                 "h-10 min-h-10 shrink-0 rounded-full px-3",
-                filterCount > 0 && "border-brand text-brand"
+                filterCount > 0 && "border-brand text-brand",
               )}
               onClick={() => setDrawerOpen(true)}
             >
@@ -114,9 +111,7 @@ export function HistoryScreen() {
                 aria-hidden="true"
                 className="size-4"
               />
-              {filterCount > 0
-                ? t("filterActive", { count: filterCount })
-                : t("filter")}
+              {filterCount > 0 ? t("filterActive", { count: filterCount }) : t("filter")}
             </Button>
 
             <Separator orientation="vertical" className="h-6 bg-border-subtle shrink-0" />
@@ -127,7 +122,7 @@ export function HistoryScreen() {
                 { id: "monthly", label: t("budgetTypes.fixed") },
                 { id: "major", label: t("budgetTypes.major") },
               ].map((qf) => {
-                const isActive = filterState.type === qf.id;
+                const isActive = filterState.type === qf.id
                 return (
                   <Button
                     key={qf.id}
@@ -139,12 +134,12 @@ export function HistoryScreen() {
                       setFilterState((prev) => ({
                         ...prev,
                         type: isActive ? "all" : (qf.id as any),
-                      }));
+                      }))
                     }}
                   >
                     {qf.label}
                   </Button>
-                );
+                )
               })}
             </div>
           </div>
@@ -223,9 +218,7 @@ export function HistoryScreen() {
                       />
                     ))
                   )}
-                  {index < array.length - 1 && (
-                    <Separator className="mt-2 opacity-50" />
-                  )}
+                  {index < array.length - 1 && <Separator className="mt-2 opacity-50" />}
                 </React.Fragment>
               ))
             ) : (
@@ -236,17 +229,11 @@ export function HistoryScreen() {
                     heroSurfaceClass,
                   )}
                 >
-                  <div
-                    className="grid w-full max-w-[14rem] grid-cols-3 gap-2"
-                    aria-hidden="true"
-                  >
+                  <div className="grid w-full max-w-[14rem] grid-cols-3 gap-2" aria-hidden="true">
                     {[0, 1, 2].map((item) => (
                       <div
                         key={item}
-                        className={cn(
-                          "flex flex-col gap-2 text-start",
-                          statTileClass,
-                        )}
+                        className={cn("flex flex-col gap-2 text-start", statTileClass)}
                       >
                         <div className="h-2 w-7 rounded-full bg-text-tertiary/20" />
                         <div
@@ -260,9 +247,7 @@ export function HistoryScreen() {
                       </div>
                     ))}
                   </div>
-                  <p className="text-base font-semibold text-foreground">
-                    {t("emptyTitle")}
-                  </p>
+                  <p className="text-base font-semibold text-foreground">{t("emptyTitle")}</p>
                   <p className="max-w-[26ch] text-sm leading-[1.6] text-text-secondary text-pretty">
                     {t("emptyDescription")}
                   </p>
@@ -286,16 +271,16 @@ export function HistoryScreen() {
         direction={direction}
         filterState={filterState}
         onApplyFilters={(filters) => {
-          setFilterState(filters);
+          setFilterState(filters)
         }}
         onOpenChange={(open) => {
           if (!open) {
-            setDrawerOpen(false);
+            setDrawerOpen(false)
           }
         }}
       />
     </div>
-  );
+  )
 }
 
 function filterHistoryTransactions(
@@ -303,51 +288,45 @@ function filterHistoryTransactions(
   filters: HistoryFilterState,
   month: Parameters<typeof getHistoryPresetRange>[0],
 ) {
-  const { direction, from, method, preset, to, type } = filters;
+  const { direction, from, method, preset, to, type } = filters
   const resolvedRange =
-    from || to
-      ? { from: from || null, to: to || null }
-      : getHistoryPresetRange(month, preset);
+    from || to ? { from: from || null, to: to || null } : getHistoryPresetRange(month, preset)
 
   return items.filter((item) => {
     if (item.isTransfer && type !== "all") {
-      return false;
+      return false
     }
 
     if (type !== "all" && item.typeCategory !== type) {
-      return false;
+      return false
     }
 
     if (direction !== "all" && item.direction !== direction) {
-      return false;
+      return false
     }
 
     if (method !== "all" && item.methodTone !== method) {
-      return false;
+      return false
     }
 
     if (!resolvedRange) {
-      return true;
+      return true
     }
 
-    return isWithinRange(item.dateISO, resolvedRange.from, resolvedRange.to);
-  });
+    return isWithinRange(item.dateISO, resolvedRange.from, resolvedRange.to)
+  })
 }
 
-function isWithinRange(
-  dateISO: string,
-  from: string | null,
-  to: string | null,
-) {
+function isWithinRange(dateISO: string, from: string | null, to: string | null) {
   if (from && dateISO < from) {
-    return false;
+    return false
   }
 
   if (to && dateISO > to) {
-    return false;
+    return false
   }
 
-  return true;
+  return true
 }
 
 function getAppliedFilters(
@@ -355,18 +334,18 @@ function getAppliedFilters(
   tFilter: ReturnType<typeof useTranslations<"History.drawer.filter">>,
   filters: HistoryFilterState,
 ) {
-  const labels: string[] = [];
+  const labels: string[] = []
 
   if (filters.type !== "all") {
-    labels.push(tFilter(`typeOptions.${filters.type}`));
+    labels.push(tFilter(`typeOptions.${filters.type}`))
   }
 
   if (filters.direction !== "all") {
-    labels.push(tFilter(`directionOptions.${filters.direction}`));
+    labels.push(tFilter(`directionOptions.${filters.direction}`))
   }
 
   if (filters.method !== "all") {
-    labels.push(tFilter(`methodOptions.${filters.method}`));
+    labels.push(tFilter(`methodOptions.${filters.method}`))
   }
 
   if (filters.from || filters.to) {
@@ -376,12 +355,12 @@ function getAppliedFilters(
         : filters.from
           ? t("rangeFrom", { from: filters.from })
           : t("rangeTo", { to: filters.to }),
-    );
+    )
   } else if (filters.preset !== "thisMonth") {
-    labels.push(tFilter(`dateOptions.${filters.preset}`));
+    labels.push(tFilter(`dateOptions.${filters.preset}`))
   }
 
-  return labels;
+  return labels
 }
 
 function getHistoryOverview(items: HistoryTransaction[]) {
@@ -392,7 +371,7 @@ function getHistoryOverview(items: HistoryTransaction[]) {
         item.direction === "expense" &&
         (item.typeCategory === "variable" || item.typeCategory === "major"),
     )
-    .reduce((sum, item) => sum + getNumericAmount(item), 0);
+    .reduce((sum, item) => sum + getNumericAmount(item), 0)
 
   const received = items
     .filter(
@@ -401,74 +380,77 @@ function getHistoryOverview(items: HistoryTransaction[]) {
         item.direction === "received" &&
         (item.typeCategory === "variable" || item.budgetTypeKey === "injection"),
     )
-    .reduce((sum, item) => sum + getNumericAmount(item), 0);
+    .reduce((sum, item) => sum + getNumericAmount(item), 0)
 
   return {
     spent: formatAmount(spent),
     received: formatAmount(received),
     count: items.length,
-  };
+  }
 }
 
 function groupTransactionsByDate(items: HistoryTransaction[], locale: string) {
-  const groups: Record<string, {
-    dateISO: string;
-    dateLabel: string;
-    transactions: HistoryTransaction[];
-    totalNumeric: number;
-  }> = {};
+  const groups: Record<
+    string,
+    {
+      dateISO: string
+      dateLabel: string
+      transactions: HistoryTransaction[]
+      totalNumeric: number
+    }
+  > = {}
 
   const dateFormatter = new Intl.DateTimeFormat(locale, {
     weekday: "short",
     day: "2-digit",
     month: "short",
-  });
+  })
 
   items.forEach((item) => {
     if (!groups[item.dateISO]) {
-      const date = new Date(item.dateISO);
+      const date = new Date(item.dateISO)
       groups[item.dateISO] = {
         dateISO: item.dateISO,
         dateLabel: isNaN(date.getTime()) ? item.date : dateFormatter.format(date),
         transactions: [],
         totalNumeric: 0,
-      };
+      }
     }
 
-    groups[item.dateISO].transactions.push(item);
-    
+    groups[item.dateISO].transactions.push(item)
+
     // Calculate daily total: expenses are negative, received/transfers are positive
-    const numeric = getNumericAmount(item);
+    const numeric = getNumericAmount(item)
     if (item.direction === "expense") {
-      groups[item.dateISO].totalNumeric -= numeric;
+      groups[item.dateISO].totalNumeric -= numeric
     } else {
-      groups[item.dateISO].totalNumeric += numeric;
+      groups[item.dateISO].totalNumeric += numeric
     }
-  });
+  })
 
   return Object.values(groups)
     .sort((a, b) => b.dateISO.localeCompare(a.dateISO))
     .map((group) => ({
       ...group,
       totalAmount: formatAmount(group.totalNumeric, true),
-    }));
+    }))
 }
 
 function parseAmount(value: string) {
-  const numeric = Number(value.replaceAll(/[^\d.-]/g, ""));
-  return Math.abs(numeric);
+  const numeric = Number(value.replaceAll(/[^\d.-]/g, ""))
+  return Math.abs(numeric)
 }
 
 function getNumericAmount(item: HistoryTransaction) {
-  return item.amountValue ?? parseAmount(item.amount);
+  return item.amountValue ?? parseAmount(item.amount)
 }
 
 function formatAmount(value: number, showSign = false) {
-  const formatted = new Intl.NumberFormat("en").format(Math.round(Math.abs(value)));
-  const currency = "EGP";
-  
-  if (!showSign) return `${formatted} ${currency}`;
-  
-  const sign = value > 0 ? "+" : value < 0 ? "-" : "";
-  return `${sign}${formatted} ${currency}`;
+  const formatted = new Intl.NumberFormat("en").format(Math.round(Math.abs(value)))
+  const currency = "EGP"
+
+  if (!showSign) return `${formatted} ${currency}`
+
+  const sign = value > 0 ? "+" : value < 0 ? "-" : ""
+  return `${sign}${formatted} ${currency}`
 }

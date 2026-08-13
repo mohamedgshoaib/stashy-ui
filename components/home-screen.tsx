@@ -37,6 +37,7 @@ export function HomeScreen() {
     budgetInjection,
     analyticsHistoryMode,
     fixedBudgetOverrun,
+    fixedPaceState,
     setIntroCardVisible,
   } = useSandboxStore()
 
@@ -47,18 +48,26 @@ export function HomeScreen() {
         budgetInjection,
         analyticsHistoryMode,
         fixedBudgetOverrun,
+        fixedPaceState,
       }),
-    [monthlyBudgetState, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun],
+    [monthlyBudgetState, budgetInjection, analyticsHistoryMode, fixedBudgetOverrun, fixedPaceState],
   )
   const currentMonth = analyticsData.current
   const budgetStrip = React.useMemo(() => getHomeBudgetStrip(currentMonth), [currentMonth])
-  const upcomingPayments = React.useMemo(() => getHomeUpcomingPayments(currentMonth), [currentMonth])
+  const upcomingPayments = React.useMemo(
+    () => getHomeUpcomingPayments(currentMonth),
+    [currentMonth],
+  )
   const dailyRate = React.useMemo(
     () => getHomeDailyRate(currentMonth, dailyRateState, t),
     [currentMonth, dailyRateState, t],
   )
   const majorExpensesRow = React.useMemo(
-    () => getHomeMajorExpensesRow(currentMonth, monthlyBudgetState === "over" ? "active" : majorScenario),
+    () =>
+      getHomeMajorExpensesRow(
+        currentMonth,
+        monthlyBudgetState === "over" ? "active" : majorScenario,
+      ),
     [currentMonth, majorScenario, monthlyBudgetState],
   )
 

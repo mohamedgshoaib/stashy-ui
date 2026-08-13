@@ -215,6 +215,9 @@
         "fixedOverrunLabel": "Fixed overrun",
         "fixedOverrunNone": "None",
         "fixedOverrunSome": "With overruns",
+        "fixedPaceLabel": "Fixed pace",
+        "fixedPaceSteady": "Steady",
+        "fixedPaceFaster": "Faster",
         "show": "Show",
         "hide": "Hide"
       },
