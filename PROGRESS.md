@@ -93,3 +93,20 @@
   - `components/settings/settings-sections.tsx`: unused `SubSectionHeader` declaration.
 - New Phase 7 errors: none.
 - Phase 11 carry: verify legend bidi and injection-linked slope rendering under VR-5; no fallback is authorized.
+
+## Phase 8 — Fixed overrun disclosure
+
+- Status: complete
+- Converted the overrun badge to a button only when manual overruns exist; the all-within-budget badge remains static.
+- Added a collapsed inline disclosure with overrunning buckets only, sorted by overage descending.
+- Kept row amounts neutral and bidi-safe, added `aria-expanded`/`aria-controls`, and used the locked 48px `min-h-12` touch target.
+- Authored Arabic strings for PR review:
+  - `Analytics.fixed.overrunDisclosureShow`: `عرض الميزانيات المتجاوزة`
+  - `Analytics.fixed.overrunDisclosureHide`: `إخفاء الميزانيات المتجاوزة`
+  - `Analytics.fixed.overrunRowOver`: `{amount} فوق الحد`
+- Gate: `pnpm typecheck` passed.
+- Gate: `pnpm lint` reported only the two plan-listed pre-existing errors:
+  - `components/tracker/tracker-transfer-drawer.tsx`: unused `surfacePanelClass` import.
+  - `components/settings/settings-sections.tsx`: unused `SubSectionHeader` declaration.
+- New Phase 8 errors: none.
+- Phase 11 carry: exercise both overrun states and RTL disclosure behavior under VR-5; no fallback is authorized.

@@ -5,12 +5,12 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import { useLocale, useTranslations } from "next-intl"
 import * as React from "react"
 
+import { getPreviousSnapshot } from "@/components/analytics/data"
 import {
   formatAnalyticsCurrency,
   formatAnalyticsSignedCurrency,
 } from "@/components/analytics/formatters"
 import type { AnalyticsData, LiveMonthAnalysis, MonthSnapshot } from "@/components/analytics/types"
-import { getPreviousSnapshot } from "@/components/analytics/data"
 import { Card, CardContent } from "@/components/ui/card"
 import { semanticProgressClass, semanticTextClass } from "@/lib/semantic-styles"
 import { cn } from "@/lib/utils"
@@ -46,6 +46,7 @@ export function FixedAnalysisCard({ month, data }: FixedAnalysisCardProps) {
   const locale = useLocale()
   const t = useTranslations("Analytics")
   const [transfersOpen, setTransfersOpen] = React.useState(false)
+  const [overrunsOpen, setOverrunsOpen] = React.useState(false)
 
   // ── Section 1: Spending this month ─────────────────────────────────────────
   const manualBuckets = month.fixedBuckets.filter((b) => b.type === "manual")
@@ -55,10 +56,15 @@ export function FixedAnalysisCard({ month, data }: FixedAnalysisCardProps) {
     return sum + (actual?.spent ?? 0)
   }, 0)
   const manualUsagePct = Math.round((manualTotalSpent / Math.max(1, manualTotalPlanned)) * 100)
-  const manualOverCount = manualBuckets.filter((b) => {
-    const actual = month.fixedBucketsActual.find((a) => a.id === b.id)
-    return (actual?.spent ?? 0) > b.budget
-  }).length
+  const manualOverruns = manualBuckets
+    .flatMap((bucket) => {
+      const actual = month.fixedBucketsActual.find((item) => item.id === bucket.id)
+      const overBy = (actual?.spent ?? 0) - bucket.budget
+
+      return overBy > 0 ? [{ id: bucket.id, name: bucket.name, overBy }] : []
+    })
+    .sort((a, b) => b.overBy - a.overBy)
+  const manualOverCount = manualOverruns.length
 
   // Usage bar color-toning
   const usageToneClass =
@@ -154,18 +160,62 @@ export function FixedAnalysisCard({ month, data }: FixedAnalysisCardProps) {
           </div>
 
           {/* Badge — own row, start-aligned */}
-          <div className="mt-3 flex justify-start">
+          <div className="mt-3">
             {manualOverCount === 0 ? (
               <span className="inline-flex items-center rounded-full bg-income-subtle px-2.5 py-1 text-xs font-medium text-income">
                 {t("fixed.allWithinBudget")}
               </span>
             ) : (
-              <span className="inline-flex items-center rounded-full bg-expense-subtle px-2.5 py-1 text-xs font-medium text-expense">
-                {t("fixed.someOverrunning", {
-                  over: manualOverCount,
-                  total: manualBuckets.length,
-                })}
-              </span>
+              <>
+                <button
+                  type="button"
+                  aria-expanded={overrunsOpen}
+                  aria-controls="fixed-overrun-disclosure"
+                  aria-label={t(
+                    overrunsOpen ? "fixed.overrunDisclosureHide" : "fixed.overrunDisclosureShow",
+                  )}
+                  onClick={() => setOverrunsOpen((open) => !open)}
+                  className="inline-flex min-h-12 items-center gap-1.5 rounded-full bg-expense-subtle px-2.5 py-1 text-xs font-medium text-expense"
+                >
+                  {t("fixed.someOverrunning", {
+                    over: manualOverCount,
+                    total: manualBuckets.length,
+                  })}
+                  <HugeiconsIcon
+                    icon={ArrowDown01Icon}
+                    size={14}
+                    aria-hidden="true"
+                    className={cn(
+                      "shrink-0 transition-transform duration-200",
+                      overrunsOpen && "rotate-180",
+                    )}
+                  />
+                </button>
+
+                {overrunsOpen ? (
+                  <div
+                    id="fixed-overrun-disclosure"
+                    className="mt-2 divide-y divide-border-subtle border-t border-border-subtle"
+                  >
+                    {manualOverruns.map((bucket) => (
+                      <div
+                        key={bucket.id}
+                        className="flex min-h-12 items-center justify-between gap-3 py-2"
+                      >
+                        <p className="min-w-0 text-sm text-foreground">{bucket.name}</p>
+                        <p
+                          dir="ltr"
+                          className="shrink-0 text-sm tabular-nums text-foreground whitespace-nowrap"
+                        >
+                          {t("fixed.overrunRowOver", {
+                            amount: formatAnalyticsCurrency(locale, bucket.overBy),
+                          })}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </>
             )}
           </div>
         </div>
