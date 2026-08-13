@@ -16,7 +16,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer"
-import { inputFieldClass, surfacePanelClass } from "@/lib/design-system-classes"
+import { inputFieldClass } from "@/lib/design-system-classes"
 import { semanticSurfaceClass, semanticTextClass } from "@/lib/semantic-styles"
 import { cn } from "@/lib/utils"
 import { getDirectionForLocale } from "@/lib/i18n"

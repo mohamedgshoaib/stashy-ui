@@ -197,22 +197,25 @@ export function FixedAnalysisCard({ month, data }: FixedAnalysisCardProps) {
                     id="fixed-overrun-disclosure"
                     className="mt-2 divide-y divide-border-subtle border-t border-border-subtle"
                   >
-                    {manualOverruns.map((bucket) => (
-                      <div
-                        key={bucket.id}
-                        className="flex min-h-12 items-center justify-between gap-3 py-2"
-                      >
-                        <p className="min-w-0 text-sm text-foreground">{bucket.name}</p>
-                        <p
-                          dir="ltr"
-                          className="shrink-0 text-sm tabular-nums text-foreground whitespace-nowrap"
+                    {manualOverruns.map((bucket) => {
+                      const amount = formatAnalyticsCurrency(locale, bucket.overBy)
+                      const label = t("fixed.overrunRowOver", { amount })
+                      const amountStart = label.indexOf(amount)
+
+                      return (
+                        <div
+                          key={bucket.id}
+                          className="flex min-h-12 items-center justify-between gap-3 py-2"
                         >
-                          {t("fixed.overrunRowOver", {
-                            amount: formatAnalyticsCurrency(locale, bucket.overBy),
-                          })}
-                        </p>
-                      </div>
-                    ))}
+                          <p className="min-w-0 text-sm text-foreground">{bucket.name}</p>
+                          <p className="shrink-0 text-sm tabular-nums text-foreground whitespace-nowrap">
+                            {label.slice(0, amountStart)}
+                            <bdi dir="ltr">{amount}</bdi>
+                            {label.slice(amountStart + amount.length)}
+                          </p>
+                        </div>
+                      )
+                    })}
                   </div>
                 ) : null}
               </>

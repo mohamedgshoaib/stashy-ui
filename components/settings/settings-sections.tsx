@@ -548,39 +548,6 @@ function SettingsRow({
   return <div className="bg-card">{inner}</div>
 }
 
-function SubSectionHeader({
-  icon,
-  label,
-  count,
-  actionLabel,
-  onAction,
-}: {
-  icon: Parameters<typeof HugeiconsIcon>[0]["icon"]
-  label: string
-  count: number
-  actionLabel: string
-  onAction: () => void
-}) {
-  return (
-    <div className="flex min-h-[3.25rem] items-center gap-3 bg-card px-4 py-3">
-      <RowIconWell icon={icon} />
-      <span className="flex-1 text-sm font-medium text-foreground">{label}</span>
-      {count > 0 && (
-        <span className="rounded-full bg-surface-offset px-2 py-0.5 text-xs font-semibold tabular-nums text-text-secondary shadow-ring">
-          {count}
-        </span>
-      )}
-      <button
-        type="button"
-        className={cn("rounded-full px-2.5 py-1 text-xs font-semibold transition-colors", semanticInteractiveTextClass.brand)}
-        onClick={onAction}
-      >
-        {actionLabel}
-      </button>
-    </div>
-  )
-}
-
 function RowIconWell({
   icon,
 }: {

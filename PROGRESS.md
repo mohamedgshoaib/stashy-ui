@@ -182,3 +182,25 @@
 - Final gate: `pnpm lint` reported only the same two plan-listed pre-existing errors; no new lint errors.
 - Final gate: `pnpm build` passed with all EN/AR static routes.
 - Final gate: targeted `pnpm exec oxfmt --check` passed for all files touched across Phases 0–11 after formatting the previously nonconforming touched files.
+
+## Post-review merge readiness
+
+- Status: complete.
+- Fixed the review-reported RTL regressions:
+  - restored inherited RTL ordering for the localized current-month legend item;
+  - kept each overrun sentence in its locale direction while isolating only its formatted amount as LTR.
+- Closed the Phase 11 even-pace bidi finding by isolating only the formatted daily amount inside the localized legend sentence.
+- Removed the two verified-dead symbols that had kept the repository lint gate red:
+  - unused `surfacePanelClass` import in `components/tracker/tracker-transfer-drawer.tsx`;
+  - unused `SubSectionHeader` in `components/settings/settings-sections.tsx`.
+- Removed the obsolete `HANDOFF.md` now that PR #12 is open.
+- Final gates:
+  - `pnpm typecheck`: passed.
+  - `pnpm lint`: passed with 0 warnings and 0 errors.
+  - `pnpm build`: passed for all EN/AR routes after allowing the configured Google font fetch.
+- Headless Arabic verification at 390×844:
+  - current-month legend inherits computed RTL with no `dir` override;
+  - even-pace sentence computes RTL while its amount is isolated with `dir="ltr"`;
+  - expanded overrun sentence computes RTL while its amount is isolated with `dir="ltr"`;
+  - document horizontal overflow remained 0px.
+- Reverted the throwaway `fixedBudgetOverrun: "some"` verification default; the store has no diff.

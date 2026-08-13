@@ -77,7 +77,43 @@ The `analysis_audit` branch was clean and the canonical analytics restructure pl
 
 ## Open Blockers
 
-1. `pnpm lint` retains the two pre-existing unrelated errors documented by the plan:
+1. ~~`pnpm lint` retains the two pre-existing unrelated errors documented by the plan:~~ **Resolved 2026-08-13:** both verified-dead symbols were removed during PR review and lint now passes cleanly.
    - `components/tracker/tracker-transfer-drawer.tsx`: unused `surfacePanelClass` import.
    - `components/settings/settings-sections.tsx`: unused `SubSectionHeader` declaration.
-2. Post-Phase 11 PR publication was rejected by the external-action approval layer because the latest direct visible user instruction limited work to Phase 0. All implementation commits are pushed to `origin/analysis_audit`; `HANDOFF.md` records the exact continuation command and required body contents.
+2. ~~Post-Phase 11 PR publication was rejected by the external-action approval layer because the latest direct visible user instruction limited work to Phase 0.~~ **Resolved 2026-08-13:** PR #12 is open and the obsolete `HANDOFF.md` was removed.
+
+# Session 2 — PR review and merge readiness
+
+**Time:** 10:38-10:45
+
+---
+
+## Status at Session Start
+
+PR #12 was open from `analysis_audit` with two reviewer-reported Arabic/RTL regressions. TypeScript passed, while lint still had two documented pre-existing unused-symbol errors.
+
+---
+
+## Completed This Session
+
+- Restored inherited RTL ordering for the localized current-month legend item.
+- Kept fixed-overrun sentences in their locale direction and isolated only formatted amounts as LTR.
+- Closed the recorded Phase 11 even-pace bidi issue with amount-level LTR isolation.
+- Removed the two verified-dead symbols so the repository lint gate passes cleanly.
+- Removed the obsolete PR-publication `HANDOFF.md`.
+- Re-ran typecheck, lint, and the production build successfully.
+- Verified the corrected Arabic current-month, even-pace, and expanded-overrun direction behavior in headless Chrome at 390×844 with 0px horizontal overflow.
+- Reverted the throwaway fixed-overrun default used to render the disclosure; the store remains unchanged.
+
+---
+
+## Decisions Made
+
+- Localized sentences retain their inherited locale direction; only embedded financial amounts receive explicit LTR isolation.
+- The former lint exceptions were safe dead-code cleanup and no longer remain as merge caveats.
+
+---
+
+## Open Blockers
+
+None.

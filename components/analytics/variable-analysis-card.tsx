@@ -171,6 +171,9 @@ export function VariableAnalysisCard({ month, data }: VariableAnalysisCardProps)
   const relativeBudgetDelta = priorSnapshot
     ? Math.abs(budgetDelta) / Math.max(1, priorSnapshot.effectiveVariableBudgetFinal)
     : 0
+  const evenPaceAmount = formatAnalyticsCurrency(locale, Math.round(evenPacePerDay))
+  const evenPaceLabel = t("variable.legend.evenPace", { amount: evenPaceAmount })
+  const evenPaceAmountStart = evenPaceLabel.indexOf(evenPaceAmount)
 
   return (
     <Card size="sm" className="py-4">
@@ -184,7 +187,7 @@ export function VariableAnalysisCard({ month, data }: VariableAnalysisCardProps)
 
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-3 pb-1.5 text-[10.5px] text-text-secondary">
-            <span dir="ltr" className="inline-flex items-center gap-1.5">
+            <span className="inline-flex items-center gap-1.5">
               <span
                 aria-hidden="true"
                 className="block h-0.5 w-3.5 rounded-full"
@@ -212,9 +215,11 @@ export function VariableAnalysisCard({ month, data }: VariableAnalysisCardProps)
                   borderTopWidth: 1.5,
                 }}
               />
-              {t("variable.legend.evenPace", {
-                amount: formatAnalyticsCurrency(locale, Math.round(evenPacePerDay)),
-              })}
+              <span>
+                {evenPaceLabel.slice(0, evenPaceAmountStart)}
+                <bdi dir="ltr">{evenPaceAmount}</bdi>
+                {evenPaceLabel.slice(evenPaceAmountStart + evenPaceAmount.length)}
+              </span>
             </span>
           </div>
 
