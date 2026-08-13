@@ -12,6 +12,7 @@ import type {
 } from "@/components/analytics/types"
 
 export const ANALYTICS_PLAN: "free" | "pro" = "pro"
+export const RHYTHM_STEADY_BAND = 0.15
 
 export function buildDailyCumulative(
   length: number,
@@ -38,12 +39,86 @@ export function deriveRhythmCharacter(
   const firstAvg = firstHalf.reduce((sum, value) => sum + value, 0) / firstHalf.length
   const secondAvg = secondHalf.reduce((sum, value) => sum + value, 0) / secondHalf.length
   const overallAvg = deltas.reduce((sum, value) => sum + value, 0) / deltas.length
-  const withinSteadyBand = (value: number) => Math.abs(value - overallAvg) <= overallAvg * 0.15
+  const withinSteadyBand = (value: number) =>
+    Math.abs(value - overallAvg) <= overallAvg * RHYTHM_STEADY_BAND
 
   if (withinSteadyBand(firstAvg) && withinSteadyBand(secondAvg)) return "steady"
-  if (firstAvg > secondAvg * 1.15) return "frontLoaded"
-  if (secondAvg > firstAvg * 1.15) return "backLoaded"
+  if (firstAvg > secondAvg * (1 + RHYTHM_STEADY_BAND)) return "frontLoaded"
+  if (secondAvg > firstAvg * (1 + RHYTHM_STEADY_BAND)) return "backLoaded"
   return "uneven"
+}
+
+function interpolateCumulative(cumulative: number[], fractionalIndex: number): number | null {
+  if (cumulative.length === 0 || !Number.isFinite(fractionalIndex)) return null
+
+  const lastIndex = cumulative.length - 1
+  const lowerIndex = Math.max(0, Math.min(lastIndex, Math.floor(fractionalIndex)))
+  const upperIndex = Math.max(0, Math.min(lastIndex, Math.ceil(fractionalIndex)))
+  const fraction = fractionalIndex - Math.floor(fractionalIndex)
+  const lowerValue = cumulative[lowerIndex]
+  const upperValue = cumulative[upperIndex]
+
+  return lowerValue + (upperValue - lowerValue) * fraction
+}
+
+export function deriveBucketPaceFlag(
+  bucketId: string,
+  month: LiveMonthAnalysis,
+  snapshots: MonthSnapshot[],
+): boolean {
+  const currentPlan = month.fixedBuckets.find(
+    (bucket) => bucket.id === bucketId && bucket.type === "manual",
+  )
+  const currentActual = month.fixedBucketsActual.find((bucket) => bucket.id === bucketId)
+
+  if (
+    !currentPlan ||
+    currentPlan.budget <= 0 ||
+    month.daysInMonth <= 0 ||
+    !currentActual?.dailyCumulative?.length
+  ) {
+    return false
+  }
+
+  const pointInMonth = month.status === "closed" ? 1 : month.daysTracked / month.daysInMonth
+  if (pointInMonth <= 0) return false
+
+  const spentAtEvaluationPoint = currentActual.dailyCumulative.at(-1)
+  if (spentAtEvaluationPoint === undefined) return false
+
+  const thisMonthPace = spentAtEvaluationPoint / currentPlan.budget / pointInMonth
+  const priorPaces = snapshots
+    .filter((snapshot) => snapshot.isoDate < month.isoDate)
+    .toSorted((a, b) => b.isoDate.localeCompare(a.isoDate))
+    .flatMap((snapshot) => {
+      const plan = snapshot.fixedBuckets.find(
+        (bucket) => bucket.id === bucketId && bucket.type === "manual",
+      )
+      const actual = snapshot.fixedBucketsActual.find((bucket) => bucket.id === bucketId)
+      if (
+        !plan ||
+        plan.budget <= 0 ||
+        snapshot.daysInMonth <= 0 ||
+        !actual?.dailyCumulative?.length
+      ) {
+        return []
+      }
+
+      const spent = interpolateCumulative(
+        actual.dailyCumulative,
+        pointInMonth * snapshot.daysInMonth,
+      )
+      return spent === null ? [] : [spent / plan.budget / pointInMonth]
+    })
+
+  if (priorPaces.length === 0) return false
+
+  const reference =
+    priorPaces.length < 3
+      ? priorPaces[0]
+      : priorPaces.reduce((sum, pace) => sum + pace, 0) / priorPaces.length
+
+  return thisMonthPace > reference * (1 + RHYTHM_STEADY_BAND)
 }
 
 const FIXED_PLAN: FixedBucketPlan[] = [
