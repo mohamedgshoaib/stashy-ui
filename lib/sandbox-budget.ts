@@ -73,11 +73,14 @@ function getMonthDayIso(month: LiveMonthAnalysis, day: number): string {
 
 function getMonthMetrics(month: LiveMonthAnalysis) {
   const variableBudget = Math.max(0, month.monthlyBudget - month.fixedTotalBudget)
-  const variableSpentExcludingMajor = month.totalVariableSpent
+  const variableSpentExcludingMajor = Math.max(
+    0,
+    month.totalVariableSpent - month.variableReceivedTotal,
+  )
   const majorSpent = month.majorTotal
   const variableSpentIncludingMajor = variableSpentExcludingMajor + majorSpent
   const fixedRemaining = Math.max(0, month.fixedTotalBudget - month.fixedTotalSpent)
-  const variableRemaining = month.effectiveVariableBudget - variableSpentIncludingMajor
+  const variableRemaining = month.effectiveVariableBudget - variableSpentExcludingMajor
 
   return {
     variableBudget,
@@ -397,7 +400,7 @@ export function getHomeDailyRate(
   const allowanceAmount = Math.max(0, month.todaysRate || month.baseDailyRate)
 
   if (month.monthlyState === "over") {
-    const overByAmount = Math.max(0, Math.round(Math.abs(metrics.totalRemaining) * 100) / 100)
+    const overByAmount = Math.max(0, Math.round(Math.abs(metrics.variableRemaining) * 100) / 100)
 
     return {
       remaining: `-${formatCurrency(overByAmount)}`,
@@ -422,7 +425,7 @@ export function getHomeDailyRate(
       ? Math.round((allowanceAmount + overspendExtra) * 100) / 100
       : baselineSpent
   const remainingAmount = Math.round((allowanceAmount - spentAmount) * 100) / 100
-  const variableSpentAfterToday = metrics.variableSpentIncludingMajor + spentAmount
+  const variableSpentAfterToday = metrics.variableSpentExcludingMajor + spentAmount
   const tomorrowAmount =
     month.daysRemaining > 1
       ? Math.round(
