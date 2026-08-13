@@ -14,6 +14,7 @@ export type FixedBucketActual = {
   id: string
   spent: number
   transactionCount: number
+  dailyCumulative?: number[]
 }
 
 export type PaymentMethodBreakdown = {

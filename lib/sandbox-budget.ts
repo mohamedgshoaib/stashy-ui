@@ -19,6 +19,7 @@ import {
 } from "@/components/analytics/data"
 import type {
   AnalyticsData,
+  FixedBucketActual,
   FixedBucketIconKey,
   LiveMonthAnalysis,
   MonthSnapshot,
@@ -77,6 +78,20 @@ function getMonthMetrics(month: LiveMonthAnalysis) {
   }
 }
 
+function withRescaledSpend(actual: FixedBucketActual, spent: number): FixedBucketActual {
+  const cumulative = actual.dailyCumulative
+  if (!cumulative || cumulative.length === 0 || actual.spent <= 0) return { ...actual, spent }
+
+  const scale = spent / actual.spent
+  return {
+    ...actual,
+    spent,
+    dailyCumulative: cumulative.map((value, index) =>
+      index === cumulative.length - 1 ? spent : Math.round(value * scale),
+    ),
+  }
+}
+
 export function getSandboxAnalyticsData(config: SandboxBudgetConfig): AnalyticsData {
   let data = getAnalyticsDataForScenario(config.monthlyBudgetState)
 
@@ -117,8 +132,9 @@ export function getSandboxAnalyticsData(config: SandboxBudgetConfig): AnalyticsD
       current: {
         ...data.current,
         fixedBucketsActual: data.current.fixedBucketsActual.map((actual) => {
-          if (actual.id === "fb-coffee") return { ...actual, spent: 240 }
-          if (actual.id === "fb-groceries") return { ...actual, spent: 320 }
+          if (actual.id === "fb-coffee") return withRescaledSpend(actual, 240)
+          if (actual.id === "fb-groceries") return withRescaledSpend(actual, 320)
+          if (actual.id === "fb-transport") return withRescaledSpend(actual, 470)
           return actual
         }),
       },

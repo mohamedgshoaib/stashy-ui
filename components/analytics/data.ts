@@ -13,6 +13,19 @@ import type {
 
 export const ANALYTICS_PLAN: "free" | "pro" = "pro"
 
+export function buildDailyCumulative(
+  length: number,
+  total: number,
+  progressExponent = 1,
+): number[] {
+  if (length <= 0) return []
+
+  return Array.from({ length }, (_, index) => {
+    if (index === length - 1) return total
+    return Math.round(total * Math.pow((index + 1) / length, progressExponent))
+  })
+}
+
 export function deriveRhythmCharacter(
   cumulative: number[],
 ): "steady" | "frontLoaded" | "backLoaded" | "uneven" {
@@ -48,6 +61,17 @@ const FIXED_PLAN: FixedBucketPlan[] = [
     id: "fb-groceries",
     name: "Groceries",
     budget: 240,
+    type: "manual",
+    iconKey: "groceries",
+  },
+]
+
+const LIVE_FIXED_PLAN: FixedBucketPlan[] = [
+  ...FIXED_PLAN,
+  {
+    id: "fb-transport",
+    name: "Transport",
+    budget: 400,
     type: "manual",
     iconKey: "groceries",
   },
@@ -472,8 +496,18 @@ const snapshot_2026_04: MonthSnapshot = withManualBucketCalibration({
     { id: "fb-rent", spent: 800, transactionCount: 1 },
     { id: "fb-spotify", spent: 100, transactionCount: 1 },
     { id: "fb-phone-installment", spent: 280, transactionCount: 1 },
-    { id: "fb-coffee", spent: 220, transactionCount: 9 },
-    { id: "fb-groceries", spent: 500, transactionCount: 7 },
+    {
+      id: "fb-coffee",
+      spent: 220,
+      transactionCount: 9,
+      dailyCumulative: buildDailyCumulative(30, 220, 0.18),
+    },
+    {
+      id: "fb-groceries",
+      spent: 500,
+      transactionCount: 7,
+      dailyCumulative: buildDailyCumulative(30, 500, 0.08),
+    },
   ],
   majorTotal: 480,
   majorCount: 1,
@@ -588,8 +622,18 @@ const snapshot_2026_03: MonthSnapshot = withManualBucketCalibration({
     { id: "fb-rent", spent: 800, transactionCount: 1 },
     { id: "fb-spotify", spent: 100, transactionCount: 1 },
     { id: "fb-phone-installment", spent: 300, transactionCount: 1 },
-    { id: "fb-coffee", spent: 240, transactionCount: 8 },
-    { id: "fb-groceries", spent: 160, transactionCount: 5 },
+    {
+      id: "fb-coffee",
+      spent: 240,
+      transactionCount: 8,
+      dailyCumulative: buildDailyCumulative(31, 240, 0.18),
+    },
+    {
+      id: "fb-groceries",
+      spent: 160,
+      transactionCount: 5,
+      dailyCumulative: buildDailyCumulative(31, 160, 0.08),
+    },
   ],
   majorTotal: 720,
   majorCount: 3,
@@ -685,8 +729,18 @@ const snapshot_2026_02: MonthSnapshot = withManualBucketCalibration({
     { id: "fb-rent", spent: 800, transactionCount: 1 },
     { id: "fb-spotify", spent: 100, transactionCount: 1 },
     { id: "fb-phone-installment", spent: 300, transactionCount: 1 },
-    { id: "fb-coffee", spent: 200, transactionCount: 11 },
-    { id: "fb-groceries", spent: 240, transactionCount: 6 },
+    {
+      id: "fb-coffee",
+      spent: 200,
+      transactionCount: 11,
+      dailyCumulative: buildDailyCumulative(28, 200, 0.18),
+    },
+    {
+      id: "fb-groceries",
+      spent: 240,
+      transactionCount: 6,
+      dailyCumulative: buildDailyCumulative(28, 240, 0.08),
+    },
   ],
   majorTotal: 0,
   majorCount: 0,
@@ -783,8 +837,24 @@ const liveFixedBucketsActual: FixedBucketActual[] = [
   { id: "fb-rent", spent: 800, transactionCount: 1 },
   { id: "fb-spotify", spent: 100, transactionCount: 1 },
   { id: "fb-phone-installment", spent: 300, transactionCount: 1 },
-  { id: "fb-coffee", spent: 195, transactionCount: 8 },
-  { id: "fb-groceries", spent: 110, transactionCount: 4 },
+  {
+    id: "fb-coffee",
+    spent: 195,
+    transactionCount: 8,
+    dailyCumulative: buildDailyCumulative(18, 195, 0.9),
+  },
+  {
+    id: "fb-groceries",
+    spent: 110,
+    transactionCount: 4,
+    dailyCumulative: buildDailyCumulative(18, 110, 0.75),
+  },
+  {
+    id: "fb-transport",
+    spent: 310,
+    transactionCount: 10,
+    dailyCumulative: buildDailyCumulative(18, 310, 0.85),
+  },
 ]
 
 const liveMonth_2026_05: LiveMonthAnalysis = withManualBucketCalibration({
@@ -797,12 +867,12 @@ const liveMonth_2026_05: LiveMonthAnalysis = withManualBucketCalibration({
   closedBy: null,
   monthlyState: "onTrack",
 
-  monthlyBudget: 6000,
-  fixedTotalBudget: 1640,
-  fixedBuckets: FIXED_PLAN,
+  monthlyBudget: 6400,
+  fixedTotalBudget: 2040,
+  fixedBuckets: LIVE_FIXED_PLAN,
 
   totalVariableSpent: 1820,
-  fixedTotalSpent: 1505,
+  fixedTotalSpent: 1815,
   fixedOverspend: 0,
   fixedBucketsActual: liveFixedBucketsActual,
   majorTotal: 900,
@@ -810,12 +880,12 @@ const liveMonth_2026_05: LiveMonthAnalysis = withManualBucketCalibration({
   majorTransactions: majorTransactions_2026_05,
   closedMonthVerdict: null,
   wholeBudgetCloseout: {
-    adjustedBudgetTotal: 6095,
-    spentTotal: 4340,
-    remainder: 1755,
-    manualFixedUnusedTotal: 95,
+    adjustedBudgetTotal: 6625,
+    spentTotal: 4760,
+    remainder: 1865,
+    manualFixedUnusedTotal: 225,
     manualFixedOverspendTotal: 0,
-    fixedSpentTotal: 1620,
+    fixedSpentTotal: 2040,
     variableSpentTotal: 1820,
     majorSpentTotal: 900,
     verdict: "underBudget",
@@ -857,10 +927,10 @@ const liveMonth_2026_05: LiveMonthAnalysis = withManualBucketCalibration({
       id: "pm1",
       name: "Cash",
       variable: 160,
-      fixed: 0,
+      fixed: 310,
       major: 0,
-      total: 160,
-      fixedByType: { manual: 0, recurring: 0, installment: 0 },
+      total: 470,
+      fixedByType: { manual: 310, recurring: 0, installment: 0 },
     },
     {
       id: "pm2",
@@ -961,10 +1031,10 @@ const liveMonth_atRisk: LiveMonthAnalysis = {
       id: "pm1",
       name: "Cash",
       variable: 260,
-      fixed: 0,
+      fixed: 310,
       major: 100,
-      total: 360,
-      fixedByType: { manual: 0, recurring: 0, installment: 0 },
+      total: 670,
+      fixedByType: { manual: 310, recurring: 0, installment: 0 },
     },
     {
       id: "pm2",
@@ -1030,10 +1100,10 @@ const liveMonth_over: LiveMonthAnalysis = {
       id: "pm1",
       name: "Cash",
       variable: 420,
-      fixed: 0,
+      fixed: 310,
       major: 0,
-      total: 420,
-      fixedByType: { manual: 0, recurring: 0, installment: 0 },
+      total: 730,
+      fixedByType: { manual: 310, recurring: 0, installment: 0 },
     },
     {
       id: "pm2",
