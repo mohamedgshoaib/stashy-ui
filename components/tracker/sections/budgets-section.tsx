@@ -9,10 +9,11 @@ import { cn } from "@/lib/utils"
 
 type BudgetsSectionProps = {
   items: FixedExpenseItem[]
+  fasterBucketIds: ReadonlySet<string>
   onCardTap: (item: FixedExpenseItem) => void
 }
 
-export function BudgetsSection({ items, onCardTap }: BudgetsSectionProps) {
+export function BudgetsSection({ items, fasterBucketIds, onCardTap }: BudgetsSectionProps) {
   const t = useTranslations("Tracker.fixed")
 
   if (items.length === 0) return null
@@ -24,14 +25,17 @@ export function BudgetsSection({ items, onCardTap }: BudgetsSectionProps) {
           <HugeiconsIcon icon={Wallet02Icon} size={18} aria-hidden="true" />
           <span className="text-[1.0625rem] font-semibold">{t("sections.budgets")}</span>
         </div>
-        <span className="text-xs font-medium tabular-nums text-text-tertiary">
-          {items.length}
-        </span>
+        <span className="text-xs font-medium tabular-nums text-text-tertiary">{items.length}</span>
       </div>
 
       <div className="flex flex-col gap-2">
         {items.map((item) => (
-          <BudgetCard key={item.id} item={item} onTap={onCardTap} />
+          <BudgetCard
+            key={item.id}
+            item={item}
+            fasterThanUsual={fasterBucketIds.has(item.id)}
+            onTap={onCardTap}
+          />
         ))}
       </div>
     </section>

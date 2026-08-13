@@ -2,6 +2,7 @@
 
 import * as React from "react"
 
+import { deriveBucketPaceFlag } from "@/components/analytics/data"
 import { FixedDetailSheet } from "@/components/tracker/fixed-detail-sheet"
 import { FixedSummaryCard } from "@/components/tracker/fixed-summary-card"
 import { BudgetsSection } from "@/components/tracker/sections/budgets-section"
@@ -84,6 +85,19 @@ export function TrackerFixedTab() {
   const manualItems = items.filter((item) => item.type === "manual")
   const summary = React.useMemo(() => buildSummary(items), [items])
   const installmentOverview = React.useMemo(() => buildInstallmentOverview(items), [items])
+  const fasterManualBucketIds = React.useMemo(
+    () =>
+      new Set(
+        items
+          .filter(
+            (item) =>
+              item.type === "manual" &&
+              deriveBucketPaceFlag(item.id, analyticsData.current, analyticsData.snapshots),
+          )
+          .map((item) => item.id),
+      ),
+    [analyticsData, items],
+  )
 
   function handleEdit(item: FixedExpenseItem) {
     setSelectedItem(null)
@@ -112,7 +126,11 @@ export function TrackerFixedTab() {
   return (
     <div className="flex flex-col gap-8">
       <FixedSummaryCard summary={summary} />
-      <BudgetsSection items={manualItems} onCardTap={setSelectedItem} />
+      <BudgetsSection
+        items={manualItems}
+        fasterBucketIds={fasterManualBucketIds}
+        onCardTap={setSelectedItem}
+      />
       <SubscriptionsSection items={recurringItems} onCardTap={setSelectedItem} />
       <InstallmentsSection
         items={installmentItems}
