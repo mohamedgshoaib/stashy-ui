@@ -110,3 +110,21 @@
   - `components/settings/settings-sections.tsx`: unused `SubSectionHeader` declaration.
 - New Phase 8 errors: none.
 - Phase 11 carry: exercise both overrun states and RTL disclosure behavior under VR-5; no fallback is authorized.
+
+## Phase 9 — Tracker user-facing rename
+
+- Status: complete
+- Renamed the English dock and page title from Tracker to Fixed.
+- Applied the locked English Fixed-page placeholder and aligned the Arabic Analytics dock label with the page title.
+- Arabic strings written/touched for PR review:
+  - `Home.nav.tracker`: `الثابت`
+  - `Tracker.title`: `الثابت`
+  - `Home.navPlaceholders.tracker`: `تفتح هنا الميزانيات الثابتة والمدفوعات المتكررة والأقساط دون مغادرة مساحة الهاتف.`
+  - `Home.nav.analytics`: `التحليلات`
+- Kept the `Tracker` namespace, component names, and `/[locale]/tracker` route unchanged.
+- Gate: `pnpm typecheck` passed.
+- Gate: `pnpm lint` reported only the two plan-listed pre-existing errors:
+  - `components/tracker/tracker-transfer-drawer.tsx`: unused `surfacePanelClass` import.
+  - `components/settings/settings-sections.tsx`: unused `SubSectionHeader` declaration.
+- New Phase 9 errors: none.
+- Phase 11 carry: verify Arabic and English dock placement under VR-5; no fallback is authorized.

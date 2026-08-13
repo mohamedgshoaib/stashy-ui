@@ -109,13 +109,13 @@
     },
     "nav": {
       "home": "Home",
-      "tracker": "Tracker",
+      "tracker": "Fixed",
       "history": "History",
       "analytics": "Analytics",
       "settings": "Settings"
     },
     "navPlaceholders": {
-      "tracker": "Tracker flows will open here without leaving the mobile sandbox.",
+      "tracker": "Fixed budgets, recurring payments, and installments open here without leaving the mobile sandbox.",
       "history": "History now lives on its own screen with filters and totals.",
       "analytics": "Analytics will reuse the same budget rhythm with richer charts.",
       "settings": "Settings stay close so locale and theme can be tested quickly."
@@ -325,7 +325,7 @@
     }
   },
   "Tracker": {
-    "title": "Tracker",
+    "title": "Fixed",
     "transfer": {
       "title": "Transfer Budget",
       "description": "Move remaining funds from {name} to another envelope or your variable pool.",
