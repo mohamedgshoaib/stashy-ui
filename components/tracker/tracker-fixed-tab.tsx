@@ -51,7 +51,15 @@ function buildInstallmentOverview(items: FixedExpenseItem[]): InstallmentOvervie
   }
 }
 
-export function TrackerFixedTab() {
+export function TrackerFixedTab({
+  addOpen,
+  onAddOpenChange,
+  defaultAddType,
+}: {
+  addOpen: boolean
+  onAddOpenChange: (open: boolean) => void
+  defaultAddType: React.ComponentProps<typeof TrackerAddDrawer>["defaultAddType"]
+}) {
   const {
     monthlyBudgetState,
     budgetInjection,
@@ -146,6 +154,12 @@ export function TrackerFixedTab() {
         onClose={() => setSelectedItem(null)}
         onEdit={handleEdit}
         onTransfer={handleTransfer}
+      />
+      <TrackerAddDrawer
+        open={addOpen}
+        onOpenChange={onAddOpenChange}
+        defaultAddType={defaultAddType}
+        onSave={handleSave}
       />
       <TrackerAddDrawer
         open={editOpen}
