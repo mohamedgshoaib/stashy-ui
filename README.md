@@ -13,7 +13,7 @@ This staging environment was generated via Forge and is configured for rapid UI 
 
 - **Framework:** Next.js App Router
 - **Styling:** Tailwind CSS v4 + Radix UI primitives + shadcn preset (`luma`)
-- **Theme:** Configured for light/dark parsing and RTL (English/Arabic directionality)
+- **Visual identity:** One governed brand system with RTL support (English/Arabic directionality)
 - **Code Quality:** `Oxlint + Oxfmt`
 - **Core Hook:** Centralized sound-ready hook surface included by default
 

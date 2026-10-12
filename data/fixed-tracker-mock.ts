@@ -1,19 +1,6 @@
 import { getTrackerFixedIcon } from "@/components/tracker/fixed-icons"
 import type { FixedExpenseItem } from "@/components/tracker/types"
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function progressClass(pct: number): string {
-  // Cap display at 100% for the bar width; over_budget shows full bar + red
-  const capped = Math.min(Math.round(pct), 100)
-  return `basis-[${capped}%]`
-}
-
-function installmentProgressClass(paid: number, total: number): string {
-  const pct = Math.round((paid / total) * 100)
-  return `basis-[${pct}%]`
-}
-
 // ─── Subscriptions (recurring) ────────────────────────────────────────────────
 
 const netflix: FixedExpenseItem = {
@@ -26,14 +13,12 @@ const netflix: FixedExpenseItem = {
   paid: 250,
   remaining: 0,
   progressPct: 100,
-  progressClass: progressClass(100),
   status: "on_track",
   paymentStatus: "paid",
   nextPaymentDate: null,
   installmentsTotal: null,
   installmentsPaid: null,
   installmentsRemaining: null,
-  installmentProgressClass: null,
   endDate: null,
   transactions: [
     {
@@ -57,14 +42,12 @@ const spotify: FixedExpenseItem = {
   paid: 0,
   remaining: 100,
   progressPct: 0,
-  progressClass: progressClass(0),
   status: "on_track",
   paymentStatus: "unpaid",
   nextPaymentDate: "May 15",
   installmentsTotal: null,
   installmentsPaid: null,
   installmentsRemaining: null,
-  installmentProgressClass: null,
   endDate: null,
   transactions: [],
 }
@@ -79,14 +62,12 @@ const adobeCC: FixedExpenseItem = {
   paid: 0,
   remaining: 899,
   progressPct: 0,
-  progressClass: progressClass(0),
   status: "on_track",
   paymentStatus: "unpaid",
   nextPaymentDate: "May 28",
   installmentsTotal: null,
   installmentsPaid: null,
   installmentsRemaining: null,
-  installmentProgressClass: null,
   endDate: null,
   transactions: [],
 }
@@ -103,14 +84,12 @@ const iphoneInstallment: FixedExpenseItem = {
   paid: 1200,
   remaining: 0,
   progressPct: 100,
-  progressClass: progressClass(100),
   status: "on_track",
   paymentStatus: "paid",
   nextPaymentDate: null,
   installmentsTotal: 12,
   installmentsPaid: 4,
   installmentsRemaining: 8,
-  installmentProgressClass: installmentProgressClass(4, 12),
   endDate: "Jan 2026",
   transactions: [
     {
@@ -134,14 +113,12 @@ const laptopInstallment: FixedExpenseItem = {
   paid: 0,
   remaining: 800,
   progressPct: 0,
-  progressClass: progressClass(0),
   status: "on_track",
   paymentStatus: "unpaid",
   nextPaymentDate: "May 20",
   installmentsTotal: 12,
   installmentsPaid: 11,
   installmentsRemaining: 1,
-  installmentProgressClass: installmentProgressClass(11, 12),
   endDate: "May 2026",
   transactions: [
     {
@@ -165,14 +142,12 @@ const carDownpayment: FixedExpenseItem = {
   paid: 3500,
   remaining: 0,
   progressPct: 100,
-  progressClass: progressClass(100),
   status: "on_track",
   paymentStatus: "paid",
   nextPaymentDate: null,
   installmentsTotal: 6,
   installmentsPaid: 1,
   installmentsRemaining: 5,
-  installmentProgressClass: installmentProgressClass(1, 6),
   endDate: "Oct 2026",
   transactions: [
     {

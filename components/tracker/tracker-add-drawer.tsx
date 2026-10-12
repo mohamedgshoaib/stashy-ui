@@ -34,11 +34,11 @@ import {
   DrawerTitle,
 } from "@/components/ui/drawer"
 import { SegmentedChoice } from "@/components/ui/segmented-choice"
+import type { Locale } from "@/i18n/routing"
 import { dateFieldClass, inputFieldClass } from "@/lib/design-system-classes"
+import { getDirectionForLocale } from "@/lib/i18n"
 import { semanticSurfaceClass } from "@/lib/semantic-styles"
 import { cn } from "@/lib/utils"
-import { getDirectionForLocale } from "@/lib/i18n"
-import type { Locale } from "@/i18n/routing"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -57,14 +57,12 @@ type FixedItemDraft = Pick<
   | "paid"
   | "remaining"
   | "progressPct"
-  | "progressClass"
   | "status"
   | "paymentStatus"
   | "nextPaymentDate"
   | "installmentsTotal"
   | "installmentsPaid"
   | "installmentsRemaining"
-  | "installmentProgressClass"
   | "endDate"
   | "transactions"
 >
@@ -81,16 +79,6 @@ type TrackerAddDrawerProps = {
   editItem?: FixedExpenseItem | null
   defaultAddType?: AddType
   onSave?: (item: FixedItemDraft) => void
-}
-
-function progressClass(pct: number): string {
-  const capped = Math.min(Math.round(pct), 100)
-  return `basis-[${capped}%]`
-}
-
-function installmentProgressClass(paid: number, total: number): string {
-  const pct = total > 0 ? Math.round((paid / total) * 100) : 0
-  return `basis-[${pct}%]`
 }
 
 function inferPaymentMethod(item: FixedExpenseItem): PaymentMethodValue {
@@ -145,11 +133,8 @@ function buildFixedItemDraft({
   const isInstallment = type === "installment"
   const isRecurring = type === "recurring"
   const installmentsTotal = isInstallment ? Math.max(1, Number(totalInstallments) || 1) : null
-  const installmentsPaid = editItem?.type === "installment"
-    ? editItem.installmentsPaid
-    : isInstallment
-      ? 0
-      : null
+  const installmentsPaid =
+    editItem?.type === "installment" ? editItem.installmentsPaid : isInstallment ? 0 : null
   const installmentsRemaining =
     installmentsTotal !== null && installmentsPaid !== null
       ? Math.max(0, installmentsTotal - installmentsPaid)
@@ -165,17 +150,12 @@ function buildFixedItemDraft({
     paid: editItem?.paid ?? 0,
     remaining: Math.max(0, budget - (editItem?.paid ?? 0)),
     progressPct: budget > 0 ? ((editItem?.paid ?? 0) / budget) * 100 : 0,
-    progressClass: progressClass(budget > 0 ? ((editItem?.paid ?? 0) / budget) * 100 : 0),
     status: editItem?.status ?? "on_track",
-    paymentStatus: type === "manual" ? "unpaid" : editItem?.paymentStatus ?? "unpaid",
-    nextPaymentDate: isRecurring ? createDateLabel(startDate) : editItem?.nextPaymentDate ?? null,
+    paymentStatus: type === "manual" ? "unpaid" : (editItem?.paymentStatus ?? "unpaid"),
+    nextPaymentDate: isRecurring ? createDateLabel(startDate) : (editItem?.nextPaymentDate ?? null),
     installmentsTotal,
     installmentsPaid,
     installmentsRemaining,
-    installmentProgressClass:
-      installmentsTotal !== null && installmentsPaid !== null
-        ? installmentProgressClass(installmentsPaid, installmentsTotal)
-        : null,
     endDate: isInstallment ? createInstallmentEndLabel(endDate) : null,
     transactions: editItem?.transactions ?? [],
   }
@@ -205,8 +185,7 @@ function monthsBetween(startStr: string, endStr: string): number {
   const end = new Date(`${endStr}T00:00:00`)
   return Math.max(
     0,
-    (end.getFullYear() - start.getFullYear()) * 12 +
-      (end.getMonth() - start.getMonth()),
+    (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()),
   )
 }
 
@@ -321,9 +300,21 @@ export function TrackerAddDrawer({
   ]
 
   const methodOptions: { value: PaymentMethodValue; label: string; icon: React.ReactNode }[] = [
-    { value: "cash", label: t("fields.methods.cash"), icon: <HugeiconsIcon icon={MoneyBag02Icon} size={16} aria-hidden="true" /> },
-    { value: "card", label: t("fields.methods.card"), icon: <HugeiconsIcon icon={CreditCardIcon} size={16} aria-hidden="true" /> },
-    { value: "bank", label: t("fields.methods.bank"), icon: <HugeiconsIcon icon={BankIcon} size={16} aria-hidden="true" /> },
+    {
+      value: "cash",
+      label: t("fields.methods.cash"),
+      icon: <HugeiconsIcon icon={MoneyBag02Icon} size={16} aria-hidden="true" />,
+    },
+    {
+      value: "card",
+      label: t("fields.methods.card"),
+      icon: <HugeiconsIcon icon={CreditCardIcon} size={16} aria-hidden="true" />,
+    },
+    {
+      value: "bank",
+      label: t("fields.methods.bank"),
+      icon: <HugeiconsIcon icon={BankIcon} size={16} aria-hidden="true" />,
+    },
   ]
 
   const syncReady = addType === "installment" && totalInstallments !== "" && endDate !== ""
@@ -383,12 +374,24 @@ export function TrackerAddDrawer({
                 onClick={() => setView("form")}
                 aria-label={t("fields.backToForm")}
               >
-                <HugeiconsIcon icon={direction === "rtl" ? ArrowRight01Icon : ArrowLeft01Icon} size={16} aria-hidden="true" />
+                <HugeiconsIcon
+                  icon={direction === "rtl" ? ArrowRight01Icon : ArrowLeft01Icon}
+                  size={16}
+                  aria-hidden="true"
+                />
               </Button>
             ) : null}
             <div className="min-w-0 text-start">
-              <DrawerTitle>{view === "iconPicker" ? t("fields.chooseIcon") : isEdit ? t("editTitle") : t("title")}</DrawerTitle>
-              {view !== "iconPicker" ? <DrawerDescription>{t(`description.${addType}`)}</DrawerDescription> : null}
+              <DrawerTitle>
+                {view === "iconPicker"
+                  ? t("fields.chooseIcon")
+                  : isEdit
+                    ? t("editTitle")
+                    : t("title")}
+              </DrawerTitle>
+              {view !== "iconPicker" ? (
+                <DrawerDescription>{t(`description.${addType}`)}</DrawerDescription>
+              ) : null}
             </div>
           </div>
         </DrawerHeader>
@@ -412,10 +415,12 @@ export function TrackerAddDrawer({
             </div>
 
             <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-              {([
-                { key: "recommended", label: t("fields.recommendedIcons") },
-                { key: "all", label: t("fields.allIcons") },
-              ] as const).map((filter) => {
+              {(
+                [
+                  { key: "recommended", label: t("fields.recommendedIcons") },
+                  { key: "all", label: t("fields.allIcons") },
+                ] as const
+              ).map((filter) => {
                 const isActive = iconFilter === filter.key
                 return (
                   <Button
@@ -444,7 +449,9 @@ export function TrackerAddDrawer({
                         type="button"
                         className={cn(
                           "flex min-h-[4.75rem] flex-col items-center justify-center gap-1.5 rounded-[var(--radius-sm)] px-2 py-2 text-center shadow-ring transition-colors active:scale-[0.96]",
-                          isSelected ? semanticSurfaceClass.fixed : "bg-surface-offset text-text-secondary",
+                          isSelected
+                            ? semanticSurfaceClass.fixed
+                            : "bg-surface-offset text-text-secondary",
                         )}
                         onClick={() => handleIconSelect(option.key)}
                       >
@@ -470,143 +477,154 @@ export function TrackerAddDrawer({
           </div>
         ) : (
           <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 pb-2">
-          {/* Type selector — read-only in edit mode */}
-          <div className="flex gap-1.5 rounded-full bg-surface-offset p-1">
-            {typeConfig.map(({ key, icon }) => (
-              <button
-                key={key}
-                type="button"
-                disabled={isEdit}
-                className={cn(
-                  "flex flex-1 items-center justify-center gap-1.5 rounded-full py-1.5 text-xs font-semibold transition-all duration-150",
-                  addType === key
-                    ? "bg-card shadow-ring text-foreground"
-                    : "text-text-secondary",
-                  isEdit && addType !== key && "opacity-40",
-                )}
-                onClick={() => !isEdit && setAddType(key)}
-              >
-                <HugeiconsIcon icon={icon} size={12} aria-hidden="true" />
-                {t(`types.${key}`)}
-              </button>
-            ))}
-          </div>
-
-          {/* Name */}
-          <FormField label={t("fields.name")}>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t(`fields.namePlaceholder.${addType}`)}
-              className={inputFieldClass}
-            />
-          </FormField>
-
-          <FormField label={t("fields.icon")}>
-            <button
-              type="button"
-              className="flex min-h-14 w-full items-center gap-3 rounded-[var(--radius-sm)] bg-surface-offset px-3 py-2.5 text-start shadow-ring transition-colors active:scale-[0.96]"
-              onClick={() => setView("iconPicker")}
-            >
-              <span className={cn("flex size-10 shrink-0 items-center justify-center rounded-full bg-card shadow-ring-sm", semanticSurfaceClass.fixed)}>
-                <HugeiconsIcon icon={selectedIcon} size={20} aria-hidden="true" className="text-fixed" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-foreground">
-                  {t(`fields.iconOptions.${selectedIconOption.labelKey}`)}
-                </p>
-                <p className="text-xs text-text-tertiary">{t("fields.tapToChange")}</p>
-              </div>
-              <HugeiconsIcon icon={disclosureIcon} size={16} aria-hidden="true" className="shrink-0 text-text-secondary" />
-            </button>
-          </FormField>
-
-          {/* Amount */}
-          <FormField
-            label={addType === "budget" ? t("fields.monthlyBudget") : t("fields.monthlyAmount")}
-          >
-            <div className="relative">
-              <input
-                type="number"
-                inputMode="decimal"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0"
-                className={cn(inputFieldClass, "pe-14")}
-              />
-              <span className="pointer-events-none absolute end-4 top-1/2 -translate-y-1/2 text-sm font-medium text-text-tertiary">
-                EGP
-              </span>
-            </div>
-          </FormField>
-
-          {/* Payment method — Recurring and Installment only */}
-          {needsPaymentMethod && (
-            <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-text-tertiary">
-                {t("fields.paymentMethod")}
-              </p>
-              <SegmentedChoice
-                value={paymentMethod}
-                onValueChange={(v) => setPaymentMethod(v as PaymentMethodValue)}
-                options={methodOptions}
-                className="grid-cols-3"
-              />
-            </div>
-          )}
-
-          {/* Recurring: start date */}
-          {addType === "recurring" && (
-            <FormField
-              label={t("fields.startDate")}
-              hint={t("fields.recurringStartHint")}
-            >
-              <DateInput value={startDate} onChange={setStartDate} />
-            </FormField>
-          )}
-
-          {/* Installment: start date + bidirectional end date / count */}
-          {addType === "installment" && (
-            <>
-              <FormField label={t("fields.startDate")}>
-                <DateInput value={startDate} onChange={handleStartDateChange} />
-              </FormField>
-
-              <div className="grid grid-cols-2 gap-3">
-                <FormField
-                  label={t("fields.totalInstallments")}
-                  hint={t("fields.totalInstallmentsHint")}
+            {/* Type selector — read-only in edit mode */}
+            <div className="flex gap-1.5 rounded-full bg-surface-offset p-1">
+              {typeConfig.map(({ key, icon }) => (
+                <button
+                  key={key}
+                  type="button"
+                  disabled={isEdit}
+                  className={cn(
+                    "flex flex-1 items-center justify-center gap-1.5 rounded-full py-1.5 text-xs font-semibold transition-all duration-150",
+                    addType === key ? "bg-card shadow-ring text-foreground" : "text-text-secondary",
+                    isEdit && addType !== key && "opacity-40",
+                  )}
+                  onClick={() => !isEdit && setAddType(key)}
                 >
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    min="1"
-                    value={totalInstallments}
-                    onChange={(e) => handleTotalInstallmentsChange(e.target.value)}
-                    placeholder="12"
-                    className={inputFieldClass}
-                  />
-                </FormField>
+                  <HugeiconsIcon icon={icon} size={12} aria-hidden="true" />
+                  {t(`types.${key}`)}
+                </button>
+              ))}
+            </div>
 
-                <FormField label={t("fields.endDate")} hint={t("fields.endDateHint")}>
-                  <DateInput
-                    value={endDate}
-                    min={startDate}
-                    onChange={handleEndDateChange}
-                  />
-                </FormField>
-              </div>
+            {/* Name */}
+            <FormField label={t("fields.name")}>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={t(`fields.namePlaceholder.${addType}`)}
+                className={inputFieldClass}
+              />
+            </FormField>
 
-              {syncReady && (
-                <div className={cn("rounded-[var(--radius-sm)] px-3 py-2.5 shadow-ring", semanticSurfaceClass.fixed)}>
-                  <p className="text-xs leading-[1.5]">
-                    {t("fields.installmentSyncHint", { count: totalInstallments, endDate })}
+            <FormField label={t("fields.icon")}>
+              <button
+                type="button"
+                className="flex min-h-14 w-full items-center gap-3 rounded-[var(--radius-sm)] bg-surface-offset px-3 py-2.5 text-start shadow-ring transition-colors active:scale-[0.96]"
+                onClick={() => setView("iconPicker")}
+              >
+                <span
+                  className={cn(
+                    "flex size-10 shrink-0 items-center justify-center rounded-full bg-card shadow-ring-sm",
+                    semanticSurfaceClass.fixed,
+                  )}
+                >
+                  <HugeiconsIcon
+                    icon={selectedIcon}
+                    size={20}
+                    aria-hidden="true"
+                    className="text-fixed"
+                  />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-foreground">
+                    {t(`fields.iconOptions.${selectedIconOption.labelKey}`)}
                   </p>
+                  <p className="text-xs text-text-tertiary">{t("fields.tapToChange")}</p>
                 </div>
-              )}
-            </>
-          )}
+                <HugeiconsIcon
+                  icon={disclosureIcon}
+                  size={16}
+                  aria-hidden="true"
+                  className="shrink-0 text-text-secondary"
+                />
+              </button>
+            </FormField>
+
+            {/* Amount */}
+            <FormField
+              label={addType === "budget" ? t("fields.monthlyBudget") : t("fields.monthlyAmount")}
+            >
+              <div className="relative">
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="0"
+                  className={cn(inputFieldClass, "pe-14")}
+                />
+                <span className="pointer-events-none absolute end-4 top-1/2 -translate-y-1/2 text-sm font-medium text-text-tertiary">
+                  EGP
+                </span>
+              </div>
+            </FormField>
+
+            {/* Payment method — Recurring and Installment only */}
+            {needsPaymentMethod && (
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-text-tertiary">
+                  {t("fields.paymentMethod")}
+                </p>
+                <SegmentedChoice
+                  value={paymentMethod}
+                  onValueChange={(v) => setPaymentMethod(v as PaymentMethodValue)}
+                  options={methodOptions}
+                  className="grid-cols-3"
+                />
+              </div>
+            )}
+
+            {/* Recurring: start date */}
+            {addType === "recurring" && (
+              <FormField label={t("fields.startDate")} hint={t("fields.recurringStartHint")}>
+                <DateInput value={startDate} onChange={setStartDate} />
+              </FormField>
+            )}
+
+            {/* Installment: start date + bidirectional end date / count */}
+            {addType === "installment" && (
+              <>
+                <FormField label={t("fields.startDate")}>
+                  <DateInput value={startDate} onChange={handleStartDateChange} />
+                </FormField>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <FormField
+                    label={t("fields.totalInstallments")}
+                    hint={t("fields.totalInstallmentsHint")}
+                  >
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      min="1"
+                      value={totalInstallments}
+                      onChange={(e) => handleTotalInstallmentsChange(e.target.value)}
+                      placeholder="12"
+                      className={inputFieldClass}
+                    />
+                  </FormField>
+
+                  <FormField label={t("fields.endDate")} hint={t("fields.endDateHint")}>
+                    <DateInput value={endDate} min={startDate} onChange={handleEndDateChange} />
+                  </FormField>
+                </div>
+
+                {syncReady && (
+                  <div
+                    className={cn(
+                      "rounded-[var(--radius-sm)] px-3 py-2.5 shadow-ring",
+                      semanticSurfaceClass.fixed,
+                    )}
+                  >
+                    <p className="text-xs leading-[1.5]">
+                      {t("fields.installmentSyncHint", { count: totalInstallments, endDate })}
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         )}
 
@@ -639,21 +657,35 @@ export function TrackerAddDrawer({
 
 // ─── Shared form primitives ───────────────────────────────────────────────────
 
-function FormField({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+function FormField({
+  label,
+  hint,
+  children,
+}: {
+  label: string
+  hint?: string
+  children: React.ReactNode
+}) {
   return (
     <label className="block space-y-1.5">
       <span className="text-xs font-semibold uppercase tracking-[0.12em] text-text-tertiary">
         {label}
       </span>
-      {hint && (
-        <span className="block text-xs leading-[1.5] text-text-secondary">{hint}</span>
-      )}
+      {hint && <span className="block text-xs leading-[1.5] text-text-secondary">{hint}</span>}
       {children}
     </label>
   )
 }
 
-function DateInput({ value, min, onChange }: { value: string; min?: string; onChange: (v: string) => void }) {
+function DateInput({
+  value,
+  min,
+  onChange,
+}: {
+  value: string
+  min?: string
+  onChange: (v: string) => void
+}) {
   return (
     <div className="relative">
       <input

@@ -28,7 +28,6 @@ function buildSummary(items: FixedExpenseItem[]): FixedTrackerSummary {
     totalBudgeted,
     totalPaid,
     totalRemaining,
-    paidProgressClass: `basis-[${Math.min(Math.round(pct), 100)}%]`,
     overallStatus: pct > 100 ? "over_budget" : pct >= 75 ? "warning" : "on_track",
     overBudgetItems: items
       .filter((item) => item.type === "manual" && item.status === "over_budget")
@@ -52,7 +51,15 @@ function buildInstallmentOverview(items: FixedExpenseItem[]): InstallmentOvervie
   }
 }
 
-export function TrackerFixedTab() {
+export function TrackerFixedTab({
+  addOpen,
+  onAddOpenChange,
+  defaultAddType,
+}: {
+  addOpen: boolean
+  onAddOpenChange: (open: boolean) => void
+  defaultAddType: React.ComponentProps<typeof TrackerAddDrawer>["defaultAddType"]
+}) {
   const {
     monthlyBudgetState,
     budgetInjection,
@@ -147,6 +154,12 @@ export function TrackerFixedTab() {
         onClose={() => setSelectedItem(null)}
         onEdit={handleEdit}
         onTransfer={handleTransfer}
+      />
+      <TrackerAddDrawer
+        open={addOpen}
+        onOpenChange={onAddOpenChange}
+        defaultAddType={defaultAddType}
+        onSave={handleSave}
       />
       <TrackerAddDrawer
         open={editOpen}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useLocale, useTranslations } from "next-intl"
+import { useLocale } from "next-intl"
 import * as React from "react"
 
 import { AppBottomNavigation } from "@/components/app-bottom-navigation"
@@ -24,7 +24,6 @@ import {
 import { useSandboxStore } from "@/store/sandbox-store"
 
 export function HomeScreen() {
-  const t = useTranslations("Home")
   const locale = useLocale() as Locale
   const direction = getDirectionForLocale(locale)
   const [drawer, setDrawer] = React.useState<DrawerKind | null>(null)
@@ -60,8 +59,8 @@ export function HomeScreen() {
     [currentMonth],
   )
   const dailyRate = React.useMemo(
-    () => getHomeDailyRate(currentMonth, dailyRateState, t),
-    [currentMonth, dailyRateState, t],
+    () => getHomeDailyRate(currentMonth, dailyRateState),
+    [currentMonth, dailyRateState],
   )
   const majorExpensesRow = React.useMemo(
     () =>
