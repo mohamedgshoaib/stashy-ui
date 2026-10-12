@@ -14,10 +14,6 @@
       "help": "Help",
       "settings": "Settings"
     },
-    "actions": {
-      "viewAll": "View All",
-      "filter": "Filter"
-    },
     "intro": {
       "eyebrow": "Today first",
       "title": "Know what you can safely spend today.",
@@ -27,16 +23,10 @@
       "dismiss": "Dismiss intro card"
     },
     "daily": {
-      "title": "Daily Rate",
-      "remaining": "Remaining",
-      "allowance": "Allowance",
-      "spent": "Spent Today:",
       "statusTrack": "On Track",
       "statusOverspent": "Overspent",
       "explanationTrack": "You still have room inside today’s safe spending limit.",
       "explanationOverspent": "You’ve spent past today’s safe limit, so tomorrow’s rate is now under pressure.",
-      "tomorrow": "Your Rate Tomorrow:",
-      "progressLabel": "Daily allowance progress",
       "remainingLabel": "Remaining today",
       "overByLabel": "Over by",
       "overBySubtext": "Variable budget exhausted for this month",
@@ -49,11 +39,8 @@
     },
     "major": {
       "title": "Major Expenses",
-      "ofVariable": "of {amount} variable budget",
-      "warning": "Major expenses are high this month",
       "rowLabel": "Major expenses",
-      "ofVariableRow": "{percent}% of variable",
-      "viewAction": "View"
+      "ofVariableRow": "{percent}% of variable"
     },
     "runningHot": {
       "rowLabel": "{count, plural, one {1 budget} other {# budgets}} running hot",
@@ -78,27 +65,7 @@
     "fixedPayments": {
       "rent": "Rent",
       "internet": "Internet",
-      "spotify": "Spotify",
-      "oneDay": "1 Day Left",
-      "twoDays": "2 Days Left"
-    },
-    "history": {
-      "title": "History"
-    },
-    "historyItems": {
-      "market": "Market run",
-      "internet": "Internet bill",
-      "transfer": "Wire transfer"
-    },
-    "historyTypes": {
-      "variable": "Variable",
-      "fixed": "Fixed",
-      "received": "Received"
-    },
-    "paymentMethods": {
-      "cash": "Cash",
-      "card": "Credit card",
-      "transfer": "Bank transfer"
+      "spotify": "Spotify"
     },
     "fab": {
       "label": "Add transaction"
@@ -126,7 +93,6 @@
         "save": "Save",
         "impactEmpty": "Enter an amount",
         "fields": {
-          "amount": "Amount",
           "date": "Date",
           "method": "Payment Method",
           "note": "Note",
@@ -155,8 +121,6 @@
           "impactOver": "Pushes past today's limit",
           "majorImpact": "{amount} lowers the monthly rate for remaining days",
           "majorHint": "Large one-time purchase? Log it as major.",
-          "majorOn": "Major ✓",
-          "majorOff": "Mark as major",
           "budgetHint": "Spend on this regularly? Track it as a budget.",
           "budgetHintAction": "Add budget"
         },
@@ -200,10 +164,6 @@
       "settings": {
         "title": "Settings",
         "description": "Switch theme or language while keeping the mobile preview in place.",
-        "previewLabel": "Sandbox daily-rate state",
-        "trackPreview": "On track",
-        "overspentPreview": "Overspent",
-        "emergencyPreview": "Emergency",
         "planLabel": "User plan",
         "planFree": "Free",
         "planPro": "Pro",
@@ -246,7 +206,6 @@
       "title": "Overview",
       "spent": "Total spent",
       "received": "Total received",
-      "transactions": "Transactions",
       "count": "{count} tx"
     },
     "filter": "Filter",
@@ -265,11 +224,7 @@
     "budgetTypes": {
       "variable": "Variable",
       "fixed": "Fixed",
-      "major": "Major",
-      "received": "Received",
-      "injection": "Budget injection",
-      "transfer": "Transfer",
-      "refund": "Refund"
+      "major": "Major"
     },
     "fixedTypes": {
       "internet": "Internet Bill",
@@ -670,36 +625,11 @@
       "description": "Jump to another saved month from here.",
       "close": "Close",
       "closed": "Closed",
-      "inProgress": "In Progress",
-      "previousPlaceholder": "the previous month"
+      "inProgress": "In Progress"
     },
     "meta": {
-      "line": "{tracked} days tracked / {remaining} days remaining / {status}",
-      "statTracked": "{count}d tracked",
-      "statLeft": "{count}d left",
       "labelTracked": "d tracked",
-      "labelLeft": "d left",
-      "status": {
-        "inProgress": "In Progress"
-      }
-    },
-    "projection": {
-      "title": "End of month forecast",
-      "heroSaving": "On track to save",
-      "heroOverspend": "Likely to overspend by",
-      "heroEarly": "Only {day} days of data so far",
-      "heroSavingCaption": "That's {rate}% of your income saved this month.",
-      "heroOverspendCaption": "Try cutting back on flexible spending to get back on track.",
-      "heroEarlyCaption": "Check back in a few days for a more reliable estimate.",
-      "paceCaption": "per day · {days} days left",
-      "lowConfidenceBadge": "Low confidence",
-      "forecastSpent": "Spent so far",
-      "forecastProjected": "Projected",
-      "dailyPaceLabel": "Daily spend",
-      "dailyBudgetLine": "Budget {amount}/day",
-      "underTarget": "Under daily target",
-      "overTarget": "Over daily target",
-      "projectedSavingsLabel": "Projected saved"
+      "labelLeft": "d left"
     },
     "section": {
       "onPace": {
@@ -743,7 +673,6 @@
       "subtitle": "Discretionary fixed spending you control",
       "spentSoFar": "Spent so far",
       "planned": "Planned",
-      "budgetUsed": "Budget used",
       "allWithinBudget": "All within budget",
       "someOverrunning": "{over} of {total} budgets overrunning",
       "overrunDisclosureShow": "Show overrunning budgets",
@@ -765,8 +694,7 @@
         "title": "Envelope transfers",
         "toVariable": "to variable pool",
         "toEnvelope": "to {name}"
-      },
-      "ofPlanned": "of {amount} planned"
+      }
     },
     "obligation": {
       "title": "Committed to methods",
@@ -777,7 +705,6 @@
       "newRecurringAdded": "One new recurring added",
       "installmentEnded": "One installment ended",
       "byMethod": "By payment method",
-      "committed": "{amount} EGP committed",
       "noCommitted": "No auto-charges assigned to any method this month",
       "vsLastMonth": "vs. last month",
       "lastMonth": "Last month"
@@ -788,8 +715,7 @@
       "legend": {
         "thisMonth": "This month",
         "lastMonth": "Last month",
-        "evenPace": "Even pace · {amount}/day",
-        "today": "Today"
+        "evenPace": "Even pace · {amount}/day"
       },
       "pace": {
         "label": "Pace",
@@ -827,11 +753,9 @@
     "methods": {
       "title": "Payment methods",
       "subtitle": "Total on each payment method, and what made it up.",
-      "totalLabel": "total spent",
       "fixedLabel": "Fixed",
       "variableLabel": "Variable",
       "majorLabel": "Major",
-      "deltaVsLastMonth": "vs last month",
       "deltaVsPreviousMonth": "vs previous month",
       "deltaNoChange": "same as last month",
       "egpSpent": "EGP spent",
@@ -842,7 +766,6 @@
     },
     "howMonthLanded": {
       "title": "How the month landed",
-      "subtitle": "See how the whole month settled once everything lands.",
       "subtitleClosed": "A closeout view for {month}: what was left or over, and what moved it there.",
       "verdict": {
         "badge": "{month} · closed"
@@ -852,30 +775,12 @@
         "exactBudget": "Landed right on budget.",
         "overBudget": "Finished over budget."
       },
-      "summary": {
-        "deltaLabel": "Month result",
-        "withinPlan": "Stayed inside the plan",
-        "adjustedInFlight": "Landed inside the adjusted plan",
-        "outranThePlan": "Finished above the plan"
-      },
       "summaryWhole": {
         "underBudget": "Left room in the month budget",
         "exactBudget": "Used the month budget exactly",
         "overBudget": "Spent above the month budget",
         "spentLabel": "Whole month spent",
         "budgetLabel": "Adjusted month budget"
-      },
-      "bar": {
-        "labelStart": "0",
-        "labelPlan": "plan · {plan}",
-        "labelPlanInj": "+inj · {planPlusInjection}",
-        "labelSpent": "spent · {totalSpent}"
-      },
-      "injections": {
-        "eyebrow": "Injections",
-        "label": "Added mid-month",
-        "value": "+{amount} EGP",
-        "sub": "{count, plural, one {1 injection} other {# injections}} · raised the month budget from {basePlan} to {adjustedPlan}"
       },
       "budgetBreakdown": {
         "eyebrow": "Budget path",
@@ -887,7 +792,6 @@
         "variableHint": "This bridges the first card into the final whole-month result.",
         "rows": {
           "injection": "Budget injection added room",
-          "received": "Received money expanded the month",
           "manualFixedReturned": "Unused manual fixed returned",
           "manualFixedOverspend": "Manual fixed overspend pulled it down",
           "variableLeft": "Variable close left",
@@ -900,8 +804,7 @@
         "metaLine": "{actual} of {plan}",
         "summaryCount": "{count, plural, one {1 bucket changed the final result} other {# buckets changed the final result}}",
         "returnedLabel": "returned",
-        "pressureLabel": "pressure",
-        "viewAllTitle": "View all manual fixed shifts"
+        "pressureLabel": "pressure"
       },
       "popup": {
         "title": "Manual fixed details",
@@ -939,31 +842,21 @@
       "export": "Export Data"
     },
     "profile": {
-      "title": "Profile",
-      "subtitle": "Username, email, and member info",
       "edit": "Edit Profile",
       "username": "Username",
       "email": "Email",
       "memberSince": "Member since",
-      "active": "Active",
-      "inactive": "Inactive",
       "proTitle": "Stashy Pro",
       "proActive": "Active ✓",
-      "upgradeTitle": "Upgrade to Stashy Pro",
-      "upgradeDescription": "Unlock analytics, spending trends, monthly projections, and data exports.",
       "upgradeCta": "Go Pro"
     },
     "budget": {
       "title": "Monthly Budget",
-      "subtitle": "Set your target budget for the month",
-      "change": "Change",
       "amountLabel": "Monthly Budget"
     },
     "boosts": {
       "title": "Budget Injection",
-      "subtitle": "Add extra budget for this month",
       "add": "Add",
-      "empty": "No injections this month.",
       "thisMonth": "Active this month",
       "label": "Label",
       "amount": "Amount",
@@ -973,8 +866,6 @@
       "title": "Payment Methods",
       "subtitle": "Manage how you pay expenses",
       "add": "Add Payment Method",
-      "edit": "Edit",
-      "delete": "Delete",
       "confirm": "Confirm",
       "confirmDelete": "Delete {name}?",
       "default": "Default",
@@ -985,17 +876,9 @@
       "bank": "Bank"
     },
     "guide": {
-      "title": "How to Use Stashy",
-      "subtitle": "Learn about budgeting with daily rates",
-      "view": "View Guide"
+      "title": "How to Use Stashy"
     },
     "appearance": {
-      "title": "Appearance & Account",
-      "subtitle": "Customize your app experience",
-      "theme": "Theme",
-      "light": "Light",
-      "dark": "Dark",
-      "system": "System",
       "language": "Language",
       "timezone": "Timezone",
       "notifications": "Notifications",
@@ -1006,7 +889,6 @@
     },
     "support": {
       "contactTitle": "Contact Support",
-      "contactSubtitle": "Get help or report an issue",
       "privacyPolicy": "Privacy Policy",
       "terms": "Terms of Service",
       "rate": "Rate Stashy"
@@ -1014,14 +896,12 @@
     "danger": {
       "sectionLabel": "Account",
       "deleteTitle": "Delete Account",
-      "deleteDescription": "Permanently delete your account and all data. This cannot be undone.",
-      "deleteConfirm": "Delete My Account"
+      "deleteDescription": "Permanently delete your account and all data. This cannot be undone."
     },
     "about": {
       "pwa": "{app} PWA",
       "version": "Version {version}",
-      "description": "Track spending, fixed costs, and goals across devices.",
-      "pro": "Pro"
+      "description": "Track spending, fixed costs, and goals across devices."
     },
     "drawer": {
       "editProfileTitle": "Edit Profile",

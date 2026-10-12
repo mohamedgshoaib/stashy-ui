@@ -14,10 +14,6 @@
       "help": "المساعدة",
       "settings": "الإعدادات"
     },
-    "actions": {
-      "viewAll": "عرض الكل",
-      "filter": "تصفية"
-    },
     "intro": {
       "eyebrow": "ابدأ من اليوم",
       "title": "اعرف كم يمكنك أن تصرف بأمان اليوم.",
@@ -27,16 +23,10 @@
       "dismiss": "إخفاء بطاقة المقدمة"
     },
     "daily": {
-      "title": "المعدل اليومي",
-      "remaining": "المتبقي",
-      "allowance": "المتاح",
-      "spent": "مصروف اليوم:",
       "statusTrack": "على المسار",
       "statusOverspent": "تم التجاوز",
       "explanationTrack": "ما زال لديك هامش داخل حد الصرف الآمن لليوم.",
       "explanationOverspent": "لقد تجاوزت الحد الآمن لليوم، لذلك أصبح معدل الغد تحت ضغط.",
-      "tomorrow": "معدل الغد:",
-      "progressLabel": "تقدم المصروف اليومي",
       "remainingLabel": "المتبقي اليوم",
       "overByLabel": "تجاوزت بمقدار",
       "overBySubtext": "استُنفدت الميزانية المتغيرة لهذا الشهر",
@@ -49,11 +39,8 @@
     },
     "major": {
       "title": "المصاريف الكبيرة",
-      "ofVariable": "من ميزانية {amount} المتغيرة",
-      "warning": "المصاريف الكبيرة مرتفعة هذا الشهر",
       "rowLabel": "المصاريف الكبيرة",
-      "ofVariableRow": "{percent}% من المتغير",
-      "viewAction": "عرض"
+      "ofVariableRow": "{percent}% من المتغير"
     },
     "runningHot": {
       "rowLabel": "{count, plural, one {ميزانية أسرع من المعتاد} two {ميزانيتان أسرع من المعتاد} other {# ميزانيات أسرع من المعتاد}}",
@@ -78,27 +65,7 @@
     "fixedPayments": {
       "rent": "الإيجار",
       "internet": "الإنترنت",
-      "spotify": "سبوتيفاي",
-      "oneDay": "متبقي يوم واحد",
-      "twoDays": "متبقي يومان"
-    },
-    "history": {
-      "title": "السجل"
-    },
-    "historyItems": {
-      "market": "مشتريات السوق",
-      "internet": "فاتورة الإنترنت",
-      "transfer": "تحويل وارد"
-    },
-    "historyTypes": {
-      "variable": "متغير",
-      "fixed": "ثابت",
-      "received": "وارد"
-    },
-    "paymentMethods": {
-      "cash": "نقدا",
-      "card": "بطاقة ائتمان",
-      "transfer": "تحويل بنكي"
+      "spotify": "سبوتيفاي"
     },
     "fab": {
       "label": "إضافة معاملة"
@@ -126,7 +93,6 @@
         "save": "حفظ",
         "impactEmpty": "أدخل المبلغ",
         "fields": {
-          "amount": "المبلغ",
           "date": "التاريخ",
           "method": "طريقة الدفع",
           "note": "ملاحظة",
@@ -155,8 +121,6 @@
           "impactOver": "يتجاوز حد اليوم",
           "majorImpact": "{amount} يُخفّض المعدل الشهري للأيام المتبقية",
           "majorHint": "شراء كبير لمرة واحدة؟ سجّله كمصروف كبير.",
-          "majorOn": "كبير ✓",
-          "majorOff": "تحديد كمصروف كبير",
           "budgetHint": "تصرف على هذا بانتظام؟ تابعه كميزانية.",
           "budgetHintAction": "إضافة ميزانية"
         },
@@ -200,10 +164,6 @@
       "settings": {
         "title": "الإعدادات",
         "description": "بدّل المظهر أو اللغة مع بقاء معاينة الهاتف في مكانها.",
-        "previewLabel": "حالة المعدل اليومي في مساحة التجربة",
-        "trackPreview": "على المسار",
-        "overspentPreview": "تم التجاوز",
-        "emergencyPreview": "طوارئ",
         "planLabel": "خطة المستخدم",
         "planFree": "مجاني",
         "planPro": "برو",
@@ -246,7 +206,6 @@
       "title": "نظرة عامة",
       "spent": "إجمالي المصروف",
       "received": "إجمالي الوارد",
-      "transactions": "المعاملات",
       "count": "{count} معاملة"
     },
     "filter": "تصفية",
@@ -265,11 +224,7 @@
     "budgetTypes": {
       "variable": "متغير",
       "fixed": "ثابت",
-      "major": "كبير",
-      "received": "وارد",
-      "injection": "دعم للميزانية",
-      "transfer": "تحويل",
-      "refund": "مسترجع"
+      "major": "كبير"
     },
     "fixedTypes": {
       "internet": "فاتورة الإنترنت",
@@ -670,36 +625,11 @@
       "description": "انتقل إلى أي شهر محفوظ من هنا.",
       "close": "إغلاق",
       "closed": "مغلق",
-      "inProgress": "قيد التنفيذ",
-      "previousPlaceholder": "الشهر السابق"
+      "inProgress": "قيد التنفيذ"
     },
     "meta": {
-      "line": "تم تتبع {tracked} يوما / متبقي {remaining} أيام / {status}",
-      "statTracked": "{count} يوم مُتتبَّع",
-      "statLeft": "{count} يوم متبقٍ",
       "labelTracked": " يوم مُتتبَّع",
-      "labelLeft": " يوم متبقٍ",
-      "status": {
-        "inProgress": "قيد التنفيذ"
-      }
-    },
-    "projection": {
-      "title": "توقعات نهاية الشهر",
-      "heroSaving": "في طريقك للتوفير",
-      "heroOverspend": "قد تتجاوز الميزانية بـ",
-      "heroEarly": "فقط {day} أيام من البيانات حتى الآن",
-      "heroSavingCaption": "هذا {rate}% من دخلك توفيراً هذا الشهر.",
-      "heroOverspendCaption": "حاول تقليل الإنفاق المرن للعودة للمسار الصحيح.",
-      "heroEarlyCaption": "راجع مجدداً بعد بضعة أيام للحصول على تقدير أدق.",
-      "paceCaption": "يومياً · {days} أيام متبقية",
-      "lowConfidenceBadge": "ثقة منخفضة",
-      "forecastSpent": "مُنفَق حتى الآن",
-      "forecastProjected": "متوقع",
-      "dailyPaceLabel": "الإنفاق اليومي",
-      "dailyBudgetLine": "الميزانية {amount}/يوم",
-      "underTarget": "دون الهدف اليومي",
-      "overTarget": "فوق الهدف اليومي",
-      "projectedSavingsLabel": "توفير متوقع"
+      "labelLeft": " يوم متبقٍ"
     },
     "section": {
       "onPace": {
@@ -743,7 +673,6 @@
       "subtitle": "الإنفاق الثابت الاختياري الذي تتحكم فيه",
       "spentSoFar": "المصروف حتى الآن",
       "planned": "المخطط",
-      "budgetUsed": "من الميزانية",
       "allWithinBudget": "الكل ضمن الميزانية",
       "someOverrunning": "{over} من {total} ميزانيات تجاوزت الحد",
       "overrunDisclosureShow": "عرض الميزانيات المتجاوزة",
@@ -765,8 +694,7 @@
         "title": "التحويلات بين الأظرف",
         "toVariable": "إلى مجموعة الإنفاق المتغير",
         "toEnvelope": "إلى {name}"
-      },
-      "ofPlanned": "من المخطط له {amount}"
+      }
     },
     "obligation": {
       "title": "ملتزم بالطرق",
@@ -777,7 +705,6 @@
       "newRecurringAdded": "تمت إضافة اشتراك متكرر جديد",
       "installmentEnded": "انتهت خطة تقسيط",
       "byMethod": "حسب وسيلة الدفع",
-      "committed": "{amount} جنيه ملتزم",
       "noCommitted": "لا توجد رسوم تلقائية ملتزمة لأي وسيلة هذا الشهر",
       "vsLastMonth": "مقارنةً بالشهر الماضي",
       "lastMonth": "الشهر الماضي"
@@ -788,8 +715,7 @@
       "legend": {
         "thisMonth": "هذا الشهر",
         "lastMonth": "الشهر الماضي",
-        "evenPace": "إيقاع متساوٍ · {amount}/يوم",
-        "today": "اليوم"
+        "evenPace": "إيقاع متساوٍ · {amount}/يوم"
       },
       "pace": {
         "label": "الإيقاع",
@@ -827,11 +753,9 @@
     "methods": {
       "title": "طرق الدفع",
       "subtitle": "إجمالي الإنفاق بكل وسيلة دفع، وممَّ تكوّن.",
-      "totalLabel": "إجمالي المصروف",
       "fixedLabel": "ثابت",
       "variableLabel": "متغير",
       "majorLabel": "كبير",
-      "deltaVsLastMonth": "مقارنة بالشهر الماضي",
       "deltaVsPreviousMonth": "مقارنة بالشهر السابق",
       "deltaNoChange": "مماثل للشهر الماضي",
       "egpSpent": "جنيه منفق",
@@ -842,7 +766,6 @@
     },
     "howMonthLanded": {
       "title": "كيف انتهى الشهر",
-      "subtitle": "راجع كيف استقر الشهر كله بعد أن تُغلق كل الحركة.",
       "subtitleClosed": "قراءة ختامية لشهر {month}: ماذا بقي أو تجاوز، وما الذي أوصل الشهر إلى هذه النتيجة.",
       "verdict": {
         "badge": "{month} · مُغلق"
@@ -852,30 +775,12 @@
         "exactBudget": "انتهى تمامًا على الميزانية.",
         "overBudget": "انتهى فوق الميزانية."
       },
-      "summary": {
-        "deltaLabel": "نتيجة الشهر",
-        "withinPlan": "انتهى داخل الخطة",
-        "adjustedInFlight": "انتهى داخل الخطة المعدلة",
-        "outranThePlan": "أنهى الشهر فوق الخطة"
-      },
       "summaryWhole": {
         "underBudget": "ترك هامشًا داخل ميزانية الشهر",
         "exactBudget": "استخدم ميزانية الشهر بالكامل",
         "overBudget": "صرف فوق ميزانية الشهر",
         "spentLabel": "إجمالي ما صُرف في الشهر",
         "budgetLabel": "ميزانية الشهر بعد التسوية"
-      },
-      "bar": {
-        "labelStart": "0",
-        "labelPlan": "الخطة · {plan}",
-        "labelPlanInj": "+دعم · {planPlusInjection}",
-        "labelSpent": "المصروف · {totalSpent}"
-      },
-      "injections": {
-        "eyebrow": "الدعم",
-        "label": "أُضيف أثناء الشهر",
-        "value": "+{amount} جنيه",
-        "sub": "{count, plural, =0 {0 مرات دعم} one {مرة دعم واحدة} two {مرتا دعم} few {# مرات دعم} many {# مرة دعم} other {# مرة دعم}} · رفعت ميزانية الشهر من {basePlan} إلى {adjustedPlan}"
       },
       "budgetBreakdown": {
         "eyebrow": "مسار الميزانية",
@@ -887,7 +792,6 @@
         "variableHint": "هذه هي الحلقة التي تربط البطاقة الأولى بنتيجة الشهر النهائية.",
         "rows": {
           "injection": "دعم الميزانية أعطى مساحة إضافية",
-          "received": "المبلغ الوارد وسّع مساحة الشهر",
           "manualFixedReturned": "فائض الثابت اليدوي عاد للشهر",
           "manualFixedOverspend": "تجاوز الثابت اليدوي ضغط على النتيجة",
           "variableLeft": "إغلاق المتغير ترك",
@@ -900,8 +804,7 @@
         "metaLine": "{actual} من {plan}",
         "summaryCount": "{count, plural, =0 {لم تغيّر أي مظاريف النتيجة} one {مظروف واحد غيّر النتيجة النهائية} two {مظروفان غيّرا النتيجة النهائية} few {# مظاريف غيّرت النتيجة النهائية} many {# مظروفًا غيّر النتيجة النهائية} other {# مظروف غيّر النتيجة النهائية}}",
         "returnedLabel": "عاد للشهر",
-        "pressureLabel": "ضغط",
-        "viewAllTitle": "عرض كل تحركات الثابت اليدوي"
+        "pressureLabel": "ضغط"
       },
       "popup": {
         "title": "تفاصيل الثابت اليدوي",
@@ -939,31 +842,21 @@
       "export": "تصدير البيانات"
     },
     "profile": {
-      "title": "الملف الشخصي",
-      "subtitle": "اسم المستخدم والبريد ومعلومات العضوية",
       "edit": "تعديل الملف",
       "username": "اسم المستخدم",
       "email": "البريد الإلكتروني",
       "memberSince": "عضو منذ",
-      "active": "نشط",
-      "inactive": "غير نشط",
       "proTitle": "ستاشي برو",
       "proActive": "نشط ✓",
-      "upgradeTitle": "ترقية إلى ستاشي برو",
-      "upgradeDescription": "افتح التحليلات وأنماط الإنفاق والتوقعات الشهرية وتصدير البيانات.",
       "upgradeCta": "اشترك الآن"
     },
     "budget": {
       "title": "ميزانية الشهر",
-      "subtitle": "حدد ميزانية الشهر المستهدفة",
-      "change": "تغيير",
       "amountLabel": "ميزانية الشهر"
     },
     "boosts": {
       "title": "دعم الميزانية",
-      "subtitle": "أضف ميزانية إضافية لهذا الشهر",
       "add": "إضافة",
-      "empty": "لا يوجد دعم هذا الشهر.",
       "thisMonth": "نشط هذا الشهر",
       "label": "الاسم",
       "amount": "المبلغ",
@@ -973,8 +866,6 @@
       "title": "طرق الدفع",
       "subtitle": "أدر الطريقة التي تدفع بها المصاريف",
       "add": "إضافة طريقة دفع",
-      "edit": "تعديل",
-      "delete": "حذف",
       "confirm": "تأكيد",
       "confirmDelete": "حذف {name}؟",
       "default": "الافتراضي",
@@ -985,17 +876,9 @@
       "bank": "بنك"
     },
     "guide": {
-      "title": "كيفية استخدام ستاشي",
-      "subtitle": "تعرف على الميزانية بالمعدل اليومي",
-      "view": "عرض الدليل"
+      "title": "كيفية استخدام ستاشي"
     },
     "appearance": {
-      "title": "المظهر والحساب",
-      "subtitle": "خصص تجربة التطبيق",
-      "theme": "المظهر",
-      "light": "فاتح",
-      "dark": "داكن",
-      "system": "النظام",
       "language": "اللغة",
       "timezone": "المنطقة الزمنية",
       "notifications": "الإشعارات",
@@ -1006,7 +889,6 @@
     },
     "support": {
       "contactTitle": "التواصل مع الدعم",
-      "contactSubtitle": "احصل على مساعدة أو أبلغ عن مشكلة",
       "privacyPolicy": "سياسة الخصوصية",
       "terms": "شروط الخدمة",
       "rate": "قيّم ستاشي"
@@ -1014,14 +896,12 @@
     "danger": {
       "sectionLabel": "الحساب",
       "deleteTitle": "حذف الحساب",
-      "deleteDescription": "حذف حسابك وجميع بياناتك بشكل دائم. لا يمكن التراجع عن هذا.",
-      "deleteConfirm": "حذف حسابي"
+      "deleteDescription": "حذف حسابك وجميع بياناتك بشكل دائم. لا يمكن التراجع عن هذا."
     },
     "about": {
       "pwa": "{app} PWA",
       "version": "الإصدار {version}",
-      "description": "تابع المصروفات والتكاليف الثابتة والأهداف عبر الأجهزة.",
-      "pro": "Pro"
+      "description": "تابع المصروفات والتكاليف الثابتة والأهداف عبر الأجهزة."
     },
     "drawer": {
       "editProfileTitle": "تعديل الملف الشخصي",
