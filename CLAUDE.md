@@ -1,1 +1,1 @@
-Follow the @Agents.md for instructions
+Follow the @AGENTS.md for instructions

@@ -12,7 +12,7 @@
 Stashy is fundamentally a native mobile application. Because rapid visual iteration is sometimes faster directly in code, this web environment was created to strictly build, visualize, and interact with UI/UX concepts via live components. A developer will pass visual references or ideas, and you will mock them up here using active libraries before they are ported to the mobile app.
 
 **Critical Execution Constraint:**
-Because Stashy targets mobile displays, the web UI canvas **must simulate a mobile interface**. The primary application shell/container width must be constrained to typical mobile or tablet bounds (e.g., `max-w-sm` [384px] or `max-w-md` [768px] in Tailwind). Desktop-spanning UI layouts are strictly invalid unless explicitly requested by the developer.
+Because Stashy targets mobile displays, the web UI canvas **must simulate a mobile interface**. The primary application shell/container width must be constrained to typical mobile or tablet bounds (e.g., `max-w-sm` [384px] or `max-w-md` [448px] in Tailwind). Desktop-spanning UI layouts are strictly invalid unless explicitly requested by the developer.
 
 ---
 
