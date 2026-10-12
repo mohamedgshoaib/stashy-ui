@@ -28,7 +28,6 @@ function buildSummary(items: FixedExpenseItem[]): FixedTrackerSummary {
     totalBudgeted,
     totalPaid,
     totalRemaining,
-    paidProgressClass: `basis-[${Math.min(Math.round(pct), 100)}%]`,
     overallStatus: pct > 100 ? "over_budget" : pct >= 75 ? "warning" : "on_track",
     overBudgetItems: items
       .filter((item) => item.type === "manual" && item.status === "over_budget")

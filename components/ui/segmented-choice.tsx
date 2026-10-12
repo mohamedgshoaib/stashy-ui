@@ -4,7 +4,7 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-export type SegmentedChoiceOption<T extends string> = {
+type SegmentedChoiceOption<T extends string> = {
   value: T
   label: string
   icon?: React.ReactNode

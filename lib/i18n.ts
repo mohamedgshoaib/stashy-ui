@@ -13,14 +13,3 @@ export function getDirectionForLocale(locale: Locale): Direction {
 export function getAlternateLocale(locale: Locale): Locale {
   return locale === "ar" ? "en" : "ar"
 }
-
-export function getLocaleHref(pathname: string, locale: Locale): string {
-  const segments = pathname.split("/").filter(Boolean)
-
-  if (segments.length > 0 && isLocale(segments[0])) {
-    segments[0] = locale
-    return `/${segments.join("/")}`
-  }
-
-  return pathname === "/" ? `/${locale}` : `/${locale}${pathname}`
-}

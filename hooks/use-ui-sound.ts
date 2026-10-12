@@ -7,7 +7,7 @@ import { clickSoftSound } from "@/sounds/click-soft"
 import { switchOffSound } from "@/sounds/switch-off"
 import { switchOnSound } from "@/sounds/switch-on"
 
-export type UiSoundName = "click-soft" | "switch-on" | "switch-off"
+type UiSoundName = "click-soft" | "switch-on" | "switch-off"
 
 type UiSoundApi = {
   playSound: (sound: UiSoundName) => void

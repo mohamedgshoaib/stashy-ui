@@ -1,10 +1,8 @@
 import {
   Alert01Icon,
   ArrowDownLeft01Icon,
-  BankIcon,
   Building01Icon,
   CafeIcon,
-  CreditCardIcon,
   DiscAlbumIcon,
   PackageReceiveIcon,
   SmartPhone01Icon,
@@ -17,7 +15,6 @@ import {
   deriveBucketPaceFlag,
   getAnalyticsDataForScenario,
   getMonthView,
-  getPreviousSnapshot,
   withManualBucketCalibration,
 } from "@/components/analytics/data"
 import type {
@@ -26,7 +23,6 @@ import type {
   FixedBucketIconKey,
   FixedBucketPlan,
   LiveMonthAnalysis,
-  MonthSnapshot,
 } from "@/components/analytics/types"
 import type { HistoryTransaction } from "@/components/history/types"
 import type { UpcomingPayment } from "@/components/home/home-data"
@@ -256,7 +252,6 @@ export function getHomeBudgetStrip(month: LiveMonthAnalysis): BudgetStrip {
 
   return {
     fixedTotal: month.fixedTotalBudget,
-    fixedPaid: month.fixedTotalSpent,
     fixedRemaining: metrics.fixedRemaining,
     variableTotal: metrics.variableBudget,
     variableSpent: metrics.variableSpentIncludingMajor,
@@ -323,14 +318,12 @@ function deriveManualFixedExpenseItem(
     paid,
     remaining: bucket.budget - paid,
     progressPct,
-    progressClass: `basis-[${Math.min(Math.round(progressPct), 100)}%]`,
     status: getFixedExpenseStatus(progressPct),
     paymentStatus: "unpaid",
     nextPaymentDate: null,
     installmentsTotal: null,
     installmentsPaid: null,
     installmentsRemaining: null,
-    installmentProgressClass: null,
     endDate: null,
     transactions: scaleFixedTransactions(fixture?.transactions ?? [], paid),
   }
@@ -394,7 +387,6 @@ export function getHomeUpcomingPayments(month: LiveMonthAnalysis): UpcomingPayme
 export function getHomeDailyRate(
   month: LiveMonthAnalysis,
   dailyRateState: "underRate" | "overRate",
-  t: (key: string) => string,
 ): DailyRate {
   const metrics = getMonthMetrics(month)
   const allowanceAmount = Math.max(0, month.todaysRate || month.baseDailyRate)
@@ -403,17 +395,10 @@ export function getHomeDailyRate(
     const overByAmount = Math.max(0, Math.round(Math.abs(metrics.variableRemaining) * 100) / 100)
 
     return {
-      remaining: `-${formatCurrency(overByAmount)}`,
       remainingAmount: -overByAmount,
-      allowance: formatCurrency(allowanceAmount),
       allowanceAmount,
-      spent: formatCurrency(allowanceAmount + overByAmount),
       spentAmount: allowanceAmount + overByAmount,
-      explanation: "",
-      tomorrow: null,
       tomorrowAmount: null,
-      status: t("daily.statusEmergency"),
-      statusTone: "expense",
       overByAmount,
     }
   }
@@ -435,18 +420,10 @@ export function getHomeDailyRate(
       : 0
 
   return {
-    remaining: `${remainingAmount < 0 ? "-" : ""}${formatCurrency(remainingAmount)}`,
     remainingAmount,
-    allowance: formatCurrency(allowanceAmount),
     allowanceAmount,
-    spent: formatCurrency(spentAmount),
     spentAmount,
-    explanation:
-      dailyRateState === "overRate" ? t("daily.explanationOverspent") : t("daily.explanationTrack"),
-    tomorrow: formatCurrency(tomorrowAmount),
     tomorrowAmount,
-    status: dailyRateState === "overRate" ? t("daily.statusOverspent") : t("daily.statusTrack"),
-    statusTone: dailyRateState === "overRate" ? "expense" : "fixed",
     overByAmount: null,
   }
 }
@@ -504,7 +481,6 @@ function getVariableHistoryRows(month: LiveMonthAnalysis): HistoryTransaction[] 
     dateISO: largestDateISO,
     direction: "expense",
     icon: VARIABLE_HISTORY_ICON,
-    methodIcon: CreditCardIcon,
     methodTone: "card",
   }
 
@@ -624,8 +600,6 @@ function getVariableHistoryRows(month: LiveMonthAnalysis): HistoryTransaction[] 
       dateISO: getMonthDayIso(month, t.dayAbs),
       direction: "expense",
       icon: VARIABLE_HISTORY_ICON,
-      methodIcon:
-        t.method === "cash" ? Wallet01Icon : t.method === "bank" ? BankIcon : CreditCardIcon,
       methodTone: t.method,
     })
   })
@@ -657,7 +631,6 @@ function getFixedHistoryRows(month: LiveMonthAnalysis): HistoryTransaction[] {
       dateISO: getMonthDayIso(month, Math.max(1, month.daysTracked - index)),
       direction: "expense",
       icon: getFixedBucketIcon(bucket.iconKey),
-      methodIcon: bucket.type === "manual" ? Wallet01Icon : CreditCardIcon,
       methodTone: bucket.type === "manual" ? "cash" : "card",
     })
 
@@ -678,7 +651,6 @@ function getMajorHistoryRows(month: LiveMonthAnalysis): HistoryTransaction[] {
     dateISO: transaction.date || getMonthDayIso(month, Math.max(1, month.daysTracked - index)),
     direction: "expense",
     icon: MAJOR_HISTORY_ICON,
-    methodIcon: BankIcon,
     methodTone: transaction.paymentMethodName === "Cash" ? "cash" : "bank",
   }))
 }
@@ -699,7 +671,6 @@ function getReceivedHistoryRows(month: LiveMonthAnalysis): HistoryTransaction[] 
       dateISO: getMonthDayIso(month, Math.max(1, month.daysTracked - 2)),
       direction: "received",
       icon: ArrowDownLeft01Icon,
-      methodIcon: ArrowDownLeft01Icon,
       methodTone: "bank",
     })
   }
@@ -717,7 +688,6 @@ function getReceivedHistoryRows(month: LiveMonthAnalysis): HistoryTransaction[] 
       dateISO: getMonthDayIso(month, Math.max(1, month.daysTracked - 5)),
       direction: "received",
       icon: PackageReceiveIcon,
-      methodIcon: PackageReceiveIcon,
       methodTone: "card",
     })
   }
@@ -759,11 +729,4 @@ export function getHistoryPresetRange(
   }
 
   return null
-}
-
-export function getPreviousMonthSnapshot(
-  data: AnalyticsData,
-  month: LiveMonthAnalysis,
-): MonthSnapshot | null {
-  return getPreviousSnapshot(data, month.month)
 }

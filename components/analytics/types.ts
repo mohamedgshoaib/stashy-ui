@@ -1,4 +1,4 @@
-export type FixedBucketType = "manual" | "recurring" | "installment"
+type FixedBucketType = "manual" | "recurring" | "installment"
 
 export type FixedBucketIconKey = "rent" | "spotify" | "phone-installment" | "coffee" | "groceries"
 
@@ -13,7 +13,6 @@ export type FixedBucketPlan = {
 export type FixedBucketActual = {
   id: string
   spent: number
-  transactionCount: number
   dailyCumulative?: number[]
 }
 
@@ -31,7 +30,7 @@ export type PaymentMethodBreakdown = {
   }
 }
 
-export type FixedTransferSummary = {
+type FixedTransferSummary = {
   type: FixedBucketType
   total: number
   sources: Array<{
@@ -45,8 +44,8 @@ export type FixedTransferSummary = {
   }>
 }
 
-export type LargestDay = { date: string; amount: number }
-export type LargestTxn = { id: string; amount: number; description: string }
+type LargestDay = { date: string; amount: number }
+type LargestTxn = { id: string; amount: number; description: string }
 
 export type MajorTransaction = {
   id: string
@@ -83,7 +82,6 @@ export type WholeBudgetCloseout = {
 export type MonthSnapshot = {
   month: string
   isoDate: string
-  closedAt: string
   closedBy: "user" | "auto"
 
   monthlyBudget: number
@@ -93,7 +91,6 @@ export type MonthSnapshot = {
 
   totalVariableSpent: number
   fixedTotalSpent: number
-  fixedOverspend: number
   fixedBucketsActual: FixedBucketActual[]
   majorTotal: number
   majorCount: number
@@ -109,9 +106,6 @@ export type MonthSnapshot = {
   adjustedVariableBudget: number
   effectiveVariableBudgetFinal: number
   baseDailyRate: number
-  variableSavingsRate: number
-  rolloverEgpFinal: number
-  overspentDays: number
   dailyVariableCumulative: number[]
   weeklySpend: number[]
   weeklyBudgetTarget: number
@@ -141,7 +135,6 @@ export type LiveMonthAnalysis = {
 
   totalVariableSpent: number
   fixedTotalSpent: number
-  fixedOverspend: number
   fixedBucketsActual: FixedBucketActual[]
   majorTotal: number
   majorCount: number
@@ -158,12 +151,9 @@ export type LiveMonthAnalysis = {
   effectiveVariableBudget: number
   baseDailyRate: number
   todaysRate: number
-  variableSavingsRateMtd: number
   rolloverEgp: number
-  pacingDeltaPct: number
   budgetUsedPct: number
   monthProgressPct: number
-  overspentDaysMtd: number
   dailyVariableCumulative: number[]
   weeklySpend: number[]
   weeklyBudgetTarget: number
@@ -173,7 +163,6 @@ export type LiveMonthAnalysis = {
   fixedManualOverBudgetCount: number
   majorPctOfBudget: number
 
-  projectionConfidenceDay: number
   avgDailySpend: number
   projectedEndSpend: number
   projectedSavings: number
@@ -187,8 +176,6 @@ export type AnalyticsData = {
   current: LiveMonthAnalysis
   snapshots: MonthSnapshot[]
 }
-
-export type ComparisonTone = "positive" | "negative" | "neutral"
 
 export type AnalyticsMonthOption = {
   id: string

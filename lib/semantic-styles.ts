@@ -104,32 +104,3 @@ export const semanticProgressClass = {
   transfer: semanticRoles.transfer.progress,
   quiet: semanticRoles.quiet.progress,
 } as const
-
-export const semanticColorToken = {
-  brand: semanticRoles.brand.token,
-  variable: semanticRoles.variable.token,
-  fixed: semanticRoles.fixed.token,
-  major: semanticRoles.major.token,
-  income: semanticRoles.income.token,
-  injection: semanticRoles.injection.token,
-  expense: semanticRoles.expense.token,
-  warning: semanticRoles.warning.token,
-  transfer: semanticRoles.transfer.token,
-  quiet: semanticRoles.quiet.token,
-} as const
-
-export const paymentStatusSemantic = {
-  paid: "fixed",
-  pending: "warning",
-  overdue: "expense",
-} as const
-
-export const transactionToneSemantic = {
-  variable: "variable",
-  fixed: "fixed",
-  major: "major",
-  transfer: "transfer",
-  received: "income",
-  injection: "injection",
-  expense: "expense",
-} as const
