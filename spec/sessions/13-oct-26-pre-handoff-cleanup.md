@@ -68,6 +68,7 @@ The user requested an inventory-first dead-code cleanup before stashy-ui becomes
 - Every completed phase passed pnpm typecheck && pnpm lint. Final production build passes. Baseline visual evidence covers 140 page renders at 390px across EN/AR, 14 sandbox configurations, Home/Fixed/History/Analytics, and closed Analytics months.
 - Post-cleanup comparison passed all 140 renders: identical visible text, zero differing pixels, and no captured page/i18n errors. Evidence: /tmp/opencode/stashy-visual-comparison.json and stashy-visual-before/after directories.
 - Final typecheck, lint, production build, git diff --check, and oxfmt --check on all 33 touched surviving source/doc/message/package files passed. Both locales have 661 matching leaves; exactly 100 leaves were removed per locale and every remaining value is unchanged.
+- Pushed cleanup/pre-handoff and opened PR #17 into main: https://github.com/mohamedgshoaib/stashy-ui/pull/17. The PR includes the grouped deletion evidence, retained candidates, small-fix dispositions, unmerged branch report, stale-document findings, and scope confirmation. PR not merged.
 
 ---
 
@@ -85,4 +86,3 @@ The user requested an inventory-first dead-code cleanup before stashy-ui becomes
 ## Open Blockers
 
 1. Owner: cleanup reviewer — approve any follow-up removal of closedMonthVerdict and newly orphaned SandboxHome messages, and decide the larger stale-wireframe documentation scope.
-2. Owner: cleanup agent — PR publication pending; all final checks completed on 2026-10-13.
